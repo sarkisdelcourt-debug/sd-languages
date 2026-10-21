@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnswerEvaluation, GuidedLessonCatalogItem, GuidedLessonView as LessonView, LanguageCode } from "@shared/types";
 import { api } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
+import { ContentNotice } from "./ContentNotice";
 import { ExerciseAnswer } from "./ExerciseAnswer";
 
 const phaseIndex = { intro: 0, practice: 1, correction: 2, conversation: 3, summary: 4 } as const;
@@ -204,6 +205,7 @@ export function GuidedLessonView({
   if (!session) {
     return (
       <div className="guided-lesson catalog-mode">
+        <ContentNotice language={language} />
         <LearningPath view={view} disabled={loading} onSelect={selectLesson} />
         <section className="lesson-welcome" aria-labelledby="lesson-preview-title">
           <div className="lesson-welcome-copy">

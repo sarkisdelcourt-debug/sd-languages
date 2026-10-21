@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../src/curriculum";
+import { DIAGNOSTIC_QUESTIONS, EXERCISES, contentCoverage } from "../src/curriculum";
 import { CONVERSATION_SCENARIOS } from "../src/scenarios";
 import { GUIDED_LESSONS } from "../src/lessons";
 import { assessPronunciation, createReviewCard, estimateLevel, evaluateAnswer, normalizeAnswer, scheduleReview } from "../src/learning";
@@ -207,5 +207,15 @@ describe("cartes de révision lisibles (21/10/2026)", () => {
 
   it("garde la consigne telle quelle pour les autres formats", () => {
     expect(createReviewCard(exercise).prompt).toBe("Bonjour");
+  });
+});
+
+describe("couverture du contenu par langue (21/10/2026)", () => {
+  it("signale l'allemand et l'espagnol comme en construction (moins de 50 exercices), pas l'anglais", () => {
+    expect(contentCoverage("en")).toMatchObject({ language: "en", inConstruction: false });
+    expect(contentCoverage("en").exercises).toBeGreaterThan(50);
+    expect(contentCoverage("de")).toMatchObject({ inConstruction: true, exercises: EXERCISES.filter((item) => item.language === "de").length });
+    expect(contentCoverage("es").inConstruction).toBe(true);
+    expect(contentCoverage("de").exercises).toBeLessThan(contentCoverage("es").exercises);
   });
 });

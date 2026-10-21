@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import type { DailyPlan, DashboardSnapshot, LanguageCode, LanguageSettings, MistakeRecord } from "@shared/types";
 import { api } from "../api";
+import { ContentNotice } from "./ContentNotice";
 
 interface Props {
   dashboard: DashboardSnapshot;
@@ -38,6 +39,7 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
           Vos données locales sont inaccessibles pour le moment (navigation privée ou stockage bloqué ?). Le plan du jour et la mémoire des erreurs ne peuvent pas s'afficher.
         </div>
       ) : null}
+      <ContentNotice language={language} />
       {settings && !settings.onboardingCompleted ? (
         <section className="setup-banner">
           <span className="setup-icon" aria-hidden="true">01</span>

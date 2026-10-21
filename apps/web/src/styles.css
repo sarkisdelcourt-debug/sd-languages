@@ -111,6 +111,7 @@ main { min-width: 0; }
 .language-pill.active { color: var(--ink); background: var(--paper); box-shadow: 0 2px 8px rgba(26, 33, 44, .09); font-weight: 600; }
 .content { width: min(1160px, 100%); margin: 0 auto; padding: clamp(24px, 4vw, 54px) clamp(22px, 5vw, 64px) 72px; }
 .stack-large { display: grid; gap: 28px; }
+.content-notice { margin: 0; padding: 12px 16px; border-left: 4px solid var(--signal); border-radius: 6px; background: var(--tint-warn); color: var(--warn-ink); font-size: 13px; line-height: 1.5; }.content-notice strong { display: block; }
 .setup-banner { padding: 18px 20px; border: 1px solid var(--line-accent); border-radius: 14px; background: var(--tint-accent); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 15px; }.setup-icon { width: 42px; height: 42px; border-radius: 10px; background: #0f766e; color: white; display: grid; place-items: center; }.setup-banner strong { font-size: 15px; }.setup-banner p { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
 
 .hero-card { min-height: 250px; padding: clamp(28px, 4vw, 48px); border-radius: 18px; background: #153036; color: white; display: flex; justify-content: space-between; align-items: center; gap: 32px; overflow: hidden; position: relative; box-shadow: 0 18px 44px rgba(19, 41, 45, .14); }

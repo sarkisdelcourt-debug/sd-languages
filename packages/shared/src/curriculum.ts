@@ -846,3 +846,12 @@ export function getExercises(language: LanguageCode, level?: CefrLevel): Exercis
     (exercise) => exercise.language === language && (!level || exercise.level === level)
   );
 }
+
+/** Seuil en dessous duquel une langue est présentée comme « en construction » (21/10/2026). */
+export const CONTENT_MIN_EXERCISES = 50;
+
+/** Volume réel d'une langue, calculé depuis la banque : sert aux bandeaux d'honnêteté de l'interface. */
+export function contentCoverage(language: LanguageCode): { language: LanguageCode; exercises: number; inConstruction: boolean } {
+  const exercises = EXERCISES.filter((exercise) => exercise.language === language).length;
+  return { language, exercises, inConstruction: exercises < CONTENT_MIN_EXERCISES };
+}

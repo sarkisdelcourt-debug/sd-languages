@@ -120,10 +120,9 @@ describe("curriculum integrity", () => {
   it("contains a complete starter set for every language", () => {
     for (const language of ["en", "de", "es"] as const) {
       expect(DIAGNOSTIC_QUESTIONS.filter((question) => question.language === language)).toHaveLength(6);
-      expect(EXERCISES.filter((item) => item.language === language)).toHaveLength(15);
-      expect(new Set(EXERCISES.filter((item) => item.language === language).map((item) => item.type))).toEqual(
-        new Set(["multiple-choice", "fill-gap", "translation"])
-      );
+      expect(EXERCISES.filter((item) => item.language === language).length).toBeGreaterThanOrEqual(15);
+      const types = new Set(EXERCISES.filter((item) => item.language === language).map((item) => item.type));
+      for (const type of ["multiple-choice", "fill-gap", "translation"] as const) expect(types.has(type)).toBe(true);
     }
   });
 

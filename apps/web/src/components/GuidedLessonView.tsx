@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnswerEvaluation, GuidedLessonCatalogItem, GuidedLessonView as LessonView, LanguageCode } from "@shared/types";
 import { api } from "../api";
+import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
+import { ExerciseAnswer } from "./ExerciseAnswer";
 
 const phaseIndex = { intro: 0, practice: 1, correction: 2, conversation: 3, summary: 4 } as const;
 const phaseLabels = ["Comprendre", "Pratiquer", "Corriger", "Dialoguer", "Retenir"];
@@ -257,19 +259,7 @@ export function GuidedLessonView({
           <div className="exercise-meta"><span>{currentExercise.level}</span><span>Exercice {session.currentExerciseIndex + 1} sur {lesson.exerciseIds.length}</span></div>
           <h2 id="lesson-step-title" tabIndex={-1}>{currentExercise.prompt}</h2>
           {currentAttempts.length ? <p className="retry-note">Deuxième essai : relisez le point d’attention avant de répondre.</p> : null}
-          {currentExercise.choices ? (
-            <div className="choice-list" role="group" aria-label="Choisissez une réponse">
-              {currentExercise.choices.map((choice) => (
-                <button key={choice} className={answer === choice ? "choice selected" : "choice"} aria-pressed={answer === choice} onClick={() => setAnswer(choice)} disabled={loading}>
-                  <span className="radio" aria-hidden="true" />{choice}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <label className="answer-field">Votre réponse
-              <input value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void submitAnswer(); }} disabled={loading} autoFocus />
-            </label>
-          )}
+          <ExerciseAnswer exercise={currentExercise} language={language} value={answer} onChange={setAnswer} onSubmit={() => void submitAnswer()} disabled={loading} />
           <p className="hint">Indice : {currentExercise.hint}</p>
           <footer><button className="primary-button" onClick={submitAnswer} disabled={!answer.trim() || loading}>{loading ? "Vérification…" : "Vérifier ma réponse"}</button></footer>
         </article>
@@ -282,10 +272,13 @@ export function GuidedLessonView({
             <p className="lesson-kicker">{evaluation.verdict === "exact" ? "Réponse exacte" : evaluation.verdict === "minor" ? "Bonne réponse, forme à préciser" : "On ajuste puis on réessaie"}</p>
             <h2 id="lesson-step-title" tabIndex={-1}>{evaluation.feedback}</h2>
             {evaluation.verdict !== "exact" ? <div className="model-answer"><span>Forme attendue</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
+            {currentExercise && currentExercise.type !== "match-pairs" && getSpeechCapabilities().synthesis ? (
+              <button className="text-button listen-model" onClick={() => speakText(evaluation.expectedAnswer, language, 0.85)}>▶ Écouter la phrase</button>
+            ) : null}
             <p>{evaluation.explanation}</p>
             {evaluation.issues.map((issue) => <p className="attention-note" key={issue.message}><strong>À observer :</strong> {issue.message}</p>)}
           </div>
-          <footer><button className="primary-button" onClick={continueLesson} disabled={loading}>{evaluation.correct ? "Continuer" : currentAttempts.length < 2 ? "Réessayer avec cet indice" : "Continuer vers la mise en situation"}</button></footer>
+          <footer><button className="primary-button" onClick={continueLesson} disabled={loading}>{evaluation.correct ? "Continuer" : currentAttempts.length < 2 ? "Réessayer avec cet indice" : session.currentExerciseIndex + 1 < lesson.exerciseIds.length ? "Passer à l'exercice suivant" : "Continuer vers la mise en situation"}</button></footer>
         </article>
       ) : null}
 

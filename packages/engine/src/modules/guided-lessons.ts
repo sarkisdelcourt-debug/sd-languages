@@ -1,5 +1,5 @@
 import { EXERCISES } from "../../../shared/src/curriculum.js";
-import { GUIDED_LESSONS } from "../../../shared/src/lessons.js";
+import { GUIDED_LESSONS, RETIRED_LESSON_REVISIONS } from "../../../shared/src/lessons.js";
 import { CONVERSATION_SCENARIOS } from "../../../shared/src/scenarios.js";
 import type {
   CefrLevel,
@@ -22,9 +22,9 @@ export function getLessons(language: LanguageCode): GuidedLessonDefinition[] {
 }
 
 export function findLessonById(lessonId: string, revision?: number): GuidedLessonDefinition {
-  const lesson = GUIDED_LESSONS.find(
-    (candidate) => candidate.id === lessonId && (revision === undefined || candidate.revision === revision)
-  );
+  const matches = (candidate: GuidedLessonDefinition) => candidate.id === lessonId && (revision === undefined || candidate.revision === revision);
+  // Une séance commencée sur une ancienne révision la garde jusqu'au bout.
+  const lesson = GUIDED_LESSONS.find(matches) ?? (revision === undefined ? undefined : RETIRED_LESSON_REVISIONS.find(matches));
   if (!lesson) throw new Error(`La leçon ${lessonId} (révision ${revision ?? "actuelle"}) n'est plus disponible.`);
   return lesson;
 }

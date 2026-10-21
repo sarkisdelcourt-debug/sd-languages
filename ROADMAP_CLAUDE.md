@@ -54,6 +54,12 @@ Garantir qu'une coupure, un redémarrage ou deux onglets ouverts ne puissent ni 
 
 ## Lot P1 — donner une identité propre aux 36 leçons
 
+> **Tranche espagnol A1 faite le 21/10/2026** (`packages/shared/src/spanish-a1.ts`) : 3 leçons en
+> révision 2, 6 exercices chacune (≥ 4 propres, ≥ 4 formats), 3 formats à la Duolingo (`word-bank`,
+> `match-pairs`, `listening`) dans `ExerciseAnswer.tsx`, ancienne révision conservée pour les séances
+> en cours (`RETIRED_LESSON_REVISIONS`). Reste pour l'A1 : un scénario hôtel propre à la leçon 3, une
+> relecture par un hispanophone, puis valider avec Sarkis avant d'étendre le modèle à l'A2 et aux autres langues.
+
 ### Objectif
 
 Passer d'une architecture de cursus complète à un contenu suffisamment varié pour un usage régulier.

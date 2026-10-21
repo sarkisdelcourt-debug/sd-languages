@@ -1,6 +1,13 @@
 export type LanguageCode = "en" | "de" | "es";
 export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1";
-export type ExerciseType = "multiple-choice" | "fill-gap" | "translation";
+/**
+ * Formats d'exercice. Les trois derniers (style Duolingo, 21/10/2026) restent corrigés par la même
+ * règle déterministe : la réponse construite est comparée au modèle.
+ * - word-bank : construire la phrase en touchant des étiquettes (`tiles`, distracteurs compris) ;
+ * - match-pairs : associer chaque mot à sa traduction (`pairs`) ; réponse = `matchPairsAnswer(pairs)` ;
+ * - listening : écouter `audioText` (synthèse vocale de l'appareil) puis l'écrire.
+ */
+export type ExerciseType = "multiple-choice" | "fill-gap" | "translation" | "word-bank" | "match-pairs" | "listening";
 export type LearningGoal = "fluency" | "travel" | "work" | "basics";
 
 export interface LanguageDefinition {
@@ -19,6 +26,9 @@ export interface Exercise {
   type: ExerciseType;
   prompt: string;
   choices?: string[];
+  tiles?: string[];
+  pairs?: Array<{ target: string; native: string }>;
+  audioText?: string;
   answer: string;
   acceptedAnswers?: string[];
   explanation: string;

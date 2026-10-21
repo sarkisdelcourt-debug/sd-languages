@@ -267,3 +267,31 @@ main { min-width: 0; }
   .relay-actions .primary-button, .relay-actions .secondary-button { width: 100%; }
   .relay-compare th, .relay-compare td { padding: 8px 4px; }
 }
+
+/* Formats à la Duolingo : construire la phrase, associer les paires, écouter */
+.word-bank { display: grid; gap: 18px; }
+.word-bank-answer { min-height: 64px; padding: 10px 0; border-bottom: 2px solid #d5d4cf; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.word-bank-placeholder { color: var(--muted); font-size: 14px; }
+.word-bank-pool { display: flex; flex-wrap: wrap; gap: 8px; }
+.word-tile { min-height: 44px; padding: 0 14px; border: 1px solid #cfd1d3; border-bottom-width: 3px; border-radius: 10px; background: white; color: var(--ink); font-size: 16px; font-weight: 600; }
+.word-tile:hover:not(:disabled) { border-color: var(--accent); }
+.word-tile.placed { border-color: var(--accent); background: #eaf6f3; }
+.word-tile.used { color: transparent; background: #ecedeb; border-style: dashed; border-bottom-width: 1px; }
+.match-pairs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.match-pairs > div { display: grid; gap: 10px; align-content: start; }
+.match-tile { min-height: 52px; padding: 8px 12px; border: 1px solid #cfd1d3; border-bottom-width: 3px; border-radius: 12px; background: white; color: var(--ink); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; text-align: left; font-size: 15px; font-weight: 600; }
+.match-tile small { width: 100%; color: var(--accent-strong); font-size: 12px; font-weight: 700; }
+.match-tile.selected { border-color: var(--accent); border-width: 2px 2px 4px; background: #eaf6f3; }
+.match-tile.linked { border-style: dashed; background: #f6f8f7; }
+.match-tile.native:disabled { opacity: 1; cursor: default; }
+.match-index { min-width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; color: white; background: var(--dark); font-size: 12px; font-weight: 800; }
+.match-help { grid-column: 1 / -1; margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.listening { display: grid; gap: 16px; }
+.listen-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.listen-buttons .secondary-button { margin-top: 0; min-width: 130px; font-size: 16px; }
+.listen-model { justify-self: start; padding-inline: 0; color: var(--accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 700px) {
+  .match-pairs { gap: 8px; }
+  .match-tile { min-height: 50px; font-size: 14px; padding: 8px 9px; }
+  .listen-buttons .secondary-button { flex: 1; }
+}

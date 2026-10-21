@@ -1,3 +1,4 @@
+import { SPANISH_A1_LESSON_REVISIONS } from "./spanish-a1.js";
 import type { GuidedLessonDefinition } from "./types.js";
 
 function supplementalLesson(
@@ -6,7 +7,7 @@ function supplementalLesson(
   return { ...definition, revision: 1, conversationTurnGoal: 4 };
 }
 
-export const GUIDED_LESSONS: GuidedLessonDefinition[] = [
+const FIRST_REVISIONS: GuidedLessonDefinition[] = [
   {
     id: "lesson-en-daily-basics",
     revision: 1,
@@ -689,3 +690,19 @@ export const GUIDED_LESSONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-b2-gap-pluperfect", "es-b2-mcq-flight-counterfactual"], scenarioId: "es-work-negotiation"
   })
 ];
+
+const REVISIONS = [...SPANISH_A1_LESSON_REVISIONS];
+
+/** Catalogue courant : une seule révision par leçon, la plus récente. */
+export const GUIDED_LESSONS: GuidedLessonDefinition[] = FIRST_REVISIONS.map((lesson) => {
+  const revision = REVISIONS.find((candidate) => candidate.id === lesson.id);
+  return revision ? { ...lesson, ...revision } : lesson;
+});
+
+/**
+ * Révisions remplacées, gardées pour qu'une séance commencée avant une mise à jour se termine avec
+ * exactement les exercices qu'elle a commencés (ne jamais casser une séance en cours).
+ */
+export const RETIRED_LESSON_REVISIONS: GuidedLessonDefinition[] = FIRST_REVISIONS.filter(
+  (lesson) => REVISIONS.some((candidate) => candidate.id === lesson.id)
+);

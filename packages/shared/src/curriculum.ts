@@ -4,6 +4,7 @@ import type {
   Exercise,
   LanguageCode
 } from "./types.js";
+import { SPANISH_A1_EXERCISES } from "./spanish-a1.js";
 
 const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
   en: [
@@ -811,7 +812,8 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
 export const EXERCISES: Exercise[] = [
   ...EXERCISES_BY_LANGUAGE.en,
   ...EXERCISES_BY_LANGUAGE.de,
-  ...EXERCISES_BY_LANGUAGE.es
+  ...EXERCISES_BY_LANGUAGE.es,
+  ...SPANISH_A1_EXERCISES
 ];
 
 export function getDiagnosticQuestions(language: LanguageCode): DiagnosticQuestion[] {

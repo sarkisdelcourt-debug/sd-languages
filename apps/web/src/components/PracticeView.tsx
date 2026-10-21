@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnswerEvaluation, LanguageCode } from "@shared/types";
 import { api, type PublicExercise } from "../api";
+import { ExerciseAnswer, exerciseTypeLabels } from "./ExerciseAnswer";
 
 export function PracticeView({ language, onProgress }: { language: LanguageCode; onProgress: () => void }) {
   const [exercises, setExercises] = useState<PublicExercise[]>([]);
@@ -48,20 +49,10 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
         <span>{index + 1} / {exercises.length}</span>
       </div>
       <article className="exercise-card">
-        <div className="exercise-meta"><span>{exercise.level}</span><span>{exercise.type === "multiple-choice" ? "Choix multiple" : exercise.type === "fill-gap" ? "Texte à trous" : "Traduction"}</span></div>
+        <div className="exercise-meta"><span>{exercise.level}</span><span>{exerciseTypeLabels[exercise.type]}</span></div>
         {exercise.recommendationReason ? <p className="recommendation-label">Recommandé : {exercise.recommendationReason}</p> : null}
         <h2>{exercise.prompt}</h2>
-        {exercise.choices ? (
-          <div className="choice-list">
-            {exercise.choices.map((choice) => (
-              <button disabled={Boolean(evaluation)} key={choice} className={answer === choice ? "choice selected" : "choice"} onClick={() => setAnswer(choice)}>
-                <span className="radio" />{choice}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <label className="answer-field">Votre réponse<input disabled={Boolean(evaluation)} value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void validate(); }} autoFocus /></label>
-        )}
+        <ExerciseAnswer exercise={exercise} language={language} value={answer} onChange={setAnswer} onSubmit={() => void validate()} disabled={Boolean(evaluation)} />
         {!evaluation ? <p className="hint">Indice : {exercise.hint}</p> : null}
         {evaluation ? (
           <div className={`feedback ${evaluation.verdict}`} role="status">

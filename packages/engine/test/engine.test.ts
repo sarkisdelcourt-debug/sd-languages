@@ -39,6 +39,21 @@ describe("transport-free engine", () => {
     expect(store.state.progress.en.completedExercises).toBe(1);
   });
 
+  it("lets a lesson session started on a retired revision continue with its own exercises", async () => {
+    const store = new MemoryStore();
+    const engine = createEngine(store);
+    const started = await engine.handle("POST", "/api/lessons/es/start", { lessonId: "lesson-es-daily-basics" });
+    expect(started.status).toBe(201);
+    // Simule une séance commencée avant la mise à jour : révision 1, premier exercice « es-a1-mcq-gender ».
+    store.state.lessonSessions[0]!.lessonRevision = 1;
+    await engine.handle("POST", "/api/lessons/es/continue");
+    const answered = await engine.handle("POST", "/api/lessons/es/answer", {
+      answer: "La", attemptId: "retired-revision-001", sessionId: store.state.lessonSessions[0]!.id, exerciseId: "es-a1-mcq-gender"
+    });
+    expect(answered.status).toBe(200);
+    expect((answered.body as { evaluation: { verdict: string } }).evaluation.verdict).toBe("exact");
+  });
+
   it("returns a 500 with a neutral message when a rule throws", async () => {
     const broken: StateStore = {
       read: async () => { throw new Error("disque plein"); },

@@ -9,6 +9,11 @@ import type {
   ReviewRating
 } from "./types.js";
 
+/** Forme canonique (et lisible en révision) d'un exercice d'association : « la casa = la maison · … ». */
+export function matchPairsAnswer(pairs: Array<{ target: string; native: string }>): string {
+  return pairs.map((pair) => `${pair.target} = ${pair.native}`).join(" · ");
+}
+
 export function normalizeAnswer(value: string): string {
   return value
     .normalize("NFD")
@@ -145,7 +150,9 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
     ? []
     : verdict === "minor"
       ? [{ kind: "accent" as const, message: "Le sens est juste, mais vérifiez les accents ou signes propres à la langue." }]
-      : nearMiss
+      : exercise.type === "match-pairs"
+        ? [{ kind: "formulation" as const, message: "Au moins une paire est inversée : comparez chaque mot avec sa traduction attendue." }]
+        : nearMiss
         ? [{ kind: "orthography" as const, message: "La réponse est très proche : relisez l'orthographe caractère par caractère." }]
         : [{ kind: exercise.type === "translation" ? "formulation" as const : "grammar" as const, message: "Comparez la structure de votre réponse avec le modèle proposé." }];
 

@@ -1,6 +1,6 @@
-import type { DashboardSnapshot, LanguageCode, LearnerState } from "../../../../packages/shared/src/types.js";
-import { LANGUAGE_CODES } from "../../../../packages/shared/src/catalog.js";
-import { isDue } from "../../../../packages/shared/src/learning.js";
+import type { DashboardSnapshot, LanguageCode, LearnerState } from "../../../shared/src/types.js";
+import { LANGUAGE_CODES } from "../../../shared/src/catalog.js";
+import { isDue } from "../../../shared/src/learning.js";
 
 function dayKey(date: Date): string {
   return date.toISOString().slice(0, 10);

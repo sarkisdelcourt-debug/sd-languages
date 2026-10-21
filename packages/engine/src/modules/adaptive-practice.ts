@@ -1,4 +1,4 @@
-import type { CefrLevel, Exercise, LanguageCode, LearnerState, LearningGoal } from "../../../../packages/shared/src/types.js";
+import type { CefrLevel, Exercise, LanguageCode, LearnerState, LearningGoal } from "../../../shared/src/types.js";
 
 const LEVEL_RANK: Record<CefrLevel, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5 };
 

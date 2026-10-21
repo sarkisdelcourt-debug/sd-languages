@@ -1,5 +1,5 @@
-import type { LanguageCode, LearnerState } from "../../../../packages/shared/src/types.js";
-import { LANGUAGE_CODES } from "../../../../packages/shared/src/catalog.js";
+import type { LanguageCode, LearnerState } from "../../shared/src/types.js";
+import { LANGUAGE_CODES } from "../../shared/src/catalog.js";
 
 export function createInitialState(): LearnerState {
   const progress = Object.fromEntries(

@@ -1,6 +1,6 @@
-import { EXERCISES } from "../../../../packages/shared/src/curriculum.js";
-import { GUIDED_LESSONS } from "../../../../packages/shared/src/lessons.js";
-import { CONVERSATION_SCENARIOS } from "../../../../packages/shared/src/scenarios.js";
+import { EXERCISES } from "../../../shared/src/curriculum.js";
+import { GUIDED_LESSONS } from "../../../shared/src/lessons.js";
+import { CONVERSATION_SCENARIOS } from "../../../shared/src/scenarios.js";
 import type {
   CefrLevel,
   GuidedLessonCatalog,
@@ -11,7 +11,7 @@ import type {
   GuidedLessonView,
   LanguageCode,
   LearnerState
-} from "../../../../packages/shared/src/types.js";
+} from "../../../shared/src/types.js";
 
 const cefrRank: Record<CefrLevel, number> = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
 

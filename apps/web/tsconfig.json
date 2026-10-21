@@ -11,5 +11,5 @@
       "@shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "../../packages/shared/src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "../../packages/shared/src/**/*.ts", "../../packages/engine/src/**/*.ts"]
 }

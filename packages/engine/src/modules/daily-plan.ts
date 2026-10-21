@@ -1,5 +1,5 @@
-import type { DailyPlan, DailyPlanItem, LanguageCode, LearnerState } from "../../../../packages/shared/src/types.js";
-import { isDue } from "../../../../packages/shared/src/learning.js";
+import type { DailyPlan, DailyPlanItem, LanguageCode, LearnerState } from "../../../shared/src/types.js";
+import { isDue } from "../../../shared/src/learning.js";
 import { createLessonCatalog } from "./guided-lessons.js";
 
 export function createDailyPlan(

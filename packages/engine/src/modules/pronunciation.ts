@@ -1,5 +1,5 @@
-import { assessPronunciation } from "../../../../packages/shared/src/learning.js";
-import { PRONUNCIATION_PROMPTS } from "../../../../packages/shared/src/pronunciation.js";
+import { assessPronunciation } from "../../../shared/src/learning.js";
+import { PRONUNCIATION_PROMPTS } from "../../../shared/src/pronunciation.js";
 import type {
   CefrLevel,
   LanguageCode,
@@ -8,7 +8,7 @@ import type {
   PronunciationAttemptResult,
   PronunciationLabView,
   PronunciationPrompt
-} from "../../../../packages/shared/src/types.js";
+} from "../../../shared/src/types.js";
 
 const cefrRank: Record<CefrLevel, number> = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
 

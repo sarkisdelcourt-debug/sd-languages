@@ -3,8 +3,8 @@ import type {
   ConversationReply,
   ConversationScenario,
   LanguageCode
-} from "../../../../packages/shared/src/types.js";
-import { normalizeAnswer } from "../../../../packages/shared/src/learning.js";
+} from "../../../shared/src/types.js";
+import { normalizeAnswer } from "../../../shared/src/learning.js";
 
 export interface CoachProvider {
   reply(

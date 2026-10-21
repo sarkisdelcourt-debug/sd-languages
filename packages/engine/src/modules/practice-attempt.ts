@@ -1,5 +1,5 @@
-import { createReviewCard, evaluateAnswer } from "../../../../packages/shared/src/learning.js";
-import type { Exercise, LearnerState, MistakeRecord } from "../../../../packages/shared/src/types.js";
+import { createReviewCard, evaluateAnswer } from "../../../shared/src/learning.js";
+import type { Exercise, LearnerState, MistakeRecord } from "../../../shared/src/types.js";
 import { recordPractice } from "./progress.js";
 
 export function applyPracticeAttempt(

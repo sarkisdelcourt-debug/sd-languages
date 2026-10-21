@@ -24,6 +24,16 @@ Chaque lot doit rester exécutable à sa fin. Une fonctionnalité non testée ou
 
 Doutes signalés dans le rapport : sur téléphone, « Parler » est sous « Plus » (cinq onglets maximum) ; les variantes acceptées sont générées par règles et peuvent accepter une forme maladroite (« I would seen it » pour « I'd seen it ») sans jamais refuser une forme juste listée.
 
+## Note du 22/10/2026 — lot 2 (branche `lot2-2026-10-22`, un commit par point)
+
+1. Leçons anglaises révision 3 : 6 exercices par leçon choisis pour l'objectif, au niveau exact (écart 0), aucun id dans deux leçons, test de pertinence (mots-clés déclarés dans chaque leçon). 22 exercices A1–A2 rédigés (`content/en/beginner.ts`) parce que la banque ne commençait qu'à l'A2. Révisions en cascade (1 → 2 → 3), toutes les révisions retirées jouables ; la séance réelle `lesson-en-project-update` reste reprenable (test moteur). Scénario hôtel espagnol `es-hotel-check-in` branché sur la leçon 3 (révision 3).
+2. `skillTags` sur chaque exercice (générés : thème, format, temps/fonction déduits par règles ; rédigés : à la main), liste fermée par langue dans `skills.ts`. Moteur `modules/skills.ts` pur et testé (exposition, 10 dernières réponses, stabilité, erreurs ouvertes, prochaine révision, action). Vue « Mes acquis » (sous « Plus » sur téléphone), série ciblée par thème ou `?skill=`. Isolation des langues testée.
+3. Carte du parcours : chapitres entièrement « Acquis » (niveau déclaré) repliés par défaut, état mémorisé par langue.
+4. Textes à trous : variantes contractée/développée acceptées (`withContractionVariants`), diagnostic B2 accepte « would've left ».
+5. Documentation (ce fichier, CLAUDE_START_HERE).
+
+Reste après ce lot : allemand (15 exercices) à enrichir sur le modèle de la banque anglaise ; espagnol A2–B2 (modèle A1 à étendre) ; session adaptative à trois intensités (lot P2) ; shadowing (studio oral) ; tests Playwright hors ligne du service worker ; relecture des nouveaux exercices A1–A2 par Sarkis ; données de « Mes acquis » encore minces tant que les séries ne journalisent pas chaque tentative (aujourd'hui : tentatives de leçon + dernier résultat par exercice).
+
 ---
 
 ## Lot P0 — fiabiliser le mode hors ligne

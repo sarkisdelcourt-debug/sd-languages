@@ -28,7 +28,9 @@ Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le
 
 9. **Audit du 21/10/2026 (branche `audit-2026-10-21`).** Correcteur tolérant (contractions, chiffres, US/UK, « 3 pm »), maîtrise des leçons avec les « détails à polir », bouton « Abandonner cette leçon », séries équilibrées par thème, générateurs plus didactiques (indice selon la phrase, distracteurs grammaticaux, traduction révélée après validation, verbes invariants hors drill prétérit), thème sombre par jetons, barre iPhone à 5 onglets, bandeau « en construction » pour l'allemand et l'espagnol. Détail dans `ROADMAP_CLAUDE.md`.
 
-Vérifications : `npm run typecheck`, `npm test` (148 tests au 21/10, 12 fichiers), `npm run build`, `node --check apps/web/public/sw.js`.
+10. **Lot 2 du 22/10/2026 (branche `lot2-2026-10-22`).** Leçons anglaises en révision 3 (exercices choisis pour l'objectif, au niveau exact, aucun id partagé, pertinence testée ; 22 exercices A1–A2 rédigés dans `content/en/beginner.ts`), `skillTags` sur chaque exercice + liste fermée de compétences (`packages/shared/src/skills.ts`), vue « Mes acquis » (`modules/skills.ts` pur et testé, route `GET /api/skills/:language`, série ciblée `?skill=`), chapitres acquis repliés sur la carte du parcours, variantes contractées des textes à trous, scénario hôtel espagnol `es-hotel-check-in`. Les révisions s'appliquent en cascade et toutes les révisions retirées restent jouables.
+
+Vérifications : `npm run typecheck`, `npm test` (183 tests au 22/10, 14 fichiers), `npm run build`, `node --check apps/web/public/sw.js`.
 
 ## État exécutable au 21 octobre 2026
 
@@ -37,12 +39,13 @@ React 19 + TypeScript + Vite ; le moteur (`packages/engine`) tourne dans le navi
 Fonctionnalités opérationnelles :
 
 - diagnostic A1–C1 indicatif pour les trois langues, ou niveau déclaré ;
-- 920 exercices déterministes avec correction didactique : 875 en anglais (banque générée + rédigée), 30 en espagnol, 15 en allemand — l'interface annonce les langues « en construction » ;
-- 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 2) tirent 6 exercices chacune de la banque ;
+- 942 exercices déterministes avec correction didactique : 897 en anglais (banque générée + rédigée, dont 22 A1–A2 du 22/10), 30 en espagnol, 15 en allemand — l'interface annonce les langues « en construction » ; chaque exercice porte des `skillTags` (24 compétences en anglais, 18 en allemand, 21 en espagnol) ;
+- 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 3) ont chacune 6 exercices propres à leur objectif, au niveau exact ; les chapitres sous le niveau déclaré se replient ;
+- carte de compétences « Mes acquis » : exposition, dix dernières réponses, stabilité, erreurs ouvertes, prochaine révision et action conseillée, avec série ciblée ;
 - carte du parcours en quatre chapitres, déblocage par maîtrise, recommandation expliquée, abandon possible ;
 - mémoire des erreurs, XP, séries et répétition espacée ;
 - séries d'entraînement « Recommandé » ou par thème, variées par format et par thème ;
-- 12 scénarios de conversation guidée, coach par règles et correcteur de francophones ;
+- 13 scénarios de conversation guidée (dont l'hôtel espagnol du 22/10), coach par règles et correcteur de francophones ;
 - laboratoire de prononciation avec synthèse navigateur, enregistrement audio éphémère et comparaison de transcription ;
 - PWA installable, tout hors ligne ; relais par fichier PC ⟷ iPhone, sauvegardes automatiques ;
 - thème clair / sombre selon l'appareil.
@@ -78,7 +81,7 @@ npm run build
 node --check apps/web/public/sw.js
 ```
 
-État de référence : 12 fichiers de tests, 148 tests réussis (21/10/2026).
+État de référence : 14 fichiers de tests, 183 tests réussis (22/10/2026).
 
 ## Architecture à connaître
 
@@ -96,9 +99,10 @@ EXPORT_MANIFEST.md         contenu et règles de confidentialité de l'export
 
 Points d'entrée importants :
 
-- `packages/shared/src/lessons.ts` et `english-lessons.ts` : catalogue des 36 leçons (révisions retirées conservées) ;
+- `packages/shared/src/lessons.ts` et `english-lessons.ts` : catalogue des 36 leçons (révisions en cascade, toutes les révisions retirées conservées) ;
+- `packages/shared/src/skills.ts` et `packages/engine/src/modules/skills.ts` : liste fermée des compétences et calcul de la carte « Mes acquis » ;
 - `packages/shared/src/curriculum.ts` : diagnostics, exercices, `contentCoverage` ;
-- `packages/shared/src/content/` : banque anglaise (listes) et `generators.ts` (exercices, variantes acceptées) ;
+- `packages/shared/src/content/` : banque anglaise (listes, `en/beginner.ts` pour l'A1–A2 rédigé) et `generators.ts` (exercices, variantes acceptées, `skillTags` déduits) ;
 - `packages/shared/src/learning.ts` : normalisation, verdicts, cartes de révision ;
 - `packages/engine/src/modules/guided-lessons.ts` : déblocage, recommandation, maîtrise, abandon ;
 - `packages/engine/src/modules/adaptive-practice.ts` : classement et séries variées ;

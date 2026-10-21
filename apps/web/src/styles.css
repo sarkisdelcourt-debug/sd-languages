@@ -295,3 +295,12 @@ main { min-width: 0; }
   .match-tile { min-height: 50px; font-size: 14px; padding: 8px 9px; }
   .listen-buttons .secondary-button { flex: 1; }
 }
+
+/* Exercices ciblés : thèmes et bilan de série */
+.topic-bar { margin-bottom: 18px; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.topic-chip { flex: 0 0 auto; min-height: 40px; padding: 0 14px; border: 1px solid #cfd1d3; border-radius: 999px; background: white; color: var(--ink); font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+.topic-chip small { color: var(--muted); font-size: 11px; font-weight: 600; }
+.topic-chip.active { border-color: var(--dark); background: var(--dark); color: white; }
+.topic-chip.active small { color: #cfe7e3; }
+.series-summary h2 { margin: 6px 0 10px; font-size: 30px; }
+.series-summary p { color: var(--muted); line-height: 1.5; }

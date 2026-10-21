@@ -54,6 +54,15 @@ Garantir qu'une coupure, un redémarrage ou deux onglets ouverts ne puissent ni 
 
 ## Lot P1 — donner une identité propre aux 36 leçons
 
+> **Banque anglaise du 22/10/2026** (`packages/shared/src/content/`) : Sarkis tournait en rond sur
+> 15 exercices. Méthode mixte décidée avec lui : listes (vocabulaire, phrases, phrasal verbs, verbes
+> irréguliers) transformées par `generators.ts` + exercices rédigés (grammaire, faux amis). Thèmes :
+> médical, conversation, voyage, grammaire, phrasal verbs, irréguliers, faux amis. « Exercices
+> ciblés » = séries de 6 avec bilan, choix du thème, exclusion de la série vue, et
+> `exerciseHistory` pour favoriser le neuf. Règle : un id publié ne change jamais. Reste : relier ces
+> exercices aux leçons guidées anglaises (révision 2, comme l'espagnol A1) et faire de même en
+> allemand et espagnol.
+
 > **Tranche espagnol A1 faite le 21/10/2026** (`packages/shared/src/spanish-a1.ts`) : 3 leçons en
 > révision 2, 6 exercices chacune (≥ 4 propres, ≥ 4 formats), 3 formats à la Duolingo (`word-bank`,
 > `match-pairs`, `listening`) dans `ExerciseAnswer.tsx`, ancienne révision conservée pour les séances

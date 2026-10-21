@@ -8,6 +8,7 @@ import type {
   DiagnosticQuestion,
   DiagnosticResult,
   Exercise,
+  ExerciseTopic,
   GuidedLessonView,
   LanguageDefinition,
   LanguageSettings,
@@ -25,6 +26,12 @@ export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers"> & {
   recommendationScore?: number;
   recommendationReason?: string;
 };
+export interface PracticeTopic {
+  topic: ExerciseTopic;
+  label: string;
+  count: number;
+  seen: number;
+}
 export type PublicDiagnosticQuestion = Omit<DiagnosticQuestion, "answer" | "acceptedAnswers">;
 export type PublicConversationScenario = ConversationScenario & {
   recommendationScore?: number;
@@ -55,7 +62,14 @@ export const api = {
   diagnostic: (language: string) => request<PublicDiagnosticQuestion[]>(`/api/diagnostic/${language}`),
   submitDiagnostic: (language: string, answers: Record<string, string>) =>
     request<DiagnosticResult>(`/api/diagnostic/${language}`, { method: "POST", body: JSON.stringify({ answers }) }),
-  exercises: (language: string) => request<PublicExercise[]>(`/api/practice/${language}`),
+  exercises: (language: string, options: { topic?: ExerciseTopic; exclude?: string[] } = {}) => {
+    const query = new URLSearchParams();
+    if (options.topic) query.set("topic", options.topic);
+    if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
+    const suffix = query.toString();
+    return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
+  },
+  practiceTopics: (language: string) => request<PracticeTopic[]>(`/api/practice-topics/${language}`),
   submitAnswer: (exerciseId: string, answer: string, attemptId: string) =>
     request<{ evaluation: AnswerEvaluation; duplicate: boolean; dashboard: DashboardSnapshot }>(
       `/api/practice/${exerciseId}/answer`,

@@ -1,22 +1,56 @@
-import { useEffect, useRef, useState } from "react";
-import type { AnswerEvaluation, LanguageCode } from "@shared/types";
-import { api, type PublicExercise } from "../api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { AnswerEvaluation, ExerciseTopic, LanguageCode } from "@shared/types";
+import { api, type PracticeTopic, type PublicExercise } from "../api";
+import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ExerciseAnswer, exerciseTypeLabels } from "./ExerciseAnswer";
 
+interface SeriesResult {
+  exerciseId: string;
+  correct: boolean;
+}
+
+/**
+ * Exercices ciblés : une série de 6, puis un bilan et une nouvelle série qui exclut ce qui vient
+ * d'être vu (plus de boucle sur les mêmes exercices). Le thème est facultatif.
+ */
 export function PracticeView({ language, onProgress }: { language: LanguageCode; onProgress: () => void }) {
+  const [topics, setTopics] = useState<PracticeTopic[]>([]);
+  const [topic, setTopic] = useState<ExerciseTopic>();
   const [exercises, setExercises] = useState<PublicExercise[]>([]);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [evaluation, setEvaluation] = useState<AnswerEvaluation>();
+  const [results, setResults] = useState<SeriesResult[]>([]);
+  const [seen, setSeen] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const attemptRef = useRef<{ exerciseId: string; id: string } | undefined>(undefined);
 
-  useEffect(() => {
-    api.exercises(language).then(setExercises).catch((reason: Error) => setError(reason.message));
+  const loadSeries = useCallback((nextTopic: ExerciseTopic | undefined, exclude: string[]) => {
+    setExercises([]);
+    setIndex(0);
+    setAnswer("");
+    setEvaluation(undefined);
+    setResults([]);
+    setError(undefined);
+    api.exercises(language, { topic: nextTopic, exclude }).then(setExercises).catch((reason: Error) => setError(reason.message));
+    // Les compteurs « vus / total » de chaque thème suivent les séries terminées.
+    api.practiceTopics(language).then(setTopics).catch(() => setTopics([]));
   }, [language]);
 
+  useEffect(() => {
+    loadSeries(undefined, []);
+  }, [language, loadSeries]);
+
+  const chooseTopic = (next: ExerciseTopic | undefined) => {
+    setTopic(next);
+    setSeen([]);
+    loadSeries(next, []);
+  };
+
   const exercise = exercises[index];
+  const finished = exercises.length > 0 && index >= exercises.length;
+
   const validate = async () => {
     if (!exercise || !answer.trim() || evaluation) return;
     if (attemptRef.current?.exerciseId !== exercise.id) {
@@ -26,6 +60,7 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
     try {
       const result = await api.submitAnswer(exercise.id, answer, attemptRef.current.id);
       setEvaluation(result.evaluation);
+      setResults((current) => [...current, { exerciseId: exercise.id, correct: result.evaluation.correct }]);
       onProgress();
     } catch (reason) {
       setError((reason as Error).message);
@@ -34,18 +69,55 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
     }
   };
   const next = () => {
-    setIndex((value) => (value + 1) % exercises.length);
+    setIndex((value) => value + 1);
     setAnswer("");
     setEvaluation(undefined);
     setError(undefined);
   };
+  const newSeries = () => {
+    const nextSeen = [...seen, ...exercises.map((item) => item.id)];
+    setSeen(nextSeen);
+    loadSeries(topic, nextSeen);
+  };
 
-  if (error && !exercise) return <div className="alert" role="alert">{error}</div>;
-  if (!exercise) return <div className="loading-card">Sélection des exercices…</div>;
+  const topicBar = topics.length ? (
+    <div className="topic-bar" role="group" aria-label="Choisir un thème">
+      <button className={topic ? "topic-chip" : "topic-chip active"} aria-pressed={!topic} onClick={() => chooseTopic(undefined)}>Recommandé</button>
+      {topics.map((entry) => (
+        <button key={entry.topic} className={topic === entry.topic ? "topic-chip active" : "topic-chip"} aria-pressed={topic === entry.topic} onClick={() => chooseTopic(entry.topic)}>
+          {entry.label}<small>{entry.seen}/{entry.count}</small>
+        </button>
+      ))}
+    </div>
+  ) : null;
+
+  if (error && !exercise && !finished) return <section className="exercise-layout">{topicBar}<div className="alert" role="alert">{error}</div></section>;
+  if (!exercises.length) return <section className="exercise-layout">{topicBar}<div className="loading-card">Sélection des exercices…</div></section>;
+
+  if (finished || !exercise) {
+    const correct = results.filter((result) => result.correct).length;
+    return (
+      <section className="exercise-layout">
+        {topicBar}
+        <article className="exercise-card series-summary" aria-live="polite">
+          <p className="eyebrow">Série terminée</p>
+          <h2>{correct} / {results.length} réponses justes</h2>
+          <p>{correct === results.length
+            ? "Série sans faute : ces exercices s'effacent quelques jours pour laisser place à du nouveau."
+            : "Les erreurs sont gardées dans votre mémoire des erreurs et reviendront en révision."}</p>
+          <div className="exercise-actions end">
+            <button className="primary-button" onClick={newSeries}>Nouvelle série</button>
+          </div>
+        </article>
+      </section>
+    );
+  }
+
   return (
     <section className="exercise-layout">
+      {topicBar}
       <div className="session-head">
-        <div><p className="eyebrow">Session adaptative</p><h2>{exercise.focus}</h2></div>
+        <div><p className="eyebrow">{topic ? topics.find((entry) => entry.topic === topic)?.label : "Série recommandée"}</p><h2>{exercise.focus}</h2></div>
         <span>{index + 1} / {exercises.length}</span>
       </div>
       <article className="exercise-card">
@@ -63,11 +135,16 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
               <div><span>Pourquoi ?</span><strong>{evaluation.explanation}</strong></div>
               {evaluation.issues.map((issue) => <div key={`${issue.kind}-${issue.message}`}><span>{issue.kind === "accent" ? "Point d'attention" : "Piste de correction"}</span><strong>{issue.message}</strong></div>)}
             </div>
+            {exercise.type !== "match-pairs" && getSpeechCapabilities().synthesis ? (
+              <button className="text-button listen-model" onClick={() => speakText(evaluation.expectedAnswer, language, 0.85)}>▶ Écouter la phrase</button>
+            ) : null}
           </div>
         ) : null}
         {error ? <div className="alert" role="alert">{error}</div> : null}
         <div className="exercise-actions end">
-          {evaluation ? <button className="primary-button" onClick={next}>Exercice suivant</button> : <button className="primary-button" disabled={!answer.trim() || loading} onClick={validate}>{loading ? "Vérification…" : "Vérifier"}</button>}
+          {evaluation
+            ? <button className="primary-button" onClick={next}>{index + 1 < exercises.length ? "Exercice suivant" : "Voir le bilan"}</button>
+            : <button className="primary-button" disabled={!answer.trim() || loading} onClick={validate}>{loading ? "Vérification…" : "Vérifier"}</button>}
         </div>
       </article>
     </section>

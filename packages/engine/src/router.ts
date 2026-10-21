@@ -2,8 +2,8 @@ import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../../shared/src/curriculum.js"
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
 import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/catalog.js";
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
-import type { CefrLevel, LearningGoal, ReviewRating } from "../../shared/src/types.js";
-import { rankExercises, selectAdaptiveExercises } from "./modules/adaptive-practice.js";
+import type { CefrLevel, ExerciseTopic, LearningGoal, ReviewRating } from "../../shared/src/types.js";
+import { rankExercises, selectAdaptiveExercises, selectTopicExercises } from "./modules/adaptive-practice.js";
 import { LocalCoachProvider } from "./modules/coach.js";
 import { createDailyPlan } from "./modules/daily-plan.js";
 import {
@@ -44,6 +44,15 @@ interface Route {
 }
 
 const reviewRatings = new Set<ReviewRating>(["again", "hard", "good", "easy"]);
+export const TOPIC_LABELS: Record<ExerciseTopic, string> = {
+  medical: "Anglais médical",
+  everyday: "Conversation",
+  travel: "Voyage",
+  grammar: "Grammaire",
+  "phrasal-verbs": "Phrasal verbs",
+  "irregular-verbs": "Verbes irréguliers",
+  "false-friends": "Faux amis"
+};
 const cefrRank: Record<CefrLevel, number> = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
 const goalLabels: Record<LearningGoal, string> = {
   fluency: "Gagner en aisance",
@@ -103,17 +112,39 @@ export function createEngine(store: StateStore): Engine {
     if (requestedLevel && !allowedLevels.includes(requestedLevel as CefrLevel)) {
       return fail(400, "Niveau CECRL invalide.");
     }
-    const candidates = EXERCISES.filter(
-      (exercise) => exercise.language === language && (!requestedLevel || exercise.level === requestedLevel)
+    const topic = query.get("topic") ?? undefined;
+    if (topic && !TOPIC_LABELS[topic as ExerciseTopic]) return fail(400, "Thème inconnu.");
+    // Exercices déjà vus dans la série en cours : la « nouvelle série » ne les repropose pas.
+    const excluded = new Set((query.get("exclude") ?? "").split(",").filter(Boolean));
+    const inScope = EXERCISES.filter(
+      (exercise) => exercise.language === language
+        && (!requestedLevel || exercise.level === requestedLevel)
+        && (!topic || exercise.topic === topic)
     );
+    const fresh = inScope.filter((exercise) => !excluded.has(exercise.id));
+    const candidates = fresh.length ? fresh : inScope;
     const state = await store.read();
     const ranked = requestedLevel
       ? rankExercises(candidates, state, language)
-      : selectAdaptiveExercises(candidates, state, language);
+      : topic
+        ? selectTopicExercises(candidates, state, language)
+        : selectAdaptiveExercises(candidates, state, language);
     return ok(ranked.map(({ exercise, score, recommendationReason }) => {
       const { answer: _answer, acceptedAnswers: _accepted, ...publicExercise } = exercise;
       return { ...publicExercise, recommendationScore: score, recommendationReason };
     }));
+  });
+
+  route("GET", "/api/practice-topics/:language", async ({ params }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const state = await store.read();
+    const topics = (Object.keys(TOPIC_LABELS) as ExerciseTopic[]).map((topic) => {
+      const exercises = EXERCISES.filter((exercise) => exercise.language === language && exercise.topic === topic);
+      const seen = exercises.filter((exercise) => state.exerciseHistory?.[exercise.id]).length;
+      return { topic, label: TOPIC_LABELS[topic], count: exercises.length, seen };
+    }).filter((entry) => entry.count > 0);
+    return ok(topics);
   });
 
   route("POST", "/api/practice/:exerciseId/answer", async ({ params, body }) => {

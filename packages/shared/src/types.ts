@@ -19,11 +19,22 @@ export interface LanguageDefinition {
   suggestedGoal: string;
 }
 
+/** Thème d'entraînement (filtre « Exercices ciblés »). Voir packages/shared/src/content/types.ts. */
+export type ExerciseTopic =
+  | "medical"
+  | "everyday"
+  | "travel"
+  | "grammar"
+  | "phrasal-verbs"
+  | "irregular-verbs"
+  | "false-friends";
+
 export interface Exercise {
   id: string;
   language: LanguageCode;
   level: CefrLevel;
   type: ExerciseType;
+  topic?: ExerciseTopic;
   prompt: string;
   choices?: string[];
   tiles?: string[];
@@ -249,6 +260,15 @@ export interface LearnerState {
   pronunciationProgress: Record<string, PronunciationProgress>;
   /** Relais entre appareils (PC ⟷ iPhone). Absent dans les profils antérieurs au mode téléphone. */
   sync?: SyncMeta;
+  /** Exposition de chaque exercice (22/10/2026), pour varier les séries. Absent dans les anciens profils. */
+  exerciseHistory?: Record<string, ExerciseExposure>;
+}
+
+export interface ExerciseExposure {
+  seen: number;
+  correct: number;
+  lastSeenAt: string;
+  lastCorrect: boolean;
 }
 
 /**

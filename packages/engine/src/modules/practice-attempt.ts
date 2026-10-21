@@ -16,6 +16,15 @@ export function applyPracticeAttempt(
     state.processedAttemptIds.splice(0, state.processedAttemptIds.length - 1_000);
   }
   recordPractice(state, exercise.language, evaluation.correct);
+  // Registre compact par exercice : permet de proposer du neuf au lieu de tourner en rond.
+  const history = (state.exerciseHistory ??= {});
+  const seen = history[exercise.id];
+  history[exercise.id] = {
+    seen: (seen?.seen ?? 0) + 1,
+    correct: (seen?.correct ?? 0) + (evaluation.correct ? 1 : 0),
+    lastSeenAt: new Date().toISOString(),
+    lastCorrect: evaluation.correct
+  };
   const mistakeId = `mistake-${exercise.id}`;
   const existingMistake = state.mistakes.find((mistake) => mistake.id === mistakeId);
   if (!evaluation.correct) {

@@ -63,9 +63,8 @@ export function expandContractions(sentence: string): string {
 export function contractionVariants(sentence: string): string[] {
   const expanded = expandContractions(sentence);
   const contracted = CONTRACTIONS.reduce((text, [, , full, contraction]) => text.replace(full, contraction), sentence);
-  // « 'd » devant un participe (« I'd seen ») : « had » est produit ci-dessus, on accepte aussi « would ».
-  const ambiguous = sentence.replace(/\b(I|you|he|she|we|they|it)'d\b/gi, "$1 would");
-  return [...new Set([expanded, contracted, ambiguous])].filter((variant) => variant !== sentence);
+  // « 'd » devant un participe (« I'd seen ») ne vaut que « had » : « I would seen » serait une faute acceptée.
+  return [...new Set([expanded, contracted])].filter((variant) => variant !== sentence);
 }
 
 const NUMBER_WORDS: Array<[number, string]> = [

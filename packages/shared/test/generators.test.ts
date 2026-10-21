@@ -80,7 +80,7 @@ describe("variantes de réponse tolérantes (21/10/2026)", () => {
     expect(expandContractions("She'd already left.")).toBe("She had already left.");
     expect(expandContractions("Let's go, we should've known.")).toBe("Let us go, we should have known.");
     expect(answerVariants("I'd seen it.")).toContain("I had seen it.");
-    expect(answerVariants("I'd seen it.")).toContain("I would seen it.");
+    expect(answerVariants("I'd seen it.")).not.toContain("I would seen it.");
   });
 
   it("contracte dans l'autre sens : would → 'd, let us → let's", () => {

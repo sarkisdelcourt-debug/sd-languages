@@ -3,6 +3,8 @@ import type { GuidedLessonSession, LearnerState } from "../../shared/src/types.j
 import { createInitialState } from "../src/initial-state.js";
 import { createEngine } from "../src/router.js";
 import { buildLessonSummary } from "../src/modules/guided-lessons.js";
+import { dailyTieBreaker, selectAdaptiveExercises } from "../src/modules/adaptive-practice.js";
+import { EXERCISES } from "../../shared/src/curriculum.js";
 import { GUIDED_LESSONS } from "../../shared/src/lessons.js";
 import type { StateStore } from "../src/state.js";
 
@@ -186,5 +188,45 @@ describe("leçons guidées : maîtrise tolérante et abandon (21/10/2026)", () =
     expect(view.session).toBeUndefined();
     expect(view.catalog.items.find((item) => item.lesson.id === "lesson-en-daily-basics")?.status).toBe("available");
     expect((await engine.handle("POST", "/api/lessons/en/start", { lessonId: "lesson-en-daily-basics" })).status).toBe(201);
+  });
+});
+
+describe("série « Recommandé » équilibrée (21/10/2026)", () => {
+  const englishExercises = EXERCISES.filter((exercise) => exercise.language === "en");
+  const declaredState = (goal: "fluency" | "work") => {
+    const state = createInitialState();
+    state.settings.en = { ...state.settings.en, goal, declaredLevel: "B1", targetLevel: "B2" };
+    return state;
+  };
+  const days = [21, 22, 23, 24, 25].map((day) => new Date(`2026-10-${day}T19:00:00.000Z`));
+
+  it("varie les thèmes sur cinq jours et ne propose jamais six exercices du même thème", () => {
+    const topicsSeen = new Set<string>();
+    for (const day of days) {
+      const series = selectAdaptiveExercises(englishExercises, declaredState("fluency"), "en", day);
+      expect(series).toHaveLength(6);
+      const perTopic = new Map<string, number>();
+      for (const item of series) {
+        const topic = item.exercise.topic ?? "général";
+        topicsSeen.add(topic);
+        perTopic.set(topic, (perTopic.get(topic) ?? 0) + 1);
+      }
+      expect(Math.max(...perTopic.values()), day.toISOString()).toBeLessThanOrEqual(2);
+    }
+    expect(topicsSeen.size).toBeGreaterThanOrEqual(4);
+  });
+
+  it("inclut de l'anglais médical quand l'objectif est « Travailler »", () => {
+    for (const day of days) {
+      const series = selectAdaptiveExercises(englishExercises, declaredState("work"), "en", day);
+      expect(series.some((item) => item.exercise.topic === "medical"), day.toISOString()).toBe(true);
+    }
+  });
+
+  it("ne dépend plus de l'ordre alphabétique : le départage jour + id couvre 0–1000", () => {
+    const values = new Set(englishExercises.slice(0, 200).map((exercise) => dailyTieBreaker(exercise.id, days[0]!)));
+    expect(values.size).toBeGreaterThan(100);
+    expect([...values].every((value) => value >= 0 && value <= 1000)).toBe(true);
+    expect(dailyTieBreaker("x", days[0]!)).toBe(dailyTieBreaker("x", days[0]!));
   });
 });

@@ -1,4 +1,4 @@
-import type { CefrLevel, Exercise, LanguageCode, LearnerState, LearningGoal } from "../../../shared/src/types.js";
+import type { CefrLevel, Exercise, ExerciseTopic, LanguageCode, LearnerState, LearningGoal } from "../../../shared/src/types.js";
 import { currentLevel } from "./level.js";
 
 const LEVEL_RANK: Record<CefrLevel, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5 };
@@ -9,9 +9,16 @@ export interface RankedExercise {
   recommendationReason: string;
 }
 
-function stableDailyTieBreaker(id: string, now: Date): number {
+/**
+ * Départage quotidien : hachage (FNV-1a) de « jour + id » réparti sur 0–1000, ramené ensuite à
+ * l'échelle des autres bonus. Mille valeurs distinctes évitent les ex æquo que l'ancien « mod 7 »
+ * laissait trancher par l'ordre alphabétique des ids (d'où un biais vers « en-day-… »).
+ */
+export function dailyTieBreaker(id: string, now: Date): number {
   const day = now.toISOString().slice(0, 10);
-  return Array.from(`${day}-${id}`).reduce((sum, character) => sum + (character.codePointAt(0) ?? 0), 0) % 7;
+  let value = 2_166_136_261;
+  for (const character of `${day}-${id}`) value = Math.imul(value ^ (character.codePointAt(0) ?? 0), 16_777_619) >>> 0;
+  return value % 1001;
 }
 
 function goalBoost(exercise: Exercise, goal: LearningGoal): number {
@@ -36,7 +43,7 @@ export function rankExercises(
       const mistake = state.mistakes.find(
         (candidate) => candidate.language === language && candidate.exerciseId === exercise.id
       );
-      let score = stableDailyTieBreaker(exercise.id, now);
+      let score = dailyTieBreaker(exercise.id, now) * 7 / 1000;
       let recommendationReason = "Découverte progressive";
       score += goalBoost(exercise, state.settings[language].goal);
 
@@ -70,25 +77,53 @@ export function rankExercises(
 
 export const SERIES_LENGTH = 6;
 const MAX_SAME_FORMAT = 2;
+const MAX_SAME_TOPIC = 2;
+const topicOf = (exercise: Exercise) => exercise.topic ?? "général";
+
+export interface DiversifyOptions {
+  /** Plafond d'exercices d'un même thème (Infinity pour une série ciblée sur un thème). */
+  maxSameTopic?: number;
+  /** Thème à garantir dans la série s'il existe parmi les candidats (ex. médical pour « Travailler »). */
+  ensureTopic?: ExerciseTopic;
+}
 
 /** Une même phrase donne « construire » et « écouter » : on ne les met pas dans la même série. */
 const sourceOf = (exercise: Exercise) => exercise.id.replace(/-(build|listen)$/u, "");
 
 /**
- * Série variée : on suit le classement, mais au plus deux exercices du même format et jamais deux
- * exercices issus de la même phrase. Si le thème ne permet pas mieux, on complète dans l'ordre.
+ * Série variée : on suit le classement, mais au plus deux exercices du même format, au plus deux
+ * du même thème (tour de rôle entre thèmes) et jamais deux exercices issus de la même phrase. Un
+ * thème garanti (médical pour l'objectif « Travailler ») prend la première place s'il est absent.
+ * Si les candidats ne permettent pas mieux, on complète dans l'ordre.
  */
-export function diversify(ranked: RankedExercise[], count = SERIES_LENGTH): RankedExercise[] {
+export function diversify(ranked: RankedExercise[], count = SERIES_LENGTH, options: DiversifyOptions = {}): RankedExercise[] {
+  const maxSameTopic = options.maxSameTopic ?? MAX_SAME_TOPIC;
   const series: RankedExercise[] = [];
   const formats = new Map<string, number>();
+  const topics = new Map<string, number>();
   const sources = new Set<string>();
-  for (const candidate of ranked) {
-    if (series.length >= count) break;
-    const format = candidate.exercise.type;
-    if ((formats.get(format) ?? 0) >= MAX_SAME_FORMAT || sources.has(sourceOf(candidate.exercise))) continue;
+  const take = (candidate: RankedExercise) => {
     series.push(candidate);
-    formats.set(format, (formats.get(format) ?? 0) + 1);
+    formats.set(candidate.exercise.type, (formats.get(candidate.exercise.type) ?? 0) + 1);
+    topics.set(topicOf(candidate.exercise), (topics.get(topicOf(candidate.exercise)) ?? 0) + 1);
     sources.add(sourceOf(candidate.exercise));
+  };
+  const ensured = options.ensureTopic ? ranked.find((candidate) => candidate.exercise.topic === options.ensureTopic) : undefined;
+  if (ensured) take(ensured);
+  // Tour de rôle : à chaque passage, un seul exercice par thème, dans l'ordre du classement.
+  while (series.length < count) {
+    const before = series.length;
+    const topicsThisRound = new Set<string>();
+    for (const candidate of ranked) {
+      if (series.length >= count) break;
+      const topic = topicOf(candidate.exercise);
+      if (series.includes(candidate) || topicsThisRound.has(topic)) continue;
+      if ((formats.get(candidate.exercise.type) ?? 0) >= MAX_SAME_FORMAT || (topics.get(topic) ?? 0) >= maxSameTopic) continue;
+      if (sources.has(sourceOf(candidate.exercise))) continue;
+      take(candidate);
+      topicsThisRound.add(topic);
+    }
+    if (series.length === before) break;
   }
   for (const candidate of ranked) {
     if (series.length >= count) break;
@@ -120,7 +155,7 @@ export function selectTopicExercises(
   language: LanguageCode,
   now: Date = new Date()
 ): RankedExercise[] {
-  return diversify(rankExercises(exercises, state, language, now));
+  return diversify(rankExercises(exercises, state, language, now), SERIES_LENGTH, { maxSameTopic: Infinity });
 }
 
 export function selectAdaptiveExercises(
@@ -140,5 +175,6 @@ export function selectAdaptiveExercises(
     const rank = LEVEL_RANK[exercise.level];
     return unresolved > 0 || (rank >= lowerRank && rank <= upperRank);
   });
-  return diversify(rankExercises(candidates, state, language, now));
+  const ensureTopic = state.settings[language].goal === "work" ? "medical" : undefined;
+  return diversify(rankExercises(candidates, state, language, now), SERIES_LENGTH, { ensureTopic });
 }

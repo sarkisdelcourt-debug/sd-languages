@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AnswerEvaluation, GuidedLessonCatalogItem, GuidedLessonView as LessonView, LanguageCode } from "@shared/types";
+import type { AnswerEvaluation, CefrLevel, GuidedLessonCatalogItem, GuidedLessonView as LessonView, LanguageCode } from "@shared/types";
 import { api } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ContentNotice } from "./ContentNotice";
@@ -21,6 +21,29 @@ const levelChapters = {
   B1: { label: "Conversation structurée", description: "Expliquer, raconter et faire avancer un échange." },
   B2: { label: "Nuance et négociation", description: "Argumenter et gérer une situation complexe." }
 } as const;
+const levelRank: Record<CefrLevel, number> = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
+
+/**
+ * Chapitres repliés/dépliés (22/10/2026) : préférence de confort mémorisée par langue dans
+ * localStorage ; en son absence, un chapitre « Acquis » (niveau déclaré) est replié, les autres ouverts.
+ */
+function readOpenChapters(language: LanguageCode): Record<string, boolean> {
+  try {
+    const saved = localStorage.getItem(`sd-path-open-${language}`);
+    const parsed: unknown = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, boolean>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeOpenChapters(language: LanguageCode, value: Record<string, boolean>) {
+  try {
+    localStorage.setItem(`sd-path-open-${language}`, JSON.stringify(value));
+  } catch {
+    // Préférence de confort seulement.
+  }
+}
 
 function LearningPath({
   view,
@@ -32,11 +55,24 @@ function LearningPath({
   onSelect: (lessonId: string) => void;
 }) {
   const { catalog, lesson } = view;
-  const chapters = Object.entries(levelChapters).map(([level, copy]) => ({
-    level,
-    ...copy,
-    items: catalog.items.filter((item) => item.lesson.level === level)
-  }));
+  const chapters = Object.entries(levelChapters).map(([level, copy]) => {
+    const items = catalog.items.filter((item) => item.lesson.level === level);
+    // Niveau déclaré (ex. B1) : les chapitres inférieurs entièrement « Acquis » se replient par défaut.
+    const acquired = Boolean(catalog.declaredLevel)
+      && levelRank[level as keyof typeof levelRank] < levelRank[catalog.declaredLevel!]
+      && items.length > 0
+      && items.every((item) => item.status === "completed");
+    return { level, ...copy, items, acquired };
+  });
+  const [openChapters, setOpenChapters] = useState<Record<string, boolean>>(() => readOpenChapters(catalog.language));
+  const isOpen = (chapter: (typeof chapters)[number]) => openChapters[chapter.level] ?? !chapter.acquired;
+  const toggle = (level: string, open: boolean) => {
+    setOpenChapters((current) => {
+      const next = { ...current, [level]: open };
+      writeOpenChapters(catalog.language, next);
+      return next;
+    });
+  };
   return (
     <section className="learning-path" aria-labelledby="learning-path-title">
       <header className="path-heading">
@@ -53,16 +89,23 @@ function LearningPath({
         {chapters.map((chapter) => {
           const mastered = chapter.items.filter((item) => item.status === "completed").length;
           const current = chapter.items.some((item) => item.lesson.id === lesson.id);
+          const open = isOpen(chapter);
           return (
-            <section className={`path-chapter${current ? " current" : ""}`} key={chapter.level} aria-labelledby={`chapter-${chapter.level}`}>
-              <header>
+            <details
+              className={`path-chapter${current ? " current" : ""}${chapter.acquired ? " acquired" : ""}`}
+              key={chapter.level}
+              aria-labelledby={`chapter-${chapter.level}`}
+              open={open}
+              onToggle={(event) => toggle(chapter.level, event.currentTarget.open)}
+            >
+              <summary>
                 <span>{chapter.level}</span>
                 <div>
                   <strong id={`chapter-${chapter.level}`}>{chapter.label}</strong>
-                  <small>{chapter.description}</small>
+                  <small>{chapter.acquired ? `Acquis · niveau ${catalog.declaredLevel} déclaré · ${open ? "replier" : "déplier"}` : chapter.description}</small>
                 </div>
                 <b aria-label={`${mastered} sur ${chapter.items.length} maîtrisées`}>{mastered}/{chapter.items.length}</b>
-              </header>
+              </summary>
               <div className="path-lessons">
                 {chapter.items.map((item) => {
                   const locked = item.status === "locked";
@@ -86,7 +129,7 @@ function LearningPath({
                   );
                 })}
               </div>
-            </section>
+            </details>
           );
         })}
       </div>

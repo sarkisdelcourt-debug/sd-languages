@@ -138,6 +138,7 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
     language,
     assessedLevel,
     targetLevel,
+    ...(declaredLevel ? { declaredLevel } : {}),
     recommendedLessonId: recommendation.item.lesson.id,
     recommendationReason,
     completedCount: provisional.filter((item) => item.status === "completed").length,

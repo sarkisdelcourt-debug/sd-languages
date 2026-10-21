@@ -252,3 +252,19 @@ describe("révisions retirées (22/10/2026)", () => {
     expect((answered.body as { evaluation: { verdict: string } }).evaluation.verdict).toBe("exact");
   });
 });
+
+describe("chapitres acquis (22/10/2026)", () => {
+  it("expose le niveau déclaré dans le catalogue pour replier les chapitres inférieurs, et rien sans déclaration", async () => {
+    const store = new MemoryStore();
+    const engine = createEngine(store);
+    const before = (await engine.handle("GET", "/api/lessons/en")).body as { catalog: { declaredLevel?: string } };
+    expect(before.catalog.declaredLevel).toBeUndefined();
+    await engine.handle("PATCH", "/api/settings/en", { goal: "fluency", dailyMinutes: 15, targetLevel: "B2", declaredLevel: "B1" });
+    const after = (await engine.handle("GET", "/api/lessons/en")).body as { catalog: { declaredLevel?: string; items: Array<{ lesson: { level: string }; status: string }> } };
+    expect(after.catalog.declaredLevel).toBe("B1");
+    for (const level of ["A1", "A2"]) {
+      expect(after.catalog.items.filter((item) => item.lesson.level === level).every((item) => item.status === "completed"), level).toBe(true);
+    }
+    expect(after.catalog.items.filter((item) => item.lesson.level === "B1").some((item) => item.status !== "completed")).toBe(true);
+  });
+});

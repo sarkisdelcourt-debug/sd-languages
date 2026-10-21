@@ -224,6 +224,8 @@ export interface GuidedLessonCatalog {
   language: LanguageCode;
   assessedLevel: CefrLevel;
   targetLevel: CefrLevel;
+  /** Niveau déclaré par l'apprenant, s'il existe : les chapitres inférieurs sont « Acquis » (repliés par défaut). */
+  declaredLevel?: CefrLevel;
   recommendedLessonId: string;
   recommendationReason: string;
   completedCount: number;

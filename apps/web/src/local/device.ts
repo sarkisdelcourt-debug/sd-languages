@@ -135,6 +135,8 @@ export async function restoreBackup(id: number): Promise<void> {
  * serveur local, son fichier `data/sd-languages.json` reste lisible via `/api/export`.
  */
 export async function fetchLegacyServerExport(): Promise<string | undefined> {
+  // Sur GitHub Pages (base /sd-languages/) ou hors ligne, il n'y a pas de serveur à interroger.
+  if (import.meta.env.BASE_URL !== "/" || !navigator.onLine) return undefined;
   try {
     const response = await fetch("/api/export", { cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok || !response.headers.get("content-type")?.includes("json")) return undefined;

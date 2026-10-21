@@ -17,10 +17,13 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
   const [mistakes, setMistakes] = useState<MistakeRecord[]>([]);
   const [plan, setPlan] = useState<DailyPlan>();
   const [settings, setSettings] = useState<LanguageSettings>();
+  const [unavailable, setUnavailable] = useState(false);
   useEffect(() => {
-    api.mistakes(language).then(setMistakes).catch(() => setMistakes([]));
-    api.plan(language).then(setPlan).catch(() => setPlan(undefined));
-    api.settings(language).then(setSettings).catch(() => setSettings(undefined));
+    setUnavailable(false);
+    const unavailableNow = () => setUnavailable(true);
+    api.mistakes(language).then(setMistakes).catch(() => { setMistakes([]); unavailableNow(); });
+    api.plan(language).then(setPlan).catch(() => { setPlan(undefined); unavailableNow(); });
+    api.settings(language).then(setSettings).catch(() => { setSettings(undefined); unavailableNow(); });
   }, [language, progress.completedExercises]);
   const accuracy = progress.completedExercises ? Math.round((progress.correctAnswers / progress.completedExercises) * 100) : 0;
   const focusAreas = useMemo(
@@ -30,6 +33,11 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
 
   return (
     <div className="stack-large">
+      {unavailable ? (
+        <div className="alert" role="alert">
+          Vos données locales sont inaccessibles pour le moment (navigation privée ou stockage bloqué ?). Le plan du jour et la mémoire des erreurs ne peuvent pas s'afficher.
+        </div>
+      ) : null}
       {settings && !settings.onboardingCompleted ? (
         <section className="setup-banner">
           <span className="setup-icon" aria-hidden="true">01</span>

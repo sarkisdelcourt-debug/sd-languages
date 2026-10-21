@@ -187,3 +187,25 @@ describe("curriculum integrity", () => {
     }
   });
 });
+
+describe("cartes de révision lisibles (21/10/2026)", () => {
+  const base = { language: "en" as const, level: "B1" as const, explanation: "", hint: "", focus: "Phrases" };
+
+  it("remplace la consigne d'écoute par la phrase française à dire", () => {
+    const card = createReviewCard({ ...base, id: "x-listen", type: "listening", prompt: "Écoutez puis écrivez la phrase.", audioText: "I'd like a coffee.", answer: "I'd like a coffee.", explanation: "« Je voudrais un café. » — Note." });
+    expect(card.prompt).toBe("Dites en anglais : « Je voudrais un café. »");
+    expect(card.answer).toBe("I'd like a coffee.");
+  });
+
+  it("transforme « Construisez » en consigne de traduction et liste les paires à associer", () => {
+    expect(createReviewCard({ ...base, id: "x-build", type: "word-bank", prompt: "Construisez : « Je voudrais un café. »", tiles: [], answer: "I'd like a coffee." }).prompt)
+      .toBe("Dites en anglais : « Je voudrais un café. »");
+    const pairs = [{ target: "a tracer", native: "un traceur" }, { target: "uptake", native: "la fixation" }];
+    expect(createReviewCard({ ...base, id: "x-pairs", type: "match-pairs", prompt: "Associez chaque mot à sa traduction.", pairs, answer: "a tracer = un traceur · uptake = la fixation" }).prompt)
+      .toBe("Traduisez en anglais : un traceur · la fixation");
+  });
+
+  it("garde la consigne telle quelle pour les autres formats", () => {
+    expect(createReviewCard(exercise).prompt).toBe("Bonjour");
+  });
+});

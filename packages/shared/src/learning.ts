@@ -191,12 +191,31 @@ export function estimateLevel(
   return { score, total, percentage, estimatedLevel: LEVEL_ORDER[index] ?? "A1" };
 }
 
+const LANGUAGE_NAMES: Record<Exercise["language"], string> = { en: "anglais", de: "allemand", es: "espagnol" };
+
+/**
+ * Consigne lisible sur une carte (sans audio ni étiquettes) : la phrase française à dire pour une
+ * dictée ou une construction, la liste des mots à traduire pour une association.
+ */
+export function reviewPrompt(exercise: Exercise): string {
+  const language = LANGUAGE_NAMES[exercise.language];
+  if (exercise.type === "listening") {
+    const translation = /^« (.+?) »/u.exec(exercise.explanation)?.[1];
+    return translation ? `Dites en ${language} : « ${translation} »` : exercise.prompt;
+  }
+  if (exercise.type === "word-bank") return exercise.prompt.replace(/^Construisez :/u, `Dites en ${language} :`);
+  if (exercise.type === "match-pairs" && exercise.pairs?.length) {
+    return `Traduisez en ${language} : ${exercise.pairs.map((pair) => pair.native).join(" · ")}`;
+  }
+  return exercise.prompt;
+}
+
 export function createReviewCard(exercise: Exercise, now: Date = new Date()): ReviewCard {
   return {
     id: `card-${exercise.id}`,
     sourceExerciseId: exercise.id,
     language: exercise.language,
-    prompt: exercise.prompt,
+    prompt: reviewPrompt(exercise),
     answer: exercise.answer,
     focus: exercise.focus,
     nextReviewAt: now.toISOString(),

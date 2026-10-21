@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { LANGUAGES } from "@shared/catalog";
 import { matchPairsAnswer } from "@shared/learning";
 import type { Exercise, LanguageCode } from "@shared/types";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
@@ -132,7 +133,7 @@ function Listening({ exercise, language, value, onChange, onSubmit, disabled }: 
           <button className="secondary-button" disabled={disabled} onClick={() => play(0.6)}>▶ Lentement</button>
         </div>
       ) : (
-        <p className="capability-note">La voix de l'appareil n'est pas disponible : écrivez en espagnol la phrase dont le sens est donné dans l'indice.</p>
+        <p className="capability-note">La voix de l'appareil n'est pas disponible : cette dictée en {LANGUAGES[language].name.toLowerCase()} ne peut pas être lue ici. Répondez si vous connaissez la phrase, sinon passez à l'exercice suivant.</p>
       )}
       <label className="answer-field">Ce que vous entendez
         <input value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled}

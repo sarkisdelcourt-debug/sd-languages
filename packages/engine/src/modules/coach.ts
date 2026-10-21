@@ -32,7 +32,7 @@ interface CoachPhrases {
   questionBack: string;
 }
 
-const PHRASES: Record<LanguageCode, CoachPhrases> = {
+export const COACH_PHRASES: Record<LanguageCode, CoachPhrases> = {
   en: {
     greeting: "Hello! Let's practise naturally. How are you today?",
     prompts: ["What would you like to talk about today?", "Can you tell me a little more about that?", "Why is that important to you?", "How did that make you feel?"],
@@ -50,7 +50,7 @@ const PHRASES: Record<LanguageCode, CoachPhrases> = {
     shortAnswer: "Kannst du mit einem ganzen Satz antworten? So übst du am besten.",
     offTopic: ["Bleiben wir bei der Situation.", "Kommen wir zur Frage zurück."],
     hint: (words) => `Zum Beispiel mit „${words.join("“ oder „")}“.`,
-    completion: "Sehr gut — Sie haben dieses Szenario abgeschlossen. Wählen Sie ein neues, wenn Sie bereit sind.",
+    completion: "Sehr gut — du hast dieses Szenario abgeschlossen. Wähl ein neues, wenn du bereit bist.",
     questionBack: "Gute Frage! Aber zuerst deine Antwort:"
   },
   es: {
@@ -94,7 +94,7 @@ export class LocalCoachProvider implements CoachProvider {
   ): ConversationReply {
     const now = options.now ?? new Date();
     const createdAt = now.toISOString();
-    const phrases = PHRASES[language];
+    const phrases = COACH_PHRASES[language];
     const trimmed = text.trim();
     const check = checkText(language, trimmed);
     const learnerMessage: ConversationMessage = {

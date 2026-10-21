@@ -59,7 +59,7 @@ export function DiagnosticView({ language, onComplete }: { language: LanguageCod
         {question.choices ? (
           <div className="choice-list">
             {question.choices.map((choice) => (
-              <button key={choice} className={currentAnswer === choice ? "choice selected" : "choice"} onClick={() => setAnswers({ ...answers, [question.id]: choice })}>
+              <button key={choice} className={currentAnswer === choice ? "choice selected" : "choice"} aria-pressed={currentAnswer === choice} onClick={() => setAnswers({ ...answers, [question.id]: choice })}>
                 <span className="radio" />{choice}
               </button>
             ))}

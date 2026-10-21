@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
-import { LocalCoachProvider } from "../src/modules/coach.js";
+import { COACH_PHRASES, LocalCoachProvider } from "../src/modules/coach.js";
 
 const coach = new LocalCoachProvider();
 const projectUpdate = CONVERSATION_SCENARIOS.find((scenario) => scenario.id === "en-work-project-update")!;
@@ -44,5 +44,13 @@ describe("coach local", () => {
     const reply = coach.reply("en", "I finished the report yesterday, and I sent it to the team.", { scenario: projectUpdate, scenarioStepIndex: 0 });
     expect(reply.learnerMessage.correction).toBeUndefined();
     expect(reply.scenarioAdvanced).toBe(true);
+  });
+});
+
+describe("coach allemand (21/10/2026)", () => {
+  it("tutoie partout : aucune forme de politesse « Sie » ne subsiste", () => {
+    const messages = Object.values(COACH_PHRASES.de).flatMap((value) => typeof value === "function" ? [value(["Beispiel"])] : [value].flat());
+    expect(messages.length).toBeGreaterThan(5);
+    for (const message of messages) expect(message, message).not.toMatch(/\b(Sie|Ihnen|Ihre?|Wählen Sie)\b/u);
   });
 });

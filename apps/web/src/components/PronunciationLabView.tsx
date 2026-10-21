@@ -172,7 +172,7 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
         </div>
         <aside className="privacy-note">
           <strong>Votre voix reste éphémère</strong>
-          <span>L'audio disparaît en quittant la page. Seule une transcription validée peut rester sur l'appareil si elle attend une synchronisation.</span>
+          <span>L'audio n'est jamais enregistré ni envoyé : il disparaît en quittant la page. Seuls le score et le verdict de chaque essai restent dans votre progression, sur cet appareil.</span>
         </aside>
       </header>
 

@@ -8,15 +8,15 @@ import type { HandwrittenExercise, IrregularVerbItem, PhrasalVerbItem } from "..
 /** 90 verbes irréguliers courants. Variantes acceptées séparées par « / ». */
 export const IRREGULAR_VERBS: IrregularVerbItem[] = [
   // A1 — les plus fréquents
-  { base: "be", past: "was/were", participle: "been", fr: "être", level: "A1" },
-  { base: "have", past: "had", participle: "had", fr: "avoir", level: "A1" },
+  { base: "be", past: "was/were", participle: "been", fr: "être", level: "A1", example: "The patient was very anxious before the scan." },
+  { base: "have", past: "had", participle: "had", fr: "avoir", level: "A1", example: "She had a headache all morning." },
   { base: "do", past: "did", participle: "done", fr: "faire", level: "A1" },
-  { base: "go", past: "went", participle: "gone", fr: "aller", level: "A1" },
-  { base: "make", past: "made", participle: "made", fr: "fabriquer, faire", level: "A1" },
-  { base: "take", past: "took", participle: "taken", fr: "prendre", level: "A1" },
-  { base: "come", past: "came", participle: "come", fr: "venir", level: "A1" },
-  { base: "see", past: "saw", participle: "seen", fr: "voir", level: "A1" },
-  { base: "get", past: "got", participle: "got/gotten", fr: "obtenir", level: "A1" },
+  { base: "go", past: "went", participle: "gone", fr: "aller", level: "A1", example: "He went home after the injection." },
+  { base: "make", past: "made", participle: "made", fr: "fabriquer, faire", level: "A1", example: "We made an appointment for Monday." },
+  { base: "take", past: "took", participle: "taken", fr: "prendre", level: "A1", example: "The scan took about twenty minutes." },
+  { base: "come", past: "came", participle: "come", fr: "venir", level: "A1", example: "The results came back this morning." },
+  { base: "see", past: "saw", participle: "seen", fr: "voir", level: "A1", example: "I saw the cardiologist last week." },
+  { base: "get", past: "got", participle: "got/gotten", fr: "obtenir", level: "A1", example: "She got the report on Friday." },
   { base: "give", past: "gave", participle: "given", fr: "donner", level: "A1" },
   { base: "know", past: "knew", participle: "known", fr: "savoir, connaître", level: "A1" },
   { base: "say", past: "said", participle: "said", fr: "dire", level: "A1" },

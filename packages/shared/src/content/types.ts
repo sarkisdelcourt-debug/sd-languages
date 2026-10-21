@@ -59,6 +59,7 @@ export interface IrregularVerbItem {
   participle: string;    // « gone »
   fr: string;            // « aller »
   level: CefrLevel;
+  example?: string;      // phrase au prétérit, affichée dans le drill si présente : « She went home after the scan. »
 }
 
 /** Exercice rédigé à la main, déjà au format final (id préfixé « en-hw- »). */

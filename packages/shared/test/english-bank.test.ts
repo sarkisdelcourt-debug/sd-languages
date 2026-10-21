@@ -99,3 +99,11 @@ describe("correcteur tolérant (21/10/2026)", () => {
     expect(evaluateAnswer(find("en-hw-g-023"), "had better").correct).toBe(true);
   });
 });
+
+describe("drills de verbes irréguliers (21/10/2026)", () => {
+  it("ne demande jamais le prétérit d'un verbe invariant comme put ou read", () => {
+    const trivial = ENGLISH_BANK.filter((exercise) => exercise.id.startsWith("en-irr-") && exercise.id.endsWith("-past") && exercise.id === `en-irr-${exercise.answer}-past`);
+    expect(trivial.map((exercise) => exercise.id)).toEqual([]);
+    expect(ENGLISH_BANK.some((exercise) => exercise.id === "en-irr-put-pp")).toBe(true);
+  });
+});

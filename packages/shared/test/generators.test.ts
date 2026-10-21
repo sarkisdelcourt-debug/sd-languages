@@ -104,3 +104,49 @@ describe("variantes de réponse tolérantes (21/10/2026)", () => {
     expect(answerVariants("I'd like to rent a car for two days downtown, it's my favorite vacation.").length).toBeLessThan(40);
   });
 });
+
+describe("générateurs plus didactiques (21/10/2026)", () => {
+  const items = [
+    { id: "en-test-s-010", topic: "medical" as const, level: "B1" as const, en: "Do you have an appointment at nine?", fr: "Avez-vous un rendez-vous à neuf heures ?", note: "Question avec do." },
+    { id: "en-test-s-011", topic: "medical" as const, level: "B1" as const, en: "Please fill in this form before the scan.", fr: "Veuillez remplir ce formulaire avant l'examen.", note: "Impératif poli." },
+    { id: "en-test-s-012", topic: "medical" as const, level: "B1" as const, en: "The injection is painless and very quick.", fr: "L'injection est indolore et très rapide.", note: "Painless = indolore." },
+    { id: "en-test-s-013", topic: "medical" as const, level: "B1" as const, en: "We have worked here since March.", fr: "Nous travaillons ici depuis mars.", note: "Since + date." }
+  ];
+  const exercises = sentenceExercises(items);
+  const build = (id: string) => exercises.find((exercise) => exercise.id === `${id}-build`)!;
+  const listen = (id: string) => exercises.find((exercise) => exercise.id === `${id}-listen`)!;
+
+  it("adapte l'indice de construction au type de phrase", () => {
+    expect(build("en-test-s-010").hint).toBe("Commencez par le mot interrogatif ou l'auxiliaire.");
+    expect(build("en-test-s-011").hint).toBe("Commencez par le verbe.");
+    expect(build("en-test-s-012").hint).toBe("Commencez par le sujet, puis le verbe.");
+  });
+
+  it("propose des distracteurs grammaticaux tirés des mots de la phrase", () => {
+    const tiles = (id: string, sentence: string) => build(id).tiles!.slice(sentenceTiles(sentence).length).map((tile) => tile.toLowerCase());
+    const question = tiles("en-test-s-010", items[0]!.en);
+    expect(question).toHaveLength(2);
+    expect(question.every((tile) => ["does", "did", "has", "had", "a", "the", "in", "on"].includes(tile))).toBe(true);
+    const since = tiles("en-test-s-013", items[3]!.en);
+    expect(since).toContain("for");
+    for (const exercise of exercises.filter((item) => item.type === "word-bank")) {
+      const present = new Set(sentenceTiles(exercise.answer).map((word) => word.toLowerCase()));
+      expect(exercise.tiles!.slice(present.size).some((tile) => present.has(tile.toLowerCase())), exercise.id).toBe(false);
+    }
+  });
+
+  it("garde la traduction d'une dictée pour l'explication, pas pour l'indice", () => {
+    expect(listen("en-test-s-012").hint).not.toContain("indolore");
+    expect(listen("en-test-s-012").explanation).toContain("L'injection est indolore et très rapide.");
+    expect(listen("en-test-s-012").explanation).toContain("Painless = indolore.");
+  });
+
+  it("retire les verbes invariants du drill du prétérit et montre l'exemple s'il existe", () => {
+    const drills = irregularVerbExercises([
+      { base: "put", past: "put", participle: "put", fr: "mettre", level: "A2" },
+      { base: "go", past: "went", participle: "gone", fr: "aller", level: "A1", example: "She went home after the scan." }
+    ]);
+    expect(drills.map((drill) => drill.id)).toEqual(["en-irr-put-pp", "en-irr-go-past", "en-irr-go-pp"]);
+    expect(drills.find((drill) => drill.id === "en-irr-go-past")!.prompt).toContain("She went home after the scan.");
+  });
+});

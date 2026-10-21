@@ -127,6 +127,41 @@ export function answerVariants(sentence: string): string[] {
   return [...variants];
 }
 
+/**
+ * Familles de mots grammaticaux : si la phrase contient l'un d'eux, ses voisins font de bons
+ * distracteurs (« does » / « did » pour une question en « do », « for » pour « since »…).
+ */
+const GRAMMAR_FAMILIES: string[][] = [
+  ["do", "does", "did"], ["is", "are", "was", "were"], ["has", "have", "had"], ["since", "for"],
+  ["in", "on", "at"], ["a", "an", "the"], ["much", "many"], ["this", "that", "these", "those"], ["some", "any"]
+];
+
+/** Distracteurs grammaticaux déterministes (au plus `count`), absents de la phrase. */
+export function grammarDistractors(words: string[], seed: string, count = 2): string[] {
+  const present = new Set(words.map((word) => word.toLowerCase()));
+  const candidates = [...new Set(GRAMMAR_FAMILIES
+    .filter((family) => family.some((member) => present.has(member)))
+    .flatMap((family) => family.filter((member) => !present.has(member))))];
+  if (!candidates.length) return [];
+  const start = hash(seed) % candidates.length;
+  return candidates.length <= count ? candidates : [candidates[start]!, candidates[(start + 1) % candidates.length]!];
+}
+
+const IMPERATIVE_STARTS = new Set([
+  "please", "don't", "do", "let", "let's", "hold", "go", "come", "avoid", "take", "turn", "call", "fill", "check", "drink", "keep",
+  "try", "make", "tell", "give", "send", "remember", "ask", "get", "bring", "breathe", "lie", "sit", "stand", "press", "follow",
+  "wait", "open", "close", "stop", "look", "put", "leave", "book", "pay", "show", "write", "read", "have", "be", "use", "rest",
+  "excuse", "thank", "relax", "swallow", "raise", "lift", "drive", "pick", "drop", "feel", "move", "stay", "sign", "describe"
+]);
+
+/** Indice de construction selon la forme de la phrase : question, impératif ou affirmation. */
+export function buildHint(sentence: string): string {
+  if (sentence.trim().endsWith("?")) return "Commencez par le mot interrogatif ou l'auxiliaire.";
+  const first = sentenceTiles(sentence)[0]?.toLowerCase() ?? "";
+  if (IMPERATIVE_STARTS.has(first)) return "Commencez par le verbe.";
+  return "Commencez par le sujet, puis le verbe.";
+}
+
 /** Mots d'une phrase tels qu'affichés sur les étiquettes (ponctuation finale retirée). */
 export function sentenceTiles(sentence: string): string[] {
   return sentence.split(/\s+/).map((word) => word.replace(/[.,?!;:]+$/g, "")).filter(Boolean);
@@ -160,22 +195,26 @@ export function sentenceExercises(items: SentenceItem[]): TopicExercise[] {
   return items.flatMap((item): TopicExercise[] => {
     const words = sentenceTiles(item.en);
     const present = new Set(words.map((word) => word.toLowerCase()));
-    const candidates = [...new Set(pool.filter((word) => !present.has(word) && word.length > 2))];
+    // Distracteurs : d'abord grammaticaux (auxiliaire, préposition, article de la phrase), sinon deux mots de la banque.
+    const grammatical = grammarDistractors(words, item.id);
+    const candidates = [...new Set(pool.filter((word) => !present.has(word) && word.length > 2 && !grammatical.includes(word)))];
     const start = candidates.length ? hash(item.id) % candidates.length : 0;
-    const distractors = candidates.length >= 2 ? [candidates[start]!, candidates[(start + 7) % candidates.length]!].filter((word, index, all) => all.indexOf(word) === index) : [];
+    const fallback = candidates.length >= 2 ? [candidates[start]!, candidates[(start + 7) % candidates.length]!].filter((word, index, all) => all.indexOf(word) === index) : [];
+    const distractors = [...grammatical, ...fallback].slice(0, 2);
     const variants = answerVariants(item.en);
     const base = { language: LANGUAGE, level: item.level, topic: item.topic, explanation: item.note, focus: "Phrases en contexte" } as const;
     return [
       {
         ...base, id: `${item.id}-build`, type: "word-bank",
         prompt: `Construisez : « ${item.fr} »`, tiles: [...words, ...distractors], answer: item.en,
-        hint: "Commencez par le sujet, puis le verbe."
+        hint: buildHint(item.en)
       },
       {
-        ...base, id: `${item.id}-listen`, type: "listening",
+        // La traduction n'est révélée qu'après validation (explication), pas dans l'indice.
+        ...base, id: `${item.id}-listen`, type: "listening", explanation: `« ${item.fr} » — ${item.note}`,
         prompt: "Écoutez puis écrivez la phrase.", audioText: item.en, answer: item.en,
         ...(variants.length ? { acceptedAnswers: variants } : {}),
-        hint: `Sens : « ${item.fr} »`
+        hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu."
       }
     ];
   });
@@ -212,12 +251,15 @@ export function irregularVerbExercises(items: IrregularVerbItem[]): TopicExercis
       language: LANGUAGE, level: item.level, topic: "irregular-verbs", type: "fill-gap", focus: "Verbes irréguliers",
       explanation: `${item.base} → ${item.past} → ${item.participle} (${item.fr}).`
     } as const;
+    // Verbes invariants (put, read, cut…) : demander le prétérit n'apprend rien, on garde le participe.
+    const invariant = past === item.base;
+    const example = item.example ? ` — ex. « ${item.example} »` : "";
     return [
-      {
-        ...base, id: `en-irr-${slug(item.base)}-past`, prompt: `Prétérit de « to ${item.base} » (${item.fr})`,
+      ...(invariant ? [] : [{
+        ...base, id: `en-irr-${slug(item.base)}-past`, prompt: `Prétérit de « to ${item.base} » (${item.fr})${example}`,
         answer: past!, ...(pastVariants.length ? { acceptedAnswers: pastVariants } : {}),
         hint: "Le prétérit : « hier, je… »."
-      },
+      }]),
       {
         ...base, id: `en-irr-${slug(item.base)}-pp`, prompt: `Participe passé de « to ${item.base} » (${item.fr})`,
         answer: participle!, ...(participleVariants.length ? { acceptedAnswers: participleVariants } : {}),

@@ -64,7 +64,9 @@ describe("tranche espagnol A1", () => {
       }
       if (item.type === "listening") {
         expect(item.audioText).toBe(item.answer);
-        expect(item.hint).toContain("Sens");
+        // La traduction n'est révélée qu'après validation (explication), jamais dans l'indice.
+        expect(item.hint).not.toContain("Sens");
+        expect(item.explanation).toMatch(/^« .+ » — /u);
       }
     }
   });

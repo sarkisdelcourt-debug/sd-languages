@@ -41,8 +41,8 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     id: "es-a1-l1-listen-question", language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "¿Cómo te llamas?", answer: "¿Cómo te llamas?",
-    explanation: "Te llamas tutoie la personne ; en espagnol, ¿ ouvre aussi la question.",
-    hint: "Sens : « Comment tu t'appelles ? »", focus: "Demander le prénom"
+    explanation: "« Comment tu t'appelles ? » — Te llamas tutoie la personne ; en espagnol, ¿ ouvre aussi la question.",
+    hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Demander le prénom"
   },
   {
     id: "es-a1-l1-gap-ser", language: "es", level: "A1", type: "fill-gap",
@@ -78,8 +78,8 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     id: "es-a1-l2-listen-sister", language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la phrase.",
     audioText: "Ella es mi hermana.", answer: "Ella es mi hermana.",
-    explanation: "Es (ser) présente une personne : ella es… ; mi est invariable devant hermano ou hermana.",
-    hint: "Sens : « C'est ma sœur. »", focus: "Présenter quelqu'un"
+    explanation: "« C'est ma sœur. » — Es (ser) présente une personne : ella es… ; mi est invariable devant hermano ou hermana.",
+    hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Présenter quelqu'un"
   },
   {
     id: "es-a1-l2-mcq-ser-plural", language: "es", level: "A1", type: "multiple-choice",
@@ -108,8 +108,8 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     id: "es-a1-l3-listen-breakfast", language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "¿A qué hora es el desayuno?", answer: "¿A qué hora es el desayuno?",
-    explanation: "¿A qué hora…? demande une heure ; qué porte un accent dans une question.",
-    hint: "Sens : « À quelle heure est le petit-déjeuner ? »", focus: "Demander une heure"
+    explanation: "« À quelle heure est le petit-déjeuner ? » — ¿A qué hora…? demande une heure ; qué porte un accent dans une question.",
+    hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Demander une heure"
   },
   {
     id: "es-a1-l3-gap-number", language: "es", level: "A1", type: "fill-gap",

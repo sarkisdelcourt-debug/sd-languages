@@ -1,0 +1,19 @@
+{
+  "name": "SD Languages — Coach linguistique",
+  "short_name": "SD Languages",
+  "description": "Coach local pour l'anglais, l'allemand et l'espagnol.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#111827",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

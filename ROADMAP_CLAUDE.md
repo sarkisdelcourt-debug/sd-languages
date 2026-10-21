@@ -11,6 +11,19 @@ Cette feuille de route part du MVP exécutable livré au 21 octobre 2026. Les pr
 
 Chaque lot doit rester exécutable à sa fin. Une fonctionnalité non testée ou uniquement maquettée doit être étiquetée comme telle.
 
+## Note du 21/10/2026 — lot d'audit (branche `audit-2026-10-21`, un commit par point)
+
+1. Correcteur tolérant : contractions (`'d` would/had selon le contexte, let's, would've…), chiffres ↔ mots (0–30, 40, 50, 100, an hour), lexique US ↔ UK, tiret/espace, « 3 pm » / « 3 p.m. » / « 3pm », « o'clock » ; réponses acceptées ajoutées à 8 exercices.
+2. Leçons : maîtrise avec exact + détails à polir ≥ 2/3 ; `POST /api/lessons/:language/abandon` et bouton « Abandonner cette leçon » (rien d'autre n'est effacé).
+3. Série « Recommandé » : départage par hachage jour + id (0–1000), au plus 2 exercices par thème, médical garanti pour l'objectif « Travailler ».
+4. Générateurs : indice selon la forme de la phrase, distracteurs grammaticaux, traduction des dictées révélée après validation, verbes invariants hors drill prétérit, exemples au prétérit.
+5. Thème sombre par jetons, barre iPhone à 5 onglets, CSS mort de l'outbox retiré.
+6. Petits bugs : langue affichée, note de confidentialité vocale, coach allemand au tutoiement, `aria-pressed`, cartes de révision lisibles, `/api/export` seulement sur le PC et en ligne, message « données inaccessibles ».
+7. Bandeau « en construction » quand une langue compte moins de 50 exercices.
+8. Documentation remise à jour (README, CLAUDE_START_HERE, ARCHITECTURE, EXPORT_MANIFEST, scripts).
+
+Doutes signalés dans le rapport : sur téléphone, « Parler » est sous « Plus » (cinq onglets maximum) ; les variantes acceptées sont générées par règles et peuvent accepter une forme maladroite (« I would seen it » pour « I'd seen it ») sans jamais refuser une forme juste listée.
+
 ---
 
 ## Lot P0 — fiabiliser le mode hors ligne

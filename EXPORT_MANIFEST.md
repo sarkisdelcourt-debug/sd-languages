@@ -18,13 +18,13 @@
 - `node_modules` : dépendances volumineuses et propres à la machine, recréées avec `npm install` ;
 - fichiers temporaires `data/*.tmp` ;
 - journaux, couverture de tests et caches d'outils s'ils existent ;
-- l'outbox IndexedDB du navigateur : elle n'appartient pas au dossier du projet. L'interface n'affichait aucune action en attente au moment de l'export, mais cet état n'est pas vérifiable depuis l'archive seule.
+- la progression IndexedDB du navigateur (`sd-languages`) : depuis le mode téléphone, c'est elle qui fait foi sur chaque appareil ; elle n'appartient pas au dossier du projet et se transfère par « Envoyer ma progression ».
 
 ## Données personnelles
 
-L'archive contient la progression d'apprentissage locale : réglages, résultats, erreurs, révisions et séance en cours. Elle ne contient ni compte, ni mot de passe, ni clé d'API, ni enregistrement audio.
+L'archive contient l'ancienne progression du PC (`data/sd-languages.json`) : réglages, résultats, erreurs, révisions et séance en cours au moment de l'export. Elle ne contient ni compte, ni mot de passe, ni clé d'API, ni enregistrement audio.
 
-Cette archive est un transfert complet du **dossier projet**. Elle ne constitue pas encore un export exhaustif de tous les stockages du navigateur : l'outbox IndexedDB, `localStorage` et les caches PWA sont extérieurs au dossier.
+Cette archive est un transfert complet du **dossier projet**. Elle ne constitue pas un export des stockages du navigateur : la progression IndexedDB courante, `localStorage` et les caches PWA sont extérieurs au dossier ; le fichier produit par « Envoyer ma progression » est la sauvegarde de référence.
 
 Ne pas publier cette archive dans un dépôt public sans retirer ou anonymiser `data/sd-languages.json`.
 

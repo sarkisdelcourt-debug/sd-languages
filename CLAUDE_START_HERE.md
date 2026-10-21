@@ -26,26 +26,28 @@ Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le
 7. **Niveau déclaré (22/10/2026).** `settings.declaredLevel` prime sur le diagnostic (`modules/level.ts` → `currentLevel`) ; les leçons des niveaux inférieurs deviennent « Acquis ». Sarkis s'est déclaré B1 en anglais.
 8. **En ligne** : https://sarkisdelcourt-debug.github.io/sd-languages/ — chaque envoi sur `main` republie (workflow `pages.yml`, tests compris).
 
-Vérifications : `npm run typecheck`, `npm test` (121 tests au 22/10), `npm run build`, `node --check apps/web/public/sw.js`.
+9. **Audit du 21/10/2026 (branche `audit-2026-10-21`).** Correcteur tolérant (contractions, chiffres, US/UK, « 3 pm »), maîtrise des leçons avec les « détails à polir », bouton « Abandonner cette leçon », séries équilibrées par thème, générateurs plus didactiques (indice selon la phrase, distracteurs grammaticaux, traduction révélée après validation, verbes invariants hors drill prétérit), thème sombre par jetons, barre iPhone à 5 onglets, bandeau « en construction » pour l'allemand et l'espagnol. Détail dans `ROADMAP_CLAUDE.md`.
 
-## État exécutable au 21 octobre 2026 (avant le mode téléphone)
+Vérifications : `npm run typecheck`, `npm test` (148 tests au 21/10, 12 fichiers), `npm run build`, `node --check apps/web/public/sw.js`.
 
-Le MVP fonctionne en React 19 + TypeScript, avec une API Express locale et une persistance JSON.
+## État exécutable au 21 octobre 2026
+
+React 19 + TypeScript + Vite ; le moteur (`packages/engine`) tourne dans le navigateur, la progression vit dans IndexedDB.
 
 Fonctionnalités opérationnelles :
 
-- diagnostic A1–C1 indicatif pour les trois langues ;
-- 45 exercices déterministes avec correction didactique ;
-- 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ;
-- carte du parcours en quatre chapitres, déblocage par maîtrise et recommandation expliquée ;
+- diagnostic A1–C1 indicatif pour les trois langues, ou niveau déclaré ;
+- 920 exercices déterministes avec correction didactique : 875 en anglais (banque générée + rédigée), 30 en espagnol, 15 en allemand — l'interface annonce les langues « en construction » ;
+- 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 2) tirent 6 exercices chacune de la banque ;
+- carte du parcours en quatre chapitres, déblocage par maîtrise, recommandation expliquée, abandon possible ;
 - mémoire des erreurs, XP, séries et répétition espacée ;
-- 12 scénarios de conversation guidée ;
+- séries d'entraînement « Recommandé » ou par thème, variées par format et par thème ;
+- 12 scénarios de conversation guidée, coach par règles et correcteur de francophones ;
 - laboratoire de prononciation avec synthèse navigateur, enregistrement audio éphémère et comparaison de transcription ;
-- PWA installable avec shell et bibliothèque préparés pour la lecture hors ligne ;
-- outbox IndexedDB pour les mutations rejouables, avec état visible et resynchronisation ;
-- conservation locale dans `data/sd-languages.json`.
+- PWA installable, tout hors ligne ; relais par fichier PC ⟷ iPhone, sauvegardes automatiques ;
+- thème clair / sombre selon l'appareil.
 
-État utilisateur à préserver : une séance anglaise B1 `lesson-en-project-update` est active en phase `conversation`. Ne jamais supprimer, réinitialiser ou remplacer le fichier de données pendant une évolution ordinaire.
+État utilisateur à préserver : une séance anglaise B1 `lesson-en-project-update` est active en phase `conversation` sur l'appareil de Sarkis. Ne jamais la clore ni réinitialiser la progression pendant une évolution ordinaire ; `data/sd-languages.json` est l'ancienne progression du PC, à ne jamais toucher.
 
 ## Démarrage
 
@@ -76,15 +78,17 @@ npm run build
 node --check apps/web/public/sw.js
 ```
 
-État de référence : 3 fichiers de tests, 30 tests réussis.
+État de référence : 12 fichiers de tests, 148 tests réussis (21/10/2026).
 
 ## Architecture à connaître
 
 ```text
-apps/web/                  React, PWA, IndexedDB et fonctions vocales navigateur
-apps/api/                  API Express, persistance JSON et modules applicatifs
-packages/shared/           types, contenus, correction et règles pédagogiques
-data/sd-languages.json     progression réelle locale — à préserver
+apps/web/                  React, PWA, IndexedDB (browser-store.ts), relais par fichier, voix navigateur
+apps/api/                  serveur Express du PC : build, parité HTTP, GET /api/export
+packages/engine/           moteur : router.ts (routes), modules/ (leçons, séries, coach, correcteur, plan), backup.ts (relais)
+packages/shared/           types, banque de contenu (content/), générateurs, correction, leçons, scénarios
+scripts/                   content-stats, bank-dump, lesson-dump, serve-pages
+data/sd-languages.json     ancienne progression du PC — à ne jamais toucher
 docs/ARCHITECTURE.md       décisions techniques et limites actuelles
 ROADMAP_CLAUDE.md          ordre recommandé des prochains travaux
 EXPORT_MANIFEST.md         contenu et règles de confidentialité de l'export
@@ -92,13 +96,16 @@ EXPORT_MANIFEST.md         contenu et règles de confidentialité de l'export
 
 Points d'entrée importants :
 
-- `packages/shared/src/lessons.ts` : catalogue des 36 leçons ;
-- `packages/shared/src/curriculum.ts` : diagnostics et exercices ;
-- `apps/api/src/modules/guided-lessons.ts` : déblocage, recommandation et état des leçons ;
-- `apps/web/src/offline.ts` : outbox IndexedDB et synchronisation ;
+- `packages/shared/src/lessons.ts` et `english-lessons.ts` : catalogue des 36 leçons (révisions retirées conservées) ;
+- `packages/shared/src/curriculum.ts` : diagnostics, exercices, `contentCoverage` ;
+- `packages/shared/src/content/` : banque anglaise (listes) et `generators.ts` (exercices, variantes acceptées) ;
+- `packages/shared/src/learning.ts` : normalisation, verdicts, cartes de révision ;
+- `packages/engine/src/modules/guided-lessons.ts` : déblocage, recommandation, maîtrise, abandon ;
+- `packages/engine/src/modules/adaptive-practice.ts` : classement et séries variées ;
+- `apps/web/src/local/browser-store.ts` et `device.ts` : IndexedDB, relais, sauvegardes ;
 - `apps/web/public/sw.js` : caches PWA ;
 - `apps/web/src/components/GuidedLessonView.tsx` : carte et séance guidée ;
-- `apps/api/src/app.ts` : routes HTTP.
+- `packages/engine/src/router.ts` : routes du moteur (reprises telles quelles par `apps/api/src/app.ts`).
 
 ## Contraintes non négociables
 
@@ -115,16 +122,15 @@ Points d'entrée importants :
 
 ## Limites actuelles importantes
 
-- Les 36 leçons réemploient une banque de 45 exercices et 12 scénarios. Le volume des leçons a augmenté plus vite que la diversité du contenu.
+- L'allemand (15 exercices) et l'espagnol (30) restent des ébauches ; leurs 24 leçons réemploient ces petites banques et 4 scénarios par langue.
+- La correction est tolérante par règles (contractions, chiffres, US/UK) mais pas sémantique : une formulation juste non prévue peut être refusée.
 - Le score de prononciation mesure la proximité de la transcription, pas les phonèmes, le rythme ou l'accent.
-- Les transitions de leçon, dialogues, diagnostics et cartes de révision ne sont pas rejoués hors ligne, car leur ordre modifie l'état.
-- L'outbox ne possède pas encore d'écran de résolution détaillée pour les conflits bloqués.
-- Il n'existe pas encore de tests navigateur automatisés du service worker.
-- Il n'existe ni comptes, ni synchronisation multi-appareils, ni fournisseur IA actif.
+- Il n'existe pas encore de tests navigateur automatisés du service worker ni de tests de rendu du thème sombre.
+- Il n'existe ni comptes, ni synchronisation automatique multi-appareils, ni fournisseur IA.
 
 ## Première action recommandée
 
-Commencer par le lot P0 de `ROADMAP_CLAUDE.md` : tests navigateur du hors-ligne, interface de conflits et cycle complet export/effacement. Ne pas attaquer l'IA ou la voix avancée avant d'avoir fiabilisé cette base.
+Enrichir l'allemand puis l'espagnol sur le modèle de la banque anglaise (`packages/shared/src/content/`), et décider avec Sarkis des tests navigateur (service worker, thème sombre). Ne pas attaquer l'IA ou la voix avancée avant.
 
 ## Méthode de travail attendue
 

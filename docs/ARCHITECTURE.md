@@ -100,12 +100,14 @@ Chaque langue possède ses propres réglages : objectif (`aisance`, `voyage`, `t
 
 ## PWA et hors ligne
 
-Le service worker sépare deux caches versionnés. Le cache `shell` contient la page, le manifeste, l'icône et les fichiers JS/CSS Vite détectés lors de l'installation. Le cache `api` utilise le réseau d'abord puis les dernières réponses valides. `/api/health` et `/api/export` restent strictement réseau ; une réponse relue depuis le cache porte `X-SD-Data-Source: cache` afin que l'interface affiche le mode hors ligne.
+Le service worker met en cache le shell (page, manifeste, icônes, fichiers JS/CSS Vite). Depuis le mode téléphone (21/10/2026), aucune route `/api/…` ne transite par le réseau : le moteur s'exécute dans la page et la progression est lue et écrite dans IndexedDB (`apps/web/src/local/browser-store.ts`, exclusion entre onglets par Web Locks puis file locale). L'ancienne outbox et son module `offline.ts` ont été supprimés : il n'y a plus de serveur à rejoindre ni de conflit à rejouer.
 
-La base IndexedDB `sd-languages-offline` contient une outbox indépendante du fichier JSON. Seules les mutations rejouables y entrent : réglages absolus, exercice libre avec `attemptId`, prononciation avec `attemptId`, et réponse de leçon avec identifiants de séance et d'exercice obligatoires côté serveur. Les réglages successifs d'une même langue sont fusionnés. La synchronisation est séquentielle et protégée entre onglets lorsque Web Locks est disponible. Le lot P0 doit ajouter un lease IndexedDB de secours pour les navigateurs qui n'exposent pas cette API. Les erreurs réseau et serveur restent en attente, tandis qu'un conflit client devient visible comme action à vérifier.
+Le relais entre appareils est un fichier : `packages/engine/src/backup.ts` compare les points de relais (`state.sync`) et avertit avant qu'une reprise n'écrase des changements ; une copie est gardée avant chaque remplacement et une par jour (10 au plus).
 
-Les mutations dont l'ordre change le sens ne sont pas mises en file : diagnostic, `continue` et message de leçon, révision espacée, démarrage de scénario et conversation. Cette limite est volontaire : le mode hors ligne privilégie l'absence de perte et de double progression plutôt qu'une fausse autonomie.
+## Thème et navigation (21/10/2026)
+
+`apps/web/src/styles.css` définit ses couleurs par jetons sur `:root`, redéfinis sous `prefers-color-scheme: dark` ; les états (exact, à polir, à revoir) combinent toujours un symbole et une luminance distincte. Sur téléphone, la barre garde quatre onglets plus « Plus » (Parler, Mes objectifs, Mes données, Diagnostic) avec des cibles d'au moins 44 px.
 
 ## Prochaines étapes recommandées
 
-`ROADMAP_CLAUDE.md` définit l'ordre normatif. Le premier lot est la fiabilisation hors ligne : tests navigateur, tests IndexedDB, lease multi-onglets de secours, conflits, export/import et effacement récupérable. Viennent ensuite la validation et l'enrichissement des 36 leçons, la carte de compétences, le studio oral avancé et, seulement après, les fournisseurs IA facultatifs.
+`ROADMAP_CLAUDE.md` définit l'ordre normatif : enrichir l'allemand et l'espagnol sur le modèle de la banque anglaise, ajouter des tests navigateur (service worker, thème sombre), puis la carte de compétences, le studio oral avancé et, seulement après, les fournisseurs IA facultatifs.

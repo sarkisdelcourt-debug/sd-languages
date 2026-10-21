@@ -1,8 +1,8 @@
 # SD Languages
 
-MVP local-first d'un coach linguistique pour progresser en anglais, réactiver l'allemand et commencer l'espagnol. L'application associe un diagnostic court, des exercices corrigés, une mémoire des erreurs, une répétition espacée, un suivi de progression et une conversation guidée.
+Coach linguistique local-first pour progresser en anglais, réactiver l'allemand et commencer l'espagnol. L'application associe un diagnostic court, des leçons guidées, des exercices corrigés (QCM, textes à trous, traduction, phrases à construire, paires à associer, dictées), une mémoire des erreurs, une répétition espacée, un suivi de progression, un coach de conversation par règles et un laboratoire de prononciation.
 
-Le MVP ne demande ni compte, ni abonnement, ni clé d'API. Les données d'apprentissage restent dans un fichier JSON sur la machine.
+Elle ne demande ni compte, ni abonnement, ni clé d'API. Le moteur pédagogique tourne dans le navigateur ; la progression vit dans IndexedDB sur chaque appareil et se transfère de l'un à l'autre par fichier. Version en ligne : <https://sarkisdelcourt-debug.github.io/sd-languages/> (installable sur iPhone, fonctionne hors ligne).
 
 ## Démarrage rapide
 
@@ -19,9 +19,7 @@ npm install
 npm run dev
 ```
 
-Ouvrir ensuite <http://127.0.0.1:5173>. Le serveur local écoute uniquement sur `127.0.0.1:8787` et Vite relaie les appels `/api` pendant le développement.
-
-Les données sont créées dans `data/sd-languages.json`. Pour choisir un autre emplacement :
+Ouvrir ensuite <http://127.0.0.1:5173>. Le serveur Express (`127.0.0.1:8787`) n'est plus nécessaire à l'apprentissage : il sert le build sur le PC, garde les tests de parité HTTP et expose `GET /api/export` pour reprendre une fois l'ancien fichier `data/sd-languages.json`. Pour choisir un autre emplacement de ce fichier :
 
 ```bash
 SD_LANGUAGES_DATA_FILE=./data/mon-profil.json npm run dev
@@ -46,33 +44,36 @@ Ouvrir <http://127.0.0.1:8787>. Le même serveur fournit alors l'API et l'interf
 ## Vérifications
 
 ```bash
-npm test
 npm run typecheck
+npm test
 npm run build
+node --check apps/web/public/sw.js
 ```
 
-Les tests ne contactent aucun service externe. Ils couvrent notamment la normalisation des réponses, le score diagnostique, la répétition espacée, la persistance et les principaux parcours API.
+Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils couvrent la correction tolérante (contractions, chiffres, lexique US/UK), les générateurs de la banque anglaise, le coach par règles et le correcteur de francophones, les leçons guidées (maîtrise, abandon, révisions retirées), les séries d'entraînement, le relais par fichier, le stockage IndexedDB (`fake-indexeddb`) et la parité de l'API Express.
 
 ## Ce qui fonctionne aujourd'hui
 
 | Domaine | État MVP | Détail |
 |---|---|---|
-| Anglais, allemand, espagnol | Opérationnel | 6 questions diagnostiques et 15 exercices progressifs par langue |
-| Diagnostic | Opérationnel | Score pondéré et estimation A1–C1 indicative |
-| Exercices | Opérationnel | QCM, texte à trous et traduction |
-| Correction didactique | Opérationnel, déterministe | Verdict exact, détail mineur ou erreur, avec réponse modèle, règle et point d'attention |
+| Anglais | Opérationnel | 875 exercices (médical, conversation, voyage, grammaire B1–B2, phrasal verbs, verbes irréguliers, faux amis) et 6 questions diagnostiques |
+| Allemand, espagnol | En construction, annoncé dans l'interface | 15 et 30 exercices, 6 questions diagnostiques ; les leçons réemploient cette petite banque |
+| Niveau | Opérationnel | Diagnostic pondéré A1–C1 indicatif, ou niveau déclaré par l'apprenant (les leçons inférieures passent « Acquis ») |
+| Exercices | Opérationnel | QCM, texte à trous, traduction, phrase à construire, paires à associer, dictée ; séries de 6 variées par format et par thème |
+| Correction didactique | Opérationnel, déterministe | Verdict exact, détail mineur (accent, apostrophe) ou erreur ; contractions, chiffres en lettres, variantes US/UK, « 3 pm » acceptés |
 | Mémoire des erreurs | Opérationnel | Regroupement par exercice, compteur d'occurrences et résolutions |
 | Répétition espacée | Opérationnel | Planification locale de type SM-2 simplifié |
 | Progression | Opérationnel | XP, précision, série, niveau indicatif et cartes dues par langue |
 | Parcours personnalisé | Opérationnel | Objectif, durée quotidienne et niveau cible configurables pour chaque langue |
-| Parcours guidé A1–B2 | Opérationnel | 36 séances persistantes (12 par langue, 3 par niveau), carte en 4 chapitres, placement par diagnostic et déblocage par maîtrise |
+| Parcours guidé A1–B2 | Opérationnel | 36 séances persistantes (12 par langue, 3 par niveau), carte en 4 chapitres, placement par diagnostic ou niveau déclaré, déblocage par maîtrise, abandon possible |
 | Parcours quotidien | Opérationnel | Plan adaptatif priorisé selon objectif, niveau, erreurs, cartes dues et temps disponible ; la leçon est l'action principale |
-| Conversation | Opérationnel, guidé | 12 scénarios locaux en 4 étapes, dont un scénario B2 par langue, recommandations ciblées et historique séparé |
+| Conversation | Opérationnel, par règles | 12 scénarios en 4 étapes ; coach local (relances, indices, suivi du thème) et correcteur d'erreurs typiques de francophones — jamais présenté comme une IA |
 | Laboratoire de prononciation | Opérationnel, progressif | 12 phrases A1–B2, écoute normale ou lente, enregistrement éphémère, transcription assistée ou manuelle et comparaison explicable des mots |
 | Lecture vocale | Opportuniste | Synthèse native du navigateur lorsqu'elle existe |
 | Dictée vocale | Opportuniste | Reconnaissance du navigateur dans la conversation et le laboratoire, transcription modifiable et envoi toujours manuel |
-| PWA hors ligne | Opérationnel avec limites explicites | Interface et bibliothèque préparées en cache, état de connexion visible, file IndexedDB et resynchronisation des réglages, réponses d'exercices, réponses de leçon contextualisées et analyses de transcription |
-| Export du profil serveur | Opérationnel via API | `GET /api/export` télécharge le fichier de progression JSON ; l'outbox du navigateur reste séparée jusqu'au lot P0 de la feuille de route |
+| PWA hors ligne | Opérationnel | Tout le moteur s'exécute dans l'appareil : aucune requête réseau pour apprendre, mode avion possible une fois installée |
+| Relais entre appareils | Opérationnel | « Envoyer ma progression » produit un fichier ; l'autre appareil le reprend avec aperçu et avertissements ; sauvegardes automatiques restaurables (10 max) |
+| Thème sombre | Opérationnel | Suit le réglage de l'appareil ; contrastes ≥ 4.5:1, états distingués par symbole et luminance |
 
 ## Ce qui est préparé mais pas encore intégré
 
@@ -89,57 +90,46 @@ Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` i
 
 - Le niveau CECRL est un repère pédagogique, pas une certification.
 - La correction ignore la casse et la ponctuation. Un accent manquant est accepté comme détail mineur et expliqué séparément ; la correction sémantique libre reste hors périmètre.
-- Le catalogue comprend 18 questions diagnostiques et 45 exercices (15 par langue). Il démontre l'architecture mais ne remplace pas encore un cursus complet.
-- Le parcours couvre A1 à B2 avec trois séances par niveau et par langue. Les 36 séances réemploient encore une banque de 45 exercices et 12 scénarios : le prochain enrichissement doit donc diversifier les exercices, les dialogues et les situations de transfert.
-- Une séance terminée ne débloque le niveau suivant que si elle atteint le seuil de maîtrise : au moins deux tiers de réponses finales exactes, aucune erreur finale et trois étapes de dialogue validées. Sinon, l'application propose une consolidation.
+- Le catalogue compte 18 questions diagnostiques et 920 exercices, très inégalement répartis : 875 en anglais, 30 en espagnol, 15 en allemand. L'interface le dit lorsqu'une langue compte moins de 50 exercices.
+- Le parcours couvre A1 à B2 avec trois séances par niveau et par langue. Les leçons anglaises tirent 6 exercices chacune de la banque ; celles d'allemand et d'espagnol réemploient leurs petites banques et 4 scénarios par langue.
+- Une séance terminée ne débloque le niveau suivant que si elle atteint le seuil de maîtrise : au moins deux tiers de réponses finales justes (exactes ou à un détail près, un accent oublié n'est pas une erreur), aucune erreur finale et trois étapes de dialogue validées. Sinon, l'application propose une consolidation. « Abandonner cette leçon » la rend à nouveau disponible sans rien effacer d'autre.
+- La correction accepte des variantes générées par règles (contractions, chiffres, lexique US/UK) ; une formulation juste mais non prévue peut encore être refusée : les réponses acceptées s'enrichissent au fil des retours.
 - La dictée vocale dépend de l'API disponible dans le navigateur. Selon le navigateur, sa reconnaissance peut utiliser un service externe : elle n'est donc pas promise comme locale ou hors ligne.
 - Le score du laboratoire mesure la proximité entre la transcription et la phrase modèle. Il ne certifie pas l'accent ni la qualité phonétique. Les enregistrements audio restent en mémoire vive, ne sont jamais envoyés à l'API et disparaissent en quittant la page.
-- Après une première ouverture en production, la PWA prépare l'interface, ses fichiers versionnés et les principales lectures des trois langues. Une file IndexedDB garde les opérations rejouables lorsque le serveur local est arrêté : réglages, réponses d'exercice, réponses de leçon associées à leur séance et transcription de prononciation. Elle se vide au redémarrage ou via « Réessayer ».
-- Les actions ordonnées qui exigent une réponse immédiate du moteur restent indisponibles sans serveur : diagnostic, transition d'une phase de leçon, dialogue, conversation libre et notation d'une carte de révision. Elles ne sont jamais mises en file pour éviter un conflit ou un double effet.
+- Il n'y a ni synchronisation automatique ni fusion entre appareils : reprendre un fichier remplace l'état de l'appareil (une copie est gardée avant chaque remplacement).
+- Il n'existe pas encore de tests navigateur automatisés du service worker.
 - Les conversations locales sont volontairement simples et prévisibles. Elles ne simulent pas un modèle génératif.
 
 ## Données et confidentialité
 
 - Aucun appel analytique ou publicitaire.
 - Aucun compte utilisateur.
-- L'API est liée à `127.0.0.1`, donc non exposée au réseau local par défaut.
-- La file hors ligne vit dans le stockage IndexedDB du navigateur. Une transcription validée peut y rester jusqu'à sa synchronisation ; l'audio n'y est jamais enregistré. L'export JSON de l'API ne contient pas cette file.
-- Le fichier `data/*.json` est ignoré par Git.
-- Une écriture temporaire suivie d'un renommage réduit le risque de fichier partiellement écrit.
-
-Pour repartir de zéro, arrêter l'application puis supprimer manuellement `data/sd-languages.json`. Cette action efface la progression.
+- La progression vit dans IndexedDB (`sd-languages`), dans le navigateur de chaque appareil ; `localStorage` ne garde que la langue choisie. Aucune donnée n'est hébergée : GitHub Pages ne sert que l'application.
+- L'audio n'est jamais enregistré ni envoyé ; seuls le score et le verdict d'un essai de prononciation sont conservés.
+- Le serveur Express est lié à `127.0.0.1` ; son fichier `data/*.json` (ancienne progression du PC) est ignoré par Git et n'est plus écrit par l'application.
+- « Mes données » permet d'envoyer, reprendre, restaurer une sauvegarde ou tout effacer (double confirmation).
 
 ## Structure
 
 ```text
-apps/web/                 interface React, PWA et synthèse vocale navigateur
-apps/api/                 API locale, persistance et modules applicatifs
-packages/shared/          types, catalogue, correction et moteur de répétition
-data/                     données personnelles locales (ignorées)
+apps/web/                 interface React, PWA, IndexedDB, relais par fichier, voix navigateur
+apps/api/                 serveur Express du PC : build, parité HTTP, reprise de l'ancien JSON
+packages/engine/          moteur pédagogique (routes « méthode + chemin », leçons, séries, coach, relais)
+packages/shared/          types, banque de contenu, générateurs, correction, répétition espacée
+scripts/                  utilitaires de contenu (voir ci-dessous)
+data/                     ancienne progression locale du PC (ignorée)
 docs/ARCHITECTURE.md      décisions techniques et points d'extension
 ```
 
-## API locale
+## Moteur local et scripts
 
-Les routes principales sont :
+Les vues appellent des chemins `/api/…`, mais ils sont traités dans l'appareil par `packages/engine/src/router.ts` (aucune requête réseau). Le serveur Express de `apps/api` expose les mêmes routes pour les tests de parité et ajoute `GET /api/export` (reprise de l'ancien fichier).
 
-- `GET /api/dashboard`
-- `GET|PATCH /api/settings/:language`
-- `GET|POST /api/diagnostic/:language`
-- `GET /api/plan/:language`
-- `GET /api/pronunciation/:language`
-- `POST /api/pronunciation/:promptId/attempts`
-- `GET /api/lessons/:language` (paramètre facultatif `lessonId`)
-- `POST /api/lessons/:language/start` (corps facultatif `{ "lessonId": "…" }`, sinon recommandation active)
-- `POST /api/lessons/:language/continue`
-- `POST /api/lessons/:language/answer`
-- `POST /api/lessons/:language/message`
-- `GET /api/practice/:language`
-- `POST /api/practice/:exerciseId/answer`
-- `GET|POST /api/reviews/:language-or-card`
-- `GET /api/mistakes?language=en`
-- `GET /api/scenarios/:language`
-- `GET|POST /api/conversations/:language`
-- `GET /api/export`
+Scripts de contenu, à lancer avec `npx tsx` :
+
+- `scripts/content-stats.ts [en|de|es]` : effectifs de la banque par thème, format et niveau ;
+- `scripts/bank-dump.ts en <topic|all>` : inventaire compact des exercices d'une langue ;
+- `scripts/lesson-dump.ts en` : composition de chaque leçon guidée ;
+- `scripts/serve-pages.mjs` (`npm run serve:pages` après `npm run build:pages`) : simule GitHub Pages sous `/sd-languages/`.
 
 Les codes de langue acceptés sont `en`, `de` et `es`.

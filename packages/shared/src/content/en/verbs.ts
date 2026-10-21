@@ -183,7 +183,7 @@ export const PHRASAL_VERBS: PhrasalVerbItem[] = [
   { id: "en-pv-bounce-back", level: "B2", verb: "bounce back", fr: "rebondir, se rétablir vite", example: "She bounced back quickly after her surgery.", form: "bounced back" },
 ];
 
-const FF = { type: "multiple-choice", topic: "false-friends", language: "en", focus: "Faux amis" } as const;
+const FF = { type: "multiple-choice", topic: "false-friends", language: "en", focus: "Faux amis", skillTags: ["false-friends"] as string[] } as const;
 
 /** 30 QCM sur les faux amis (courants et médicaux). */
 export const FALSE_FRIENDS: HandwrittenExercise[] = [

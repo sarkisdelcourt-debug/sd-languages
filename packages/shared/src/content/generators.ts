@@ -1,5 +1,5 @@
 import { matchPairsAnswer } from "../learning.js";
-import type { Exercise, LanguageCode } from "../types.js";
+import type { Exercise, ExerciseTopic, LanguageCode } from "../types.js";
 import type { IrregularVerbItem, PhrasalVerbItem, SentenceItem, TopicExercise, VocabSet } from "./types.js";
 
 /**
@@ -180,11 +180,40 @@ export function sentenceTiles(sentence: string): string[] {
   return sentence.split(/\s+/).map((word) => word.replace(/[.,?!;:]+$/g, "")).filter(Boolean);
 }
 
+/** Compétence de vocabulaire associée à un thème de la banque (skills.ts). */
+export const TOPIC_SKILL: Partial<Record<ExerciseTopic, string>> = {
+  medical: "medical-vocabulary", everyday: "everyday-vocabulary", travel: "travel-vocabulary",
+  "phrasal-verbs": "phrasal-verbs", "false-friends": "false-friends"
+};
+
+const PAST_PARTICIPLE_FORMS = "(?:been|done|gone|seen|had|known|taken|made|given|left|forgotten|written|told|thought|said|come|become|heard|found|got|gotten|lost|met|put|read|run|sent|spent|won|delayed|\\w+ed)";
+const SENTENCE_SKILL_RULES: Array<[RegExp, string]> = [
+  [new RegExp("\\b(have|has|'ve)( not| never| already| just| ever)? " + PAST_PARTICIPLE_FORMS + "\\b", "i"), "present-perfect"],
+  [/\b(how long have|have you ever|has been|have been)\b/i, "present-perfect"],
+  [/^(could|can|would|may) (i|we|you)\b|\bplease\b|\bwould you like\b|\bi'd like\b|\bi would like\b/i, "polite-requests"],
+  [/\b(will|'ll|going to|won't)\b/i, "future-forms"],
+  [/\b(should|must|mustn't|have to|has to|had better|ought to|might)\b/i, "modals"],
+  [/\bif\b/i, "conditionals"],
+  [new RegExp("\\b(was|were|is|are|been|be) (being )?" + PAST_PARTICIPLE_FORMS + "\\b(?! (to|a|the|an|my|your|our|this|for|at|in|on)\\b)", "i"), "passive-voice"],
+  [/\b(said|told|asked)\b/i, "reported-speech"],
+  [/\b(\w+er|better|worse|more \w+) than\b|\bas \w+ as\b/i, "comparatives"],
+  [/\b(some|any|much|many|a few|a little|plenty of)\b/i, "quantifiers"]
+];
+
+/** Compétences grammaticales ou fonctionnelles déduites d'une phrase anglaise (règles simples, testées). */
+export function deduceSentenceSkills(sentence: string): string[] {
+  const tags = SENTENCE_SKILL_RULES.filter(([pattern]) => pattern.test(sentence)).map(([, tag]) => tag);
+  if (sentence.trim().endsWith("?")) tags.push("questions");
+  return [...new Set(tags)];
+}
+
+const vocabSkills = (topic: ExerciseTopic): string[] => [TOPIC_SKILL[topic] ?? "everyday-vocabulary"];
+
 export function vocabExercises(set: VocabSet): TopicExercise[] {
   const pairs = chunkForPairs(set.items).map((group, index): TopicExercise => {
     const items = group.map((item) => ({ target: item.en, native: item.fr }));
     return {
-      id: `${set.id}-pairs-${index + 1}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "match-pairs",
+      id: `${set.id}-pairs-${index + 1}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "match-pairs", skillTags: vocabSkills(set.topic),
       prompt: "Associez chaque mot à sa traduction.", pairs: items, answer: matchPairsAnswer(items),
       explanation: `Vocabulaire : ${set.title.toLowerCase()}.`, hint: "Commencez par les mots que vous reconnaissez.", focus: set.title
     };
@@ -195,7 +224,7 @@ export function vocabExercises(set: VocabSet): TopicExercise[] {
     const distractors = [0, 1, 2].map((offset) => others[(start + offset * 3) % others.length]!.fr);
     const choices = [...new Set([item.fr, ...distractors])].sort((left, right) => hash(`${item.en}${left}`) - hash(`${item.en}${right}`));
     return {
-      id: `${set.id}-${slug(item.en)}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "multiple-choice",
+      id: `${set.id}-${slug(item.en)}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "multiple-choice", skillTags: vocabSkills(set.topic),
       prompt: `Que signifie « ${item.en} » ?`, choices, answer: item.fr,
       explanation: `« ${item.en} » se traduit par « ${item.fr} ».`, hint: `Thème : ${set.title.toLowerCase()}.`, focus: set.title
     };
@@ -216,15 +245,16 @@ export function sentenceExercises(items: SentenceItem[]): TopicExercise[] {
     const distractors = [...grammatical, ...fallback].slice(0, 2);
     const variants = answerVariants(item.en);
     const base = { language: LANGUAGE, level: item.level, topic: item.topic, explanation: item.note, focus: "Phrases en contexte" } as const;
+    const skills = [...vocabSkills(item.topic), ...deduceSentenceSkills(item.en)];
     return [
       {
-        ...base, id: `${item.id}-build`, type: "word-bank",
+        ...base, id: `${item.id}-build`, type: "word-bank", skillTags: [...skills, "sentence-building"],
         prompt: `Construisez : « ${item.fr} »`, tiles: [...words, ...distractors], answer: item.en,
         hint: buildHint(item.en)
       },
       {
         // La traduction n'est révélée qu'après validation (explication), pas dans l'indice.
-        ...base, id: `${item.id}-listen`, type: "listening", explanation: `« ${item.fr} » — ${item.note}`,
+        ...base, id: `${item.id}-listen`, type: "listening", skillTags: [...skills, "listening"], explanation: `« ${item.fr} » — ${item.note}`,
         prompt: "Écoutez puis écrivez la phrase.", audioText: item.en, answer: item.en,
         ...(variants.length ? { acceptedAnswers: variants } : {}),
         hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu."
@@ -237,7 +267,7 @@ export function phrasalVerbExercises(items: PhrasalVerbItem[]): TopicExercise[] 
   const gaps = items.map((item): TopicExercise => {
     const blanks = item.form.split(/\s+/).map(() => "___").join(" ");
     return {
-      id: `${item.id}-gap`, language: LANGUAGE, level: item.level, topic: "phrasal-verbs", type: "fill-gap",
+      id: `${item.id}-gap`, language: LANGUAGE, level: item.level, topic: "phrasal-verbs", type: "fill-gap", skillTags: ["phrasal-verbs"],
       prompt: `Complétez (« ${item.fr} ») : ${item.example.replace(item.form, blanks)}`, answer: item.form,
       explanation: `« ${item.verb} » = ${item.fr}. Dans cette phrase : « ${item.form} ».`,
       hint: `Verbe à particule en ${item.form.split(/\s+/).length} mots.`, focus: "Phrasal verbs"
@@ -247,7 +277,7 @@ export function phrasalVerbExercises(items: PhrasalVerbItem[]): TopicExercise[] 
     const pairItems = group.map((item) => ({ target: item.verb, native: item.fr }));
     const level = group.some((item) => item.level === "B2") ? "B2" : "B1";
     return {
-      id: `en-pv-pairs-${index + 1}`, language: LANGUAGE, level, topic: "phrasal-verbs", type: "match-pairs",
+      id: `en-pv-pairs-${index + 1}`, language: LANGUAGE, level, topic: "phrasal-verbs", type: "match-pairs", skillTags: ["phrasal-verbs"],
       prompt: "Associez chaque verbe à particule à sa traduction.", pairs: pairItems, answer: matchPairsAnswer(pairItems),
       explanation: "La particule change le sens du verbe : apprenez-les comme des mots à part entière.",
       hint: "Pensez à une phrase où vous les avez déjà entendus.", focus: "Phrasal verbs"
@@ -269,12 +299,12 @@ export function irregularVerbExercises(items: IrregularVerbItem[]): TopicExercis
     const example = item.example ? ` — ex. « ${item.example} »` : "";
     return [
       ...(invariant ? [] : [{
-        ...base, id: `en-irr-${slug(item.base)}-past`, prompt: `Prétérit de « to ${item.base} » (${item.fr})${example}`,
+        ...base, id: `en-irr-${slug(item.base)}-past`, skillTags: ["irregular-past"], prompt: `Prétérit de « to ${item.base} » (${item.fr})${example}`,
         answer: past!, ...(pastVariants.length ? { acceptedAnswers: pastVariants } : {}),
         hint: "Le prétérit : « hier, je… »."
       }]),
       {
-        ...base, id: `en-irr-${slug(item.base)}-pp`, prompt: `Participe passé de « to ${item.base} » (${item.fr})`,
+        ...base, id: `en-irr-${slug(item.base)}-pp`, skillTags: ["past-participles"], prompt: `Participe passé de « to ${item.base} » (${item.fr})`,
         answer: participle!, ...(participleVariants.length ? { acceptedAnswers: participleVariants } : {}),
         hint: "Le participe passé : « I have… »."
       }

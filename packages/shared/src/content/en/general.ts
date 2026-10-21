@@ -1019,8 +1019,32 @@ const GRAMMAR_SOURCE: HandwrittenExercise[] = [
   }
 ];
 
-/** Grammaire rédigée : chaque texte à trous accepte aussi la forme contractée ou développée de sa réponse. */
-export const GRAMMAR_EXERCISES: HandwrittenExercise[] = GRAMMAR_SOURCE.map(withContractionVariants);
+/** Compétences par point de grammaire (`focus`) ; un point absent de cette table ferait échouer le test skills.test.ts. */
+const GRAMMAR_SKILLS: Record<string, string[]> = {
+  "Present perfect vs prétérit": ["present-perfect", "past-tenses"],
+  "Present perfect continu": ["present-perfect"],
+  "Past continuous": ["past-tenses"],
+  "Futur : will, going to, présent continu": ["future-forms"],
+  "Modaux : obligation": ["modals"],
+  "Modaux : conseil": ["modals", "polite-requests"],
+  "Modaux : déduction": ["modals"],
+  "Conditionnel de type 1": ["conditionals"],
+  "Conditionnel de type 2": ["conditionals"],
+  "Conditionnel de type 3": ["conditionals"],
+  "Voix passive": ["passive-voice"],
+  "Discours indirect": ["reported-speech"],
+  "Gérondif ou infinitif": ["gerund-infinitive"],
+  "Prépositions": ["prepositions"],
+  "Articles": ["articles"],
+  "Comparatifs et superlatifs": ["comparatives"],
+  "Questions indirectes": ["questions"],
+  "Used to / be used to": ["past-tenses"]
+};
+
+/** Grammaire rédigée : compétences par point, et chaque texte à trous accepte aussi la forme contractée ou développée de sa réponse. */
+export const GRAMMAR_EXERCISES: HandwrittenExercise[] = GRAMMAR_SOURCE.map((exercise) => (
+  withContractionVariants({ ...exercise, skillTags: GRAMMAR_SKILLS[exercise.focus] ?? [] })
+));
 
 // ---------------------------------------------------------------------------------------------
 // Phrases de la vie courante (B1–B2)

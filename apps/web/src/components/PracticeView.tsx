@@ -3,6 +3,7 @@ import type { AnswerEvaluation, ExerciseTopic, LanguageCode } from "@shared/type
 import { api, type PracticeTopic, type PublicExercise } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ExerciseAnswer, exerciseTypeLabels } from "./ExerciseAnswer";
+import type { PracticeTarget } from "./SkillsView";
 
 interface SeriesResult {
   exerciseId: string;
@@ -11,11 +12,13 @@ interface SeriesResult {
 
 /**
  * Exercices ciblés : une série de 6, puis un bilan et une nouvelle série qui exclut ce qui vient
- * d'être vu (plus de boucle sur les mêmes exercices). Le thème est facultatif.
+ * d'être vu (plus de boucle sur les mêmes exercices). Le thème est facultatif. Depuis « Mes acquis »,
+ * la série vise un thème s'il existe, sinon une compétence (`skillTags`).
  */
-export function PracticeView({ language, onProgress }: { language: LanguageCode; onProgress: () => void }) {
+export function PracticeView({ language, onProgress, target }: { language: LanguageCode; onProgress: () => void; target?: PracticeTarget }) {
   const [topics, setTopics] = useState<PracticeTopic[]>([]);
-  const [topic, setTopic] = useState<ExerciseTopic>();
+  const [topic, setTopic] = useState<ExerciseTopic | undefined>(target?.topic);
+  const [skill, setSkill] = useState<PracticeTarget | undefined>(target?.skill ? target : undefined);
   const [exercises, setExercises] = useState<PublicExercise[]>([]);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -26,24 +29,28 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
   const [error, setError] = useState<string>();
   const attemptRef = useRef<{ exerciseId: string; id: string } | undefined>(undefined);
 
-  const loadSeries = useCallback((nextTopic: ExerciseTopic | undefined, exclude: string[]) => {
+  const loadSeries = useCallback((nextTopic: ExerciseTopic | undefined, exclude: string[], nextSkill?: string) => {
     setExercises([]);
     setIndex(0);
     setAnswer("");
     setEvaluation(undefined);
     setResults([]);
     setError(undefined);
-    api.exercises(language, { topic: nextTopic, exclude }).then(setExercises).catch((reason: Error) => setError(reason.message));
+    api.exercises(language, { topic: nextTopic, skill: nextSkill, exclude }).then(setExercises).catch((reason: Error) => setError(reason.message));
     // Les compteurs « vus / total » de chaque thème suivent les séries terminées.
     api.practiceTopics(language).then(setTopics).catch(() => setTopics([]));
   }, [language]);
 
   useEffect(() => {
-    loadSeries(undefined, []);
-  }, [language, loadSeries]);
+    setTopic(target?.topic);
+    setSkill(target?.skill ? target : undefined);
+    setSeen([]);
+    loadSeries(target?.topic, [], target?.skill);
+  }, [language, loadSeries, target]);
 
   const chooseTopic = (next: ExerciseTopic | undefined) => {
     setTopic(next);
+    setSkill(undefined);
     setSeen([]);
     loadSeries(next, []);
   };
@@ -77,12 +84,13 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
   const newSeries = () => {
     const nextSeen = [...seen, ...exercises.map((item) => item.id)];
     setSeen(nextSeen);
-    loadSeries(topic, nextSeen);
+    loadSeries(topic, nextSeen, skill?.skill);
   };
 
   const topicBar = topics.length ? (
     <div className="topic-bar" role="group" aria-label="Choisir un thème">
-      <button className={topic ? "topic-chip" : "topic-chip active"} aria-pressed={!topic} onClick={() => chooseTopic(undefined)}>Recommandé</button>
+      <button className={topic || skill ? "topic-chip" : "topic-chip active"} aria-pressed={!topic && !skill} onClick={() => chooseTopic(undefined)}>Recommandé</button>
+      {skill ? <button className="topic-chip active" aria-pressed="true" onClick={() => loadSeries(undefined, [], skill.skill)}>Compétence : {skill.label}</button> : null}
       {topics.map((entry) => (
         <button key={entry.topic} className={topic === entry.topic ? "topic-chip active" : "topic-chip"} aria-pressed={topic === entry.topic} onClick={() => chooseTopic(entry.topic)}>
           {entry.label}<small>{entry.seen}/{entry.count}</small>
@@ -117,7 +125,7 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
     <section className="exercise-layout">
       {topicBar}
       <div className="session-head">
-        <div><p className="eyebrow">{topic ? topics.find((entry) => entry.topic === topic)?.label : "Série recommandée"}</p><h2>{exercise.focus}</h2></div>
+        <div><p className="eyebrow">{skill ? `Compétence · ${skill.label}` : topic ? topics.find((entry) => entry.topic === topic)?.label : "Série recommandée"}</p><h2>{exercise.focus}</h2></div>
         <span>{index + 1} / {exercises.length}</span>
       </div>
       <article className="exercise-card">

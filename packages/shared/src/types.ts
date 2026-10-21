@@ -1,3 +1,5 @@
+import type { SkillGroup } from "./skills.js";
+
 export type LanguageCode = "en" | "de" | "es";
 export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1";
 /**
@@ -35,6 +37,8 @@ export interface Exercise {
   level: CefrLevel;
   type: ExerciseType;
   topic?: ExerciseTopic;
+  /** Micro-compétences travaillées (liste fermée par langue dans skills.ts), 22/10/2026. */
+  skillTags?: string[];
   prompt: string;
   choices?: string[];
   tiles?: string[];
@@ -404,6 +408,42 @@ export interface PronunciationAttemptResult {
   assessment: PronunciationAssessment;
   progress: PronunciationProgress;
   duplicate: boolean;
+}
+
+export type SkillAction = "consolidate" | "review" | "practice";
+
+/** Une compétence et ses preuves (22/10/2026) : aucun score sans la donnée qui le justifie. */
+export interface SkillSummary {
+  id: string;
+  label: string;
+  group: SkillGroup;
+  /** Thème des « Exercices ciblés » quand la compétence en a un (série par thème), sinon série par skillTags. */
+  topic?: ExerciseTopic;
+  /** Exercices de la banque qui travaillent cette compétence. */
+  exerciseCount: number;
+  /** Tentatives cumulées sur ces exercices (exposition). */
+  exposure: number;
+  /** Exercices distincts déjà rencontrés. */
+  seenExerciseCount: number;
+  /** Dix dernières observations, la plus récente en premier (true = réussie). */
+  recentResults: boolean[];
+  /** Part de réussite des dix dernières observations ; absent sans observation. */
+  recentSuccess?: number;
+  /** 0–1 : part des exercices rencontrés réussis au moins deux fois et à leur dernière tentative. */
+  stability: number;
+  /** Erreurs mémorisées non encore corrigées sur ces exercices. */
+  openMistakes: number;
+  /** Prochaine carte de révision due pour cette compétence. */
+  nextReviewAt?: string;
+  action: SkillAction;
+  reason: string;
+}
+
+export interface SkillsView {
+  language: LanguageCode;
+  generatedAt: string;
+  groups: Array<{ group: SkillGroup; label: string }>;
+  skills: SkillSummary[];
 }
 
 export interface ApiError {

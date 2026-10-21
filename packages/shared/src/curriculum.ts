@@ -11,7 +11,7 @@ import { SPANISH_A1_EXERCISES } from "./spanish-a1.js";
 const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
   en: [
     {
-      id: "diag-en-a1-greeting",
+      id: "diag-en-a1-greeting", skillTags: ["present-simple"],
       language: "en",
       level: "A1",
       type: "multiple-choice",
@@ -24,7 +24,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-en-a2-past",
+      id: "diag-en-a2-past", skillTags: ["irregular-past"],
       language: "en",
       level: "A2",
       type: "fill-gap",
@@ -36,7 +36,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-en-b1-duration",
+      id: "diag-en-b1-duration", skillTags: ["present-perfect"],
       language: "en",
       level: "B1",
       type: "multiple-choice",
@@ -54,7 +54,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-en-b2-condition",
+      id: "diag-en-b2-condition", skillTags: ["conditionals"],
       language: "en",
       level: "B2",
       type: "fill-gap",
@@ -66,7 +66,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-en-c1-inversion",
+      id: "diag-en-c1-inversion", skillTags: ["sentence-building"],
       language: "en",
       level: "C1",
       type: "multiple-choice",
@@ -79,7 +79,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 3
     },
     {
-      id: "diag-en-c1-translation",
+      id: "diag-en-c1-translation", skillTags: ["sentence-building"],
       language: "en",
       level: "C1",
       type: "translation",
@@ -98,7 +98,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
   ],
   de: [
     {
-      id: "diag-de-a1-copula",
+      id: "diag-de-a1-copula", skillTags: ["present-tense"],
       language: "de",
       level: "A1",
       type: "multiple-choice",
@@ -111,7 +111,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-de-a2-accusative",
+      id: "diag-de-a2-accusative", skillTags: ["accusative"],
       language: "de",
       level: "A2",
       type: "fill-gap",
@@ -123,7 +123,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-de-b1-subordinate",
+      id: "diag-de-b1-subordinate", skillTags: ["subordinate-clauses"],
       language: "de",
       level: "B1",
       type: "multiple-choice",
@@ -141,7 +141,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-de-b2-passive",
+      id: "diag-de-b2-passive", skillTags: ["passive-voice"],
       language: "de",
       level: "B2",
       type: "fill-gap",
@@ -153,7 +153,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-de-c1-konjunktiv",
+      id: "diag-de-c1-konjunktiv", skillTags: ["konjunktiv-1"],
       language: "de",
       level: "C1",
       type: "multiple-choice",
@@ -166,7 +166,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 3
     },
     {
-      id: "diag-de-c1-translation",
+      id: "diag-de-c1-translation", skillTags: ["comparison"],
       language: "de",
       level: "C1",
       type: "translation",
@@ -185,7 +185,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
   ],
   es: [
     {
-      id: "diag-es-a1-ser",
+      id: "diag-es-a1-ser", skillTags: ["ser-estar"],
       language: "es",
       level: "A1",
       type: "multiple-choice",
@@ -198,7 +198,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-es-a2-past",
+      id: "diag-es-a2-past", skillTags: ["preterite"],
       language: "es",
       level: "A2",
       type: "fill-gap",
@@ -210,7 +210,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 1
     },
     {
-      id: "diag-es-b1-subjunctive",
+      id: "diag-es-b1-subjunctive", skillTags: ["subjunctive"],
       language: "es",
       level: "B1",
       type: "multiple-choice",
@@ -223,7 +223,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-es-b2-condition",
+      id: "diag-es-b2-condition", skillTags: ["pluperfect-conditional"],
       language: "es",
       level: "B2",
       type: "fill-gap",
@@ -235,7 +235,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 2
     },
     {
-      id: "diag-es-c1-concession",
+      id: "diag-es-c1-concession", skillTags: ["subjunctive"],
       language: "es",
       level: "C1",
       type: "multiple-choice",
@@ -248,7 +248,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       diagnosticWeight: 3
     },
     {
-      id: "diag-es-c1-translation",
+      id: "diag-es-c1-translation", skillTags: ["subjunctive"],
       language: "es",
       level: "C1",
       type: "translation",
@@ -266,7 +266,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
 const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
   en: [
     {
-      id: "en-a1-mcq-have",
+      id: "en-a1-mcq-have", skillTags: ["present-simple"],
       language: "en",
       level: "A1",
       type: "multiple-choice",
@@ -278,7 +278,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Présent simple"
     },
     {
-      id: "en-a1-gap-plural",
+      id: "en-a1-gap-plural", skillTags: ["everyday-vocabulary"],
       language: "en",
       level: "A1",
       type: "fill-gap",
@@ -289,7 +289,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Pluriels irréguliers"
     },
     {
-      id: "en-a2-translation-routine",
+      id: "en-a2-translation-routine", skillTags: ["present-simple", "everyday-vocabulary"],
       language: "en",
       level: "A2",
       type: "translation",
@@ -301,7 +301,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Fréquence et habitudes"
     },
     {
-      id: "en-a2-mcq-comparative",
+      id: "en-a2-mcq-comparative", skillTags: ["comparatives"],
       language: "en",
       level: "A2",
       type: "multiple-choice",
@@ -313,7 +313,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Comparatif"
     },
     {
-      id: "en-b1-gap-since",
+      id: "en-b1-gap-since", skillTags: ["present-perfect"],
       language: "en",
       level: "B1",
       type: "fill-gap",
@@ -324,7 +324,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Since et for"
     },
     {
-      id: "en-b1-translation-advice",
+      id: "en-b1-translation-advice", skillTags: ["modals", "polite-requests"],
       language: "en",
       level: "B1",
       type: "translation",
@@ -345,7 +345,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Conseil avec should"
     },
     {
-      id: "en-b2-mcq-reported",
+      id: "en-b2-mcq-reported", skillTags: ["reported-speech"],
       language: "en",
       level: "B2",
       type: "multiple-choice",
@@ -362,7 +362,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Discours indirect"
     },
     {
-      id: "en-b2-gap-wish",
+      id: "en-b2-gap-wish", skillTags: ["conditionals"],
       language: "en",
       level: "B2",
       type: "fill-gap",
@@ -373,7 +373,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Wish et irréel présent"
     },
     {
-      id: "en-c1-translation-emphasis",
+      id: "en-c1-translation-emphasis", skillTags: ["sentence-building"],
       language: "en",
       level: "C1",
       type: "translation",
@@ -385,7 +385,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Inversion emphatique"
     },
     {
-      id: "en-a1-mcq-airport-gate",
+      id: "en-a1-mcq-airport-gate", skillTags: ["questions", "travel-vocabulary"],
       language: "en",
       level: "A1",
       type: "multiple-choice",
@@ -397,7 +397,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Question de localisation en voyage"
     },
     {
-      id: "en-a2-gap-grocery-any",
+      id: "en-a2-gap-grocery-any", skillTags: ["quantifiers"],
       language: "en",
       level: "A2",
       type: "fill-gap",
@@ -408,7 +408,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Some et any au quotidien"
     },
     {
-      id: "en-b1-translation-report-deadline",
+      id: "en-b1-translation-report-deadline", skillTags: ["polite-requests", "modals"],
       language: "en",
       level: "B1",
       type: "translation",
@@ -425,7 +425,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Demande polie au travail"
     },
     {
-      id: "en-b2-mcq-missed-flight",
+      id: "en-b2-mcq-missed-flight", skillTags: ["conditionals"],
       language: "en",
       level: "B2",
       type: "multiple-choice",
@@ -437,7 +437,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Troisième conditionnel en voyage"
     },
     {
-      id: "en-c1-gap-work-inversion",
+      id: "en-c1-gap-work-inversion", skillTags: ["sentence-building"],
       language: "en",
       level: "C1",
       type: "fill-gap",
@@ -448,7 +448,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Inversion emphatique au travail"
     },
     {
-      id: "en-b1-translation-doctor-appointment",
+      id: "en-b1-translation-doctor-appointment", skillTags: ["everyday-vocabulary", "prepositions"],
       language: "en",
       level: "B1",
       type: "translation",
@@ -471,7 +471,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
   ],
   de: [
     {
-      id: "de-a1-mcq-present",
+      id: "de-a1-mcq-present", skillTags: ["present-tense"],
       language: "de",
       level: "A1",
       type: "multiple-choice",
@@ -483,7 +483,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Présent des verbes réguliers"
     },
     {
-      id: "de-a1-gap-article",
+      id: "de-a1-gap-article", skillTags: ["articles-gender"],
       language: "de",
       level: "A1",
       type: "fill-gap",
@@ -494,7 +494,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Genre et articles"
     },
     {
-      id: "de-a2-translation-order",
+      id: "de-a2-translation-order", skillTags: ["verb-second"],
       language: "de",
       level: "A2",
       type: "translation",
@@ -506,7 +506,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Verbe en deuxième position"
     },
     {
-      id: "de-a2-mcq-modal",
+      id: "de-a2-mcq-modal", skillTags: ["modals"],
       language: "de",
       level: "A2",
       type: "multiple-choice",
@@ -518,7 +518,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Verbes modaux"
     },
     {
-      id: "de-b1-gap-perfect",
+      id: "de-b1-gap-perfect", skillTags: ["perfekt"],
       language: "de",
       level: "B1",
       type: "fill-gap",
@@ -529,7 +529,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Perfekt des verbes de déplacement"
     },
     {
-      id: "de-b1-translation-because",
+      id: "de-b1-translation-because", skillTags: ["subordinate-clauses"],
       language: "de",
       level: "B1",
       type: "translation",
@@ -541,7 +541,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Subordonnée avec weil"
     },
     {
-      id: "de-b2-mcq-relative",
+      id: "de-b2-mcq-relative", skillTags: ["relative-clauses", "dative"],
       language: "de",
       level: "B2",
       type: "multiple-choice",
@@ -553,7 +553,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Pronom relatif au datif"
     },
     {
-      id: "de-b2-gap-konjunktiv",
+      id: "de-b2-gap-konjunktiv", skillTags: ["konjunktiv-2"],
       language: "de",
       level: "B2",
       type: "fill-gap",
@@ -564,7 +564,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Konjunktiv II"
     },
     {
-      id: "de-c1-translation-nominal",
+      id: "de-c1-translation-nominal", skillTags: ["passive-voice"],
       language: "de",
       level: "C1",
       type: "translation",
@@ -576,7 +576,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Génitif et passif"
     },
     {
-      id: "de-a1-mcq-hotel-key",
+      id: "de-a1-mcq-hotel-key", skillTags: ["possessives", "travel-vocabulary"],
       language: "de",
       level: "A1",
       type: "multiple-choice",
@@ -588,7 +588,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Possessif de politesse en voyage"
     },
     {
-      id: "de-a2-gap-shopping-dative",
+      id: "de-a2-gap-shopping-dative", skillTags: ["dative"],
       language: "de",
       level: "A2",
       type: "fill-gap",
@@ -599,7 +599,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Paiement au quotidien"
     },
     {
-      id: "de-b1-translation-meeting-delay",
+      id: "de-b1-translation-meeting-delay", skillTags: ["work-vocabulary"],
       language: "de",
       level: "B1",
       type: "translation",
@@ -611,7 +611,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Horaires au travail"
     },
     {
-      id: "de-b2-mcq-train-announcement",
+      id: "de-b2-mcq-train-announcement", skillTags: ["separable-verbs", "travel-vocabulary"],
       language: "de",
       level: "B2",
       type: "multiple-choice",
@@ -623,7 +623,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Annonce ferroviaire"
     },
     {
-      id: "de-c1-gap-work-reported",
+      id: "de-c1-gap-work-reported", skillTags: ["konjunktiv-1", "work-vocabulary"],
       language: "de",
       level: "C1",
       type: "fill-gap",
@@ -634,7 +634,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Discours indirect au travail"
     },
     {
-      id: "de-b1-translation-pharmacy",
+      id: "de-b1-translation-pharmacy", skillTags: ["health-vocabulary"],
       language: "de",
       level: "B1",
       type: "translation",
@@ -648,7 +648,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
   ],
   es: [
     {
-      id: "es-a1-mcq-gender",
+      id: "es-a1-mcq-gender", skillTags: ["articles-gender"],
       language: "es",
       level: "A1",
       type: "multiple-choice",
@@ -660,7 +660,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Genre et articles"
     },
     {
-      id: "es-a1-gap-present",
+      id: "es-a1-gap-present", skillTags: ["present-tense"],
       language: "es",
       level: "A1",
       type: "fill-gap",
@@ -671,7 +671,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Présent des verbes en -ar"
     },
     {
-      id: "es-a2-translation-location",
+      id: "es-a2-translation-location", skillTags: ["location", "ser-estar"],
       language: "es",
       level: "A2",
       type: "translation",
@@ -682,7 +682,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Localisation avec estar"
     },
     {
-      id: "es-a2-mcq-object",
+      id: "es-a2-mcq-object", skillTags: ["object-pronouns"],
       language: "es",
       level: "A2",
       type: "multiple-choice",
@@ -694,7 +694,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Pronoms compléments directs"
     },
     {
-      id: "es-b1-gap-imperfect",
+      id: "es-b1-gap-imperfect", skillTags: ["imperfect"],
       language: "es",
       level: "B1",
       type: "fill-gap",
@@ -705,7 +705,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Imparfait de l'indicatif"
     },
     {
-      id: "es-b1-translation-duration",
+      id: "es-b1-translation-duration", skillTags: ["duration"],
       language: "es",
       level: "B1",
       type: "translation",
@@ -717,7 +717,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Expression de la durée"
     },
     {
-      id: "es-b2-mcq-subjunctive",
+      id: "es-b2-mcq-subjunctive", skillTags: ["subjunctive"],
       language: "es",
       level: "B2",
       type: "multiple-choice",
@@ -729,7 +729,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Subjonctif dans les relatives"
     },
     {
-      id: "es-b2-gap-pluperfect",
+      id: "es-b2-gap-pluperfect", skillTags: ["pluperfect-conditional"],
       language: "es",
       level: "B2",
       type: "fill-gap",
@@ -740,7 +740,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Plus-que-parfait"
     },
     {
-      id: "es-c1-translation-concession",
+      id: "es-c1-translation-concession", skillTags: ["subjunctive"],
       language: "es",
       level: "C1",
       type: "translation",
@@ -752,7 +752,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Concession au subjonctif"
     },
     {
-      id: "es-a1-mcq-hotel-room",
+      id: "es-a1-mcq-hotel-room", skillTags: ["hotel-travel-vocabulary"],
       language: "es",
       level: "A1",
       type: "multiple-choice",
@@ -764,7 +764,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Arrivée à l'hôtel"
     },
     {
-      id: "es-a2-gap-market-quantity",
+      id: "es-a2-gap-market-quantity", skillTags: ["quantities"],
       language: "es",
       level: "A2",
       type: "fill-gap",
@@ -775,7 +775,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Quantités au marché"
     },
     {
-      id: "es-b1-translation-work-schedule",
+      id: "es-b1-translation-work-schedule", skillTags: ["obligation", "work-vocabulary"],
       language: "es",
       level: "B1",
       type: "translation",
@@ -787,7 +787,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Obligation et échéance au travail"
     },
     {
-      id: "es-b2-mcq-flight-counterfactual",
+      id: "es-b2-mcq-flight-counterfactual", skillTags: ["pluperfect-conditional"],
       language: "es",
       level: "B2",
       type: "multiple-choice",
@@ -799,7 +799,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Hypothèse passée en voyage"
     },
     {
-      id: "es-c1-gap-work-concession",
+      id: "es-c1-gap-work-concession", skillTags: ["subjunctive", "work-vocabulary"],
       language: "es",
       level: "C1",
       type: "fill-gap",
@@ -810,7 +810,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       focus: "Concession au travail"
     },
     {
-      id: "es-b1-translation-doctor",
+      id: "es-b1-translation-doctor", skillTags: ["health-vocabulary"],
       language: "es",
       level: "B1",
       type: "translation",

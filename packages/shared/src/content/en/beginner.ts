@@ -18,14 +18,14 @@ const comparatives = pairs([["cheaper", "moins cher"], ["faster", "plus rapide"]
 export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
   // --- A1 · Commander simplement au café ---------------------------------------------------
   {
-    id: "en-hw-a1-cafe-pairs", language: "en", level: "A1", topic: "everyday", type: "match-pairs",
+    id: "en-hw-a1-cafe-pairs", skillTags: ["everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "match-pairs",
     prompt: "Associez chaque mot à sa traduction.",
     pairs: cafe, answer: matchPairsAnswer(cafe),
     explanation: "Au café, l'article a accompagne presque toujours ce que l'on commande : a coffee, a tea, a sandwich.",
     hint: "Commencez par les mots qui ressemblent au français.", focus: "Commander au café"
   },
   {
-    id: "en-hw-a1-cafe-build", language: "en", level: "A1", topic: "everyday", type: "word-bank",
+    id: "en-hw-a1-cafe-build", skillTags: ["polite-requests", "sentence-building"], language: "en", level: "A1", topic: "everyday", type: "word-bank",
     prompt: "Construisez : « Je voudrais un café, s'il vous plaît. »",
     tiles: ["I", "would", "like", "a", "coffee", "please", "want", "the"],
     answer: "I would like a coffee, please.", acceptedAnswers: ["I'd like a coffee, please."],
@@ -33,14 +33,14 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Commencez par le sujet, puis would like.", focus: "Commander au café"
   },
   {
-    id: "en-hw-a1-cafe-listen", language: "en", level: "A1", topic: "everyday", type: "listening",
+    id: "en-hw-a1-cafe-listen", skillTags: ["polite-requests", "questions", "listening"], language: "en", level: "A1", topic: "everyday", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "Would you like something to eat?", answer: "Would you like something to eat?",
     explanation: "« Voulez-vous quelque chose à manger ? » — Would you like…? est la question polie du serveur ; something to eat = quelque chose à manger.",
     hint: LISTEN_HINT, focus: "Comprendre une question au café"
   },
   {
-    id: "en-hw-a1-cafe-mcq-here", language: "en", level: "A1", topic: "everyday", type: "multiple-choice",
+    id: "en-hw-a1-cafe-mcq-here", skillTags: ["everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "multiple-choice",
     prompt: "Le serveur demande « For here or to take away? ». Vous restez sur place : que répondez-vous ?",
     choices: ["For here, please.", "To take away, please.", "I stay, please.", "Here I am, please."],
     answer: "For here, please.",
@@ -48,14 +48,14 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Sur place se dit avec here.", focus: "Comprendre une question au café"
   },
   {
-    id: "en-hw-a1-cafe-gap-have", language: "en", level: "A1", topic: "everyday", type: "fill-gap",
+    id: "en-hw-a1-cafe-gap-have", skillTags: ["polite-requests", "present-simple"], language: "en", level: "A1", topic: "everyday", type: "fill-gap",
     prompt: "Complétez : Can I ___ a tea, please? (avoir)",
     answer: "have",
     explanation: "Can I have…? est une demande simple et polie ; après can, le verbe reste à la base verbale : have.",
     hint: "Le verbe « avoir » à la base verbale.", focus: "Commander au café"
   },
   {
-    id: "en-hw-a1-cafe-translation", language: "en", level: "A1", topic: "everyday", type: "translation",
+    id: "en-hw-a1-cafe-translation", skillTags: ["polite-requests", "everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "translation",
     prompt: "Traduisez : Un thé et un sandwich, s'il vous plaît.",
     answer: "A tea and a sandwich, please.",
     acceptedAnswers: ["One tea and a sandwich, please.", "A tea and a sandwich please."],
@@ -65,7 +65,7 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
 
   // --- A1 · Poser une question simple ------------------------------------------------------
   {
-    id: "en-hw-a1-ask-build", language: "en", level: "A1", topic: "everyday", type: "word-bank",
+    id: "en-hw-a1-ask-build", skillTags: ["questions", "sentence-building"], language: "en", level: "A1", topic: "everyday", type: "word-bank",
     prompt: "Construisez : « Où est la gare, s'il vous plaît ? »",
     tiles: ["Where", "is", "the", "station", "please", "are", "what"],
     answer: "Where is the station, please?",
@@ -73,21 +73,21 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Commencez par le mot interrogatif, puis is.", focus: "Poser une question simple"
   },
   {
-    id: "en-hw-a1-ask-listen", language: "en", level: "A1", topic: "everyday", type: "listening",
+    id: "en-hw-a1-ask-listen", skillTags: ["questions", "listening"], language: "en", level: "A1", topic: "everyday", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "Where are you from?", answer: "Where are you from?",
     explanation: "« D'où venez-vous ? » — From se place en fin de question ; on répond I'm from + ville ou pays.",
     hint: LISTEN_HINT, focus: "Comprendre une question simple"
   },
   {
-    id: "en-hw-a1-ask-gap-am", language: "en", level: "A1", topic: "everyday", type: "fill-gap",
+    id: "en-hw-a1-ask-gap-am", skillTags: ["present-simple"], language: "en", level: "A1", topic: "everyday", type: "fill-gap",
     prompt: "Complétez : I ___ from France. (be)",
     answer: "am",
     explanation: "Avec I, le verbe be prend la forme am : I am from France, souvent contracté en I'm from France.",
     hint: "I + be → ?", focus: "Dire d'où l'on vient"
   },
   {
-    id: "en-hw-a1-ask-translation", language: "en", level: "A1", topic: "everyday", type: "translation",
+    id: "en-hw-a1-ask-translation", skillTags: ["present-simple", "everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "translation",
     prompt: "Traduisez : Je m'appelle Anna et je viens de Paris.",
     answer: "My name is Anna and I am from Paris.",
     acceptedAnswers: [
@@ -100,7 +100,7 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "My name is…, I am from…", focus: "Se présenter"
   },
   {
-    id: "en-hw-a1-ask-pairs", language: "en", level: "A1", topic: "everyday", type: "match-pairs",
+    id: "en-hw-a1-ask-pairs", skillTags: ["questions"], language: "en", level: "A1", topic: "everyday", type: "match-pairs",
     prompt: "Associez chaque mot interrogatif à sa traduction.",
     pairs: questionWords, answer: matchPairsAnswer(questionWords),
     explanation: "Le mot interrogatif ouvre la question ; be ou l'auxiliaire vient juste après : Where is…? When do…?",
@@ -109,14 +109,14 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
 
   // --- A1 · Parler des personnes et des quantités ------------------------------------------
   {
-    id: "en-hw-a1-family-pairs", language: "en", level: "A1", topic: "everyday", type: "match-pairs",
+    id: "en-hw-a1-family-pairs", skillTags: ["everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "match-pairs",
     prompt: "Associez chaque mot à sa traduction.",
     pairs: family, answer: matchPairsAnswer(family),
     explanation: "Children est un pluriel irrégulier (child → children) ; parents prend un -s régulier.",
     hint: "Un seul de ces pluriels ne se termine pas par -s.", focus: "Famille et pluriels"
   },
   {
-    id: "en-hw-a1-family-build", language: "en", level: "A1", topic: "everyday", type: "word-bank",
+    id: "en-hw-a1-family-build", skillTags: ["present-simple", "sentence-building"], language: "en", level: "A1", topic: "everyday", type: "word-bank",
     prompt: "Construisez : « Elle a deux sœurs et un frère. »",
     tiles: ["She", "has", "two", "sisters", "and", "one", "brother", "have", "a"],
     answer: "She has two sisters and one brother.",
@@ -124,14 +124,14 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Commencez par le sujet, puis le verbe.", focus: "Dire ce que quelqu'un possède"
   },
   {
-    id: "en-hw-a1-family-listen", language: "en", level: "A1", topic: "everyday", type: "listening",
+    id: "en-hw-a1-family-listen", skillTags: ["present-simple", "listening"], language: "en", level: "A1", topic: "everyday", type: "listening",
     prompt: "Écoutez puis écrivez la phrase.",
     audioText: "We have three children.", answer: "We have three children.",
     explanation: "« Nous avons trois enfants. » — Avec we, le verbe reste have ; children est le pluriel irrégulier de child.",
     hint: LISTEN_HINT, focus: "Famille et pluriels"
   },
   {
-    id: "en-hw-a1-family-translation", language: "en", level: "A1", topic: "everyday", type: "translation",
+    id: "en-hw-a1-family-translation", skillTags: ["present-simple", "everyday-vocabulary"], language: "en", level: "A1", topic: "everyday", type: "translation",
     prompt: "Traduisez : J'ai deux frères et une sœur.",
     answer: "I have two brothers and a sister.",
     acceptedAnswers: [
@@ -147,7 +147,7 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
 
   // --- A2 · Comparer deux options du quotidien ---------------------------------------------
   {
-    id: "en-hw-a2-compare-build", language: "en", level: "A2", topic: "everyday", type: "word-bank",
+    id: "en-hw-a2-compare-build", skillTags: ["comparatives", "sentence-building"], language: "en", level: "A2", topic: "everyday", type: "word-bank",
     prompt: "Construisez : « Le train est moins cher que l'avion. »",
     tiles: ["The", "train", "is", "cheaper", "than", "the", "plane", "more", "that"],
     answer: "The train is cheaper than the plane.",
@@ -155,21 +155,21 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Commencez par le sujet, puis le verbe.", focus: "Comparer deux options"
   },
   {
-    id: "en-hw-a2-compare-listen", language: "en", level: "A2", topic: "everyday", type: "listening",
+    id: "en-hw-a2-compare-listen", skillTags: ["comparatives", "listening"], language: "en", level: "A2", topic: "everyday", type: "listening",
     prompt: "Écoutez puis écrivez la phrase.",
     audioText: "This hotel is better than the other one.", answer: "This hotel is better than the other one.",
     explanation: "« Cet hôtel est meilleur que l'autre. » — Good a un comparatif irrégulier : better ; the other one évite de répéter hotel.",
     hint: LISTEN_HINT, focus: "Comparer deux options"
   },
   {
-    id: "en-hw-a2-compare-pairs", language: "en", level: "A2", topic: "everyday", type: "match-pairs",
+    id: "en-hw-a2-compare-pairs", skillTags: ["comparatives"], language: "en", level: "A2", topic: "everyday", type: "match-pairs",
     prompt: "Associez chaque comparatif à sa traduction.",
     pairs: comparatives, answer: matchPairsAnswer(comparatives),
     explanation: "Adjectif court : -er (consonne doublée dans bigger) ; good devient better, irrégulier.",
     hint: "Good ne prend pas -er : cherchez sa forme irrégulière.", focus: "Comparer deux options"
   },
   {
-    id: "en-hw-a2-compare-translation", language: "en", level: "A2", topic: "everyday", type: "translation",
+    id: "en-hw-a2-compare-translation", skillTags: ["comparatives"], language: "en", level: "A2", topic: "everyday", type: "translation",
     prompt: "Traduisez : Cette chambre est plus grande que l'autre.",
     answer: "This room is bigger than the other one.",
     acceptedAnswers: [
@@ -184,14 +184,14 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
 
   // --- A2 · Expliquer sa routine et ses besoins --------------------------------------------
   {
-    id: "en-hw-a2-routine-gap-usually", language: "en", level: "A2", topic: "everyday", type: "fill-gap",
+    id: "en-hw-a2-routine-gap-usually", skillTags: ["present-simple"], language: "en", level: "A2", topic: "everyday", type: "fill-gap",
     prompt: "Complétez avec l'adverbe de fréquence (d'habitude) : I ___ go to the gym on Mondays.",
     answer: "usually", acceptedAnswers: ["normally", "generally"],
     explanation: "Usually se place avant le verbe principal : I usually go. Après be, il se place après : I am usually late.",
     hint: "D'habitude = usually.", focus: "Adverbes de fréquence"
   },
   {
-    id: "en-hw-a2-request-mcq", language: "en", level: "A2", topic: "everyday", type: "multiple-choice",
+    id: "en-hw-a2-request-mcq", skillTags: ["polite-requests", "quantifiers"], language: "en", level: "A2", topic: "everyday", type: "multiple-choice",
     prompt: "Vous voulez de l'eau au restaurant. Choisissez la demande polie.",
     choices: ["Could I have some water, please?", "I want water.", "Give me water.", "Water, you give me?"],
     answer: "Could I have some water, please?",
@@ -199,7 +199,7 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     hint: "Commencez par Could I…", focus: "Demander un service"
   },
   {
-    id: "en-hw-a2-routine-translation", language: "en", level: "A2", topic: "everyday", type: "translation",
+    id: "en-hw-a2-routine-translation", skillTags: ["present-simple", "everyday-vocabulary"], language: "en", level: "A2", topic: "everyday", type: "translation",
     prompt: "Traduisez : Je me lève d'habitude à sept heures.",
     answer: "I usually get up at seven.",
     acceptedAnswers: [

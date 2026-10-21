@@ -18,7 +18,8 @@ import type {
   PronunciationAttemptResult,
   PronunciationLabView,
   ReviewCard,
-  ReviewRating
+  ReviewRating,
+  SkillsView
 } from "@shared/types";
 import { engine } from "./local/device";
 
@@ -62,14 +63,16 @@ export const api = {
   diagnostic: (language: string) => request<PublicDiagnosticQuestion[]>(`/api/diagnostic/${language}`),
   submitDiagnostic: (language: string, answers: Record<string, string>) =>
     request<DiagnosticResult>(`/api/diagnostic/${language}`, { method: "POST", body: JSON.stringify({ answers }) }),
-  exercises: (language: string, options: { topic?: ExerciseTopic; exclude?: string[] } = {}) => {
+  exercises: (language: string, options: { topic?: ExerciseTopic; skill?: string; exclude?: string[] } = {}) => {
     const query = new URLSearchParams();
     if (options.topic) query.set("topic", options.topic);
+    if (options.skill) query.set("skill", options.skill);
     if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
     const suffix = query.toString();
     return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
   },
   practiceTopics: (language: string) => request<PracticeTopic[]>(`/api/practice-topics/${language}`),
+  skills: (language: string) => request<SkillsView>(`/api/skills/${language}`),
   submitAnswer: (exerciseId: string, answer: string, attemptId: string) =>
     request<{ evaluation: AnswerEvaluation; duplicate: boolean; dashboard: DashboardSnapshot }>(
       `/api/practice/${exerciseId}/answer`,

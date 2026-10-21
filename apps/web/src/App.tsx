@@ -10,10 +10,11 @@ import { NavIcon } from "./components/NavIcon";
 import { PracticeView } from "./components/PracticeView";
 import { ReviewView } from "./components/ReviewView";
 import { SettingsView } from "./components/SettingsView";
+import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
 import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
-type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "conversation" | "settings" | "data";
+type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "conversation" | "settings" | "data";
 
 const viewLabels: Record<View, string> = {
   home: "Vue d'ensemble",
@@ -21,6 +22,7 @@ const viewLabels: Record<View, string> = {
   diagnostic: "Diagnostic",
   practice: "S'entraîner",
   review: "Réviser",
+  skills: "Mes acquis",
   conversation: "Parler",
   settings: "Mes objectifs",
   data: "Mes données"
@@ -28,10 +30,10 @@ const viewLabels: Record<View, string> = {
 
 /**
  * Navigation (21/10/2026) : sur ordinateur, tous les écrans sont listés ; sur téléphone, la barre
- * garde 4 onglets + « Plus » (qui regroupe Parler, Mes objectifs, Mes données, Diagnostic).
+ * garde 4 onglets + « Plus » (qui regroupe Mes acquis, Parler, Mes objectifs, Mes données, Diagnostic).
  */
 const primaryViews = ["home", "lesson", "practice", "review"] as const;
-const secondaryViews = ["conversation", "settings", "data", "diagnostic"] as const;
+const secondaryViews = ["skills", "conversation", "settings", "data", "diagnostic"] as const;
 
 function readSavedLanguage(): LanguageCode {
   try {
@@ -51,6 +53,8 @@ export function App() {
   const [externalChange, setExternalChange] = useState(false);
   const [error, setError] = useState<string>();
   const [moreOpen, setMoreOpen] = useState(false);
+  /** Série ciblée demandée depuis « Mes acquis » ; effacée dès que l'écran S'entraîner est quitté. */
+  const [practiceTarget, setPracticeTarget] = useState<PracticeTarget>();
 
   const refreshDashboard = useCallback(() => {
     api.dashboard().then(setDashboard).catch((reason: Error) => setError(reason.message));
@@ -69,6 +73,7 @@ export function App() {
   useEffect(() => {
     document.querySelector<HTMLElement>("#view-title")?.focus();
     setMoreOpen(false);
+    if (view !== "practice") setPracticeTarget(undefined);
   }, [view]);
 
   const chooseLanguage = (next: LanguageCode) => {
@@ -181,7 +186,8 @@ export function App() {
           ) : null}
           {view === "diagnostic" ? <DiagnosticView language={language} onComplete={refreshDashboard} /> : null}
           {view === "lesson" ? <GuidedLessonView language={language} onProgress={refreshDashboard} onHome={() => setView("home")} /> : null}
-          {view === "practice" ? <PracticeView language={language} onProgress={refreshDashboard} /> : null}
+          {view === "practice" ? <PracticeView language={language} onProgress={refreshDashboard} target={practiceTarget} /> : null}
+          {view === "skills" ? <SkillsView language={language} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}
           {view === "review" ? <ReviewView language={language} onProgress={refreshDashboard} /> : null}
           {view === "conversation" ? <SpeakingView language={language} mode={speakingMode} onModeChange={setSpeakingMode} /> : null}
           {view === "settings" ? <SettingsView language={language} onSaved={refreshDashboard} /> : null}

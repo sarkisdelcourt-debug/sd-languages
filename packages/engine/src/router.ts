@@ -18,6 +18,8 @@ import {
 import { applyPracticeAttempt } from "./modules/practice-attempt.js";
 import { applyPronunciationAttempt, createPronunciationLab, findPronunciationPrompt } from "./modules/pronunciation.js";
 import { createDashboard } from "./modules/progress.js";
+import { createSkillsView } from "./modules/skills.js";
+import { findSkill } from "../../shared/src/skills.js";
 import type { StateStore } from "./state.js";
 
 /**
@@ -115,19 +117,23 @@ export function createEngine(store: StateStore): Engine {
     }
     const topic = query.get("topic") ?? undefined;
     if (topic && !TOPIC_LABELS[topic as ExerciseTopic]) return fail(400, "Thème inconnu.");
+    // Série ciblée par compétence (carte « Mes acquis ») quand la compétence n'a pas de thème.
+    const skill = query.get("skill") ?? undefined;
+    if (skill && !findSkill(language, skill)) return fail(400, "Compétence inconnue.");
     // Exercices déjà vus dans la série en cours : la « nouvelle série » ne les repropose pas.
     const excluded = new Set((query.get("exclude") ?? "").split(",").filter(Boolean));
     const inScope = EXERCISES.filter(
       (exercise) => exercise.language === language
         && (!requestedLevel || exercise.level === requestedLevel)
         && (!topic || exercise.topic === topic)
+        && (!skill || exercise.skillTags?.includes(skill))
     );
     const fresh = inScope.filter((exercise) => !excluded.has(exercise.id));
     const candidates = fresh.length ? fresh : inScope;
     const state = await store.read();
     const ranked = requestedLevel
       ? rankExercises(candidates, state, language)
-      : topic
+      : topic || skill
         ? selectTopicExercises(candidates, state, language)
         : selectAdaptiveExercises(candidates, state, language);
     return ok(ranked.map(({ exercise, score, recommendationReason }) => {
@@ -183,6 +189,10 @@ export function createEngine(store: StateStore): Engine {
   });
 
   route("GET", "/api/dashboard", async () => ok(createDashboard(await store.read())));
+  route("GET", "/api/skills/:language", async ({ params }) => {
+    if (!isLanguageCode(params.language)) return unknownLanguage();
+    return ok(createSkillsView(await store.read(), params.language));
+  });
   route("GET", "/api/plan/:language", async ({ params }) => {
     if (!isLanguageCode(params.language)) return unknownLanguage();
     return ok(createDailyPlan(await store.read(), params.language));

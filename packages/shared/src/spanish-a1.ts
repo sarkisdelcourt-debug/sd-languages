@@ -16,21 +16,21 @@ const hotel = pairs([["la habitación", "la chambre"], ["la llave", "la clé"], 
 export const SPANISH_A1_EXERCISES: Exercise[] = [
   // Leçon 1 — se présenter
   {
-    id: "es-a1-l1-match-greetings", language: "es", level: "A1", type: "match-pairs",
+    id: "es-a1-l1-match-greetings", skillTags: ["introductions"], language: "es", level: "A1", type: "match-pairs",
     prompt: "Associez chaque mot à sa traduction.",
     pairs: greetings, answer: matchPairsAnswer(greetings),
     explanation: "Ces quatre formules suffisent pour ouvrir et fermer poliment un échange.",
     hint: "Hola se dit à toute heure de la journée.", focus: "Salutations"
   },
   {
-    id: "es-a1-l1-mcq-llamo", language: "es", level: "A1", type: "multiple-choice",
+    id: "es-a1-l1-mcq-llamo", skillTags: ["introductions"], language: "es", level: "A1", type: "multiple-choice",
     prompt: "Comment dit-on « Je m'appelle Ana » ?",
     choices: ["Me llamo Ana.", "Me llama Ana.", "Yo llamo Ana.", "Soy llamo Ana."], answer: "Me llamo Ana.",
     explanation: "Llamarse se construit avec un pronom : me llamo, te llamas, se llama.",
     hint: "Comme en français : je m'appelle → me…", focus: "Dire son prénom"
   },
   {
-    id: "es-a1-l1-wordbank-origin", language: "es", level: "A1", type: "word-bank",
+    id: "es-a1-l1-wordbank-origin", skillTags: ["introductions", "ser-estar", "sentence-building"], language: "es", level: "A1", type: "word-bank",
     prompt: "Construisez : « Je m'appelle Ana et je suis de Madrid. »",
     tiles: ["Me", "llamo", "Ana", "y", "soy", "de", "Madrid", "estoy", "es"],
     answer: "Me llamo Ana y soy de Madrid.",
@@ -38,21 +38,21 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     hint: "L'origine se dit avec ser : soy de…", focus: "Se présenter"
   },
   {
-    id: "es-a1-l1-listen-question", language: "es", level: "A1", type: "listening",
+    id: "es-a1-l1-listen-question", skillTags: ["introductions", "listening"], language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "¿Cómo te llamas?", answer: "¿Cómo te llamas?",
     explanation: "« Comment tu t'appelles ? » — Te llamas tutoie la personne ; en espagnol, ¿ ouvre aussi la question.",
     hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Demander le prénom"
   },
   {
-    id: "es-a1-l1-gap-ser", language: "es", level: "A1", type: "fill-gap",
+    id: "es-a1-l1-gap-ser", skillTags: ["ser-estar"], language: "es", level: "A1", type: "fill-gap",
     prompt: "Complétez : Yo ___ de Francia. (ser)",
     answer: "soy",
     explanation: "Ser à la première personne : soy. Il sert à dire son origine.",
     hint: "Soy, eres, es…", focus: "Ser au présent"
   },
   {
-    id: "es-a1-l1-translation-and-you", language: "es", level: "A1", type: "translation",
+    id: "es-a1-l1-translation-and-you", skillTags: ["introductions", "ser-estar"], language: "es", level: "A1", type: "translation",
     prompt: "Traduisez : Je suis de Lyon, et toi ?",
     answer: "Soy de Lyon, ¿y tú?", acceptedAnswers: ["Yo soy de Lyon, ¿y tú?"],
     explanation: "¿Y tú? renvoie la question. Le pronom yo est facultatif : la terminaison suffit.",
@@ -60,14 +60,14 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
   },
   // Leçon 2 — présenter son groupe
   {
-    id: "es-a1-l2-match-family", language: "es", level: "A1", type: "match-pairs",
+    id: "es-a1-l2-match-family", skillTags: ["family-vocabulary", "articles-gender"], language: "es", level: "A1", type: "match-pairs",
     prompt: "Associez chaque mot à sa traduction.",
     pairs: family, answer: matchPairsAnswer(family),
     explanation: "El devant un nom masculin, la devant un nom féminin, los au masculin pluriel.",
     hint: "Hermano / hermana : -o masculin, -a féminin.", focus: "Famille et articles"
   },
   {
-    id: "es-a1-l2-wordbank-we-speak", language: "es", level: "A1", type: "word-bank",
+    id: "es-a1-l2-wordbank-we-speak", skillTags: ["present-tense", "sentence-building"], language: "es", level: "A1", type: "word-bank",
     prompt: "Construisez : « Nous parlons espagnol et anglais. »",
     tiles: ["Hablamos", "español", "e", "inglés", "y", "hablan", "Nosotros"],
     answer: "Hablamos español e inglés.", acceptedAnswers: ["Nosotros hablamos español e inglés."],
@@ -75,14 +75,14 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     hint: "Le sujet nosotros peut être omis ; regardez le mot qui suit « et ».", focus: "Présent en -amos"
   },
   {
-    id: "es-a1-l2-listen-sister", language: "es", level: "A1", type: "listening",
+    id: "es-a1-l2-listen-sister", skillTags: ["family-vocabulary", "listening"], language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la phrase.",
     audioText: "Ella es mi hermana.", answer: "Ella es mi hermana.",
     explanation: "« C'est ma sœur. » — Es (ser) présente une personne : ella es… ; mi est invariable devant hermano ou hermana.",
     hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Présenter quelqu'un"
   },
   {
-    id: "es-a1-l2-mcq-ser-plural", language: "es", level: "A1", type: "multiple-choice",
+    id: "es-a1-l2-mcq-ser-plural", skillTags: ["ser-estar"], language: "es", level: "A1", type: "multiple-choice",
     prompt: "Complétez : Mis amigos ___ simpáticos.",
     choices: ["son", "es", "somos", "están"], answer: "son",
     explanation: "Mis amigos = ellos, donc ser au pluriel : son. Ser décrit un trait durable.",
@@ -90,14 +90,14 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
   },
   // Leçon 3 — arriver à l'hôtel
   {
-    id: "es-a1-l3-match-hotel", language: "es", level: "A1", type: "match-pairs",
+    id: "es-a1-l3-match-hotel", skillTags: ["hotel-travel-vocabulary"], language: "es", level: "A1", type: "match-pairs",
     prompt: "Associez chaque mot à sa traduction.",
     pairs: hotel, answer: matchPairsAnswer(hotel),
     explanation: "Le vocabulaire minimal d'une arrivée : la chambre, la clé, le petit-déjeuner, la nuit.",
     hint: "Llave ressemble peu à « clé » : retenez-le avec son article, la llave.", focus: "Vocabulaire de l'hôtel"
   },
   {
-    id: "es-a1-l3-wordbank-nights", language: "es", level: "A1", type: "word-bank",
+    id: "es-a1-l3-wordbank-nights", skillTags: ["hotel-travel-vocabulary", "sentence-building"], language: "es", level: "A1", type: "word-bank",
     prompt: "Construisez : « J'ai une réservation pour deux nuits. »",
     tiles: ["Tengo", "una", "reserva", "para", "dos", "noches", "por", "noche", "Tiene"],
     answer: "Tengo una reserva para dos noches.",
@@ -105,21 +105,21 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
     hint: "Deux nuits : le nom est au pluriel.", focus: "Annoncer sa réservation"
   },
   {
-    id: "es-a1-l3-listen-breakfast", language: "es", level: "A1", type: "listening",
+    id: "es-a1-l3-listen-breakfast", skillTags: ["hotel-travel-vocabulary", "listening"], language: "es", level: "A1", type: "listening",
     prompt: "Écoutez puis écrivez la question.",
     audioText: "¿A qué hora es el desayuno?", answer: "¿A qué hora es el desayuno?",
     explanation: "« À quelle heure est le petit-déjeuner ? » — ¿A qué hora…? demande une heure ; qué porte un accent dans une question.",
     hint: "Réécoutez autant de fois que nécessaire, puis écrivez les mots dans l'ordre entendu.", focus: "Demander une heure"
   },
   {
-    id: "es-a1-l3-gap-number", language: "es", level: "A1", type: "fill-gap",
+    id: "es-a1-l3-gap-number", skillTags: ["numbers"], language: "es", level: "A1", type: "fill-gap",
     prompt: "Complétez : Su habitación es la número ___. (12)",
     answer: "doce",
     explanation: "De 11 à 15 : once, doce, trece, catorce, quince.",
     hint: "Douze commence par d…", focus: "Nombres 11 à 15"
   },
   {
-    id: "es-a1-l3-translation-key", language: "es", level: "A1", type: "translation",
+    id: "es-a1-l3-translation-key", skillTags: ["polite-requests", "hotel-travel-vocabulary"], language: "es", level: "A1", type: "translation",
     prompt: "Traduisez : La clé, s'il vous plaît.",
     answer: "La llave, por favor.",
     explanation: "Por favor se place en fin de demande, comme « s'il vous plaît ».",

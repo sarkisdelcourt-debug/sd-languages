@@ -14,25 +14,28 @@ export function matchPairsAnswer(pairs: Array<{ target: string; native: string }
   return pairs.map((pair) => `${pair.target} = ${pair.native}`).join(" · ");
 }
 
-export function normalizeAnswer(value: string): string {
+/**
+ * Tolérances d'écriture communes aux deux normalisations : tiret ou espace (« half-life »),
+ * « 3pm » / « 3 p.m. » / « 3 pm », « o clock » / « oclock » / « o'clock ».
+ */
+function tolerateSpelling(value: string): string {
   return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("fr")
     .replace(/[’']/g, "'")
+    .replace(/\b([ap])\.m\.?(?=\s|$)/g, "$1m")
     .replace(/[^\p{L}\p{N}'\s-]/gu, "")
+    .replace(/-/g, " ")
+    .replace(/(\d)\s*([ap]m)\b/g, "$1 $2")
+    .replace(/\bo\s*'?\s*clock\b/g, "o'clock")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+export function normalizeAnswer(value: string): string {
+  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr"));
+}
+
 function normalizeSurface(value: string): string {
-  return value
-    .normalize("NFC")
-    .toLocaleLowerCase("fr")
-    .replace(/[’']/g, "'")
-    .replace(/[^\p{L}\p{N}'\s-]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return tolerateSpelling(value.normalize("NFC").toLocaleLowerCase("fr"));
 }
 
 function editDistance(left: string, right: string): number {

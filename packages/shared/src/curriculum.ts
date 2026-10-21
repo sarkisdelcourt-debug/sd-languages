@@ -294,7 +294,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       type: "translation",
       prompt: "Traduisez : Je prends habituellement le bus pour aller au travail.",
       answer: "I usually take the bus to work.",
-      acceptedAnswers: ["I usually go to work by bus."],
+      acceptedAnswers: ["I usually go to work by bus.", "I usually take the bus to go to work."],
       explanation: "« Usually » se place avant le verbe principal ; « take the bus » désigne le moyen de transport.",
       hint: "Placez usually avant take.",
       focus: "Fréquence et habitudes"
@@ -333,7 +333,11 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
         "You should talk to her before deciding.",
         "You should speak to him before deciding.",
         "You should speak to her before deciding.",
-        "You should talk to them before deciding."
+        "You should talk to them before deciding.",
+        "You should talk to him before you decide.",
+        "You should talk to her before you decide.",
+        "You should speak to him before you decide.",
+        "You should speak to her before you decide."
       ],
       explanation: "Should exprime un conseil et est suivi de la base verbale ; before peut être suivi d'un gérondif.",
       hint: "Utilisez should + talk, puis before + verbe en -ing.",
@@ -409,7 +413,12 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       type: "translation",
       prompt: "Traduisez : Pourriez-vous m'envoyer le rapport avant vendredi ?",
       answer: "Could you send me the report by Friday?",
-      acceptedAnswers: ["Could you send the report to me by Friday?", "Could you please send me the report by Friday?"],
+      acceptedAnswers: [
+        "Could you send the report to me by Friday?",
+        "Could you please send me the report by Friday?",
+        "Could you send me the report before Friday?",
+        "Could you please send me the report before Friday?"
+      ],
       explanation: "Could you formule une demande polie et by Friday fixe une échéance au plus tard vendredi.",
       hint: "Utilisez Could you, puis by pour l'échéance.",
       focus: "Demande polie au travail"
@@ -444,7 +453,16 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       type: "translation",
       prompt: "Traduisez : J'ai rendez-vous chez le médecin à trois heures.",
       answer: "I have a doctor's appointment at three o'clock.",
-      acceptedAnswers: ["I have an appointment with the doctor at three o'clock.", "I have a doctor's appointment at three."],
+      acceptedAnswers: [
+        "I have an appointment with the doctor at three o'clock.",
+        "I have a doctor's appointment at three.",
+        "I have a doctor's appointment at 3 o'clock.",
+        "I have a doctor's appointment at 3 pm.",
+        "I have a doctor's appointment at three pm.",
+        "I have an appointment with the doctor at 3 o'clock.",
+        "I have an appointment with the doctor at 3 pm.",
+        "I have an appointment with the doctor at three pm."
+      ],
       explanation: "A doctor's appointment désigne un rendez-vous médical et at introduit une heure précise.",
       hint: "Utilisez have an appointment ou have a doctor's appointment.",
       focus: "Rendez-vous du quotidien"
@@ -481,7 +499,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       type: "translation",
       prompt: "Traduisez : Demain, je vais au marché.",
       answer: "Morgen gehe ich auf den Markt.",
-      acceptedAnswers: ["Ich gehe morgen auf den Markt."],
+      acceptedAnswers: ["Ich gehe morgen auf den Markt.", "Morgen gehe ich zum Markt.", "Ich gehe morgen zum Markt."],
       explanation: "Quand Morgen occupe la première position, le verbe reste en deuxième position, avant le sujet.",
       hint: "Commencez par Morgen, puis placez le verbe.",
       focus: "Verbe en deuxième position"
@@ -516,6 +534,7 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
       type: "translation",
       prompt: "Traduisez : Je reste à la maison parce qu'il pleut.",
       answer: "Ich bleibe zu Hause, weil es regnet.",
+      acceptedAnswers: ["Ich bleibe zuhause, weil es regnet."],
       explanation: "Weil introduit une subordonnée dans laquelle le verbe conjugué se place à la fin.",
       hint: "Après weil, placez regnet en fin de proposition.",
       focus: "Subordonnée avec weil"

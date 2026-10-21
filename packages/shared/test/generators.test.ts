@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  answerVariants,
   chunkForPairs,
+  expandContractions,
   contractionVariants,
   irregularVerbExercises,
   phrasalVerbExercises,
@@ -69,5 +71,36 @@ describe("générateurs de contenu", () => {
     expect(evaluateAnswer(past!, "learned").correct).toBe(true);
     expect(evaluateAnswer(participle!, "learnt").verdict).toBe("exact");
     expect(matchPairsAnswer([{ target: "a", native: "b" }])).toBe("a = b");
+  });
+});
+
+describe("variantes de réponse tolérantes (21/10/2026)", () => {
+  it("développe « 'd » selon le contexte, « let's » et « would've »", () => {
+    expect(expandContractions("I'd like a coffee.")).toBe("I would like a coffee.");
+    expect(expandContractions("She'd already left.")).toBe("She had already left.");
+    expect(expandContractions("Let's go, we should've known.")).toBe("Let us go, we should have known.");
+    expect(answerVariants("I'd seen it.")).toContain("I had seen it.");
+    expect(answerVariants("I'd seen it.")).toContain("I would seen it.");
+  });
+
+  it("contracte dans l'autre sens : would → 'd, let us → let's", () => {
+    expect(answerVariants("I would ask for a second opinion.")).toContain("I'd ask for a second opinion.");
+    expect(answerVariants("Let us start now.")).toContain("Let's start now.");
+  });
+
+  it("échange chiffres et mots, y compris « an hour »", () => {
+    expect(answerVariants("Call me back in ten minutes.")).toContain("Call me back in 10 minutes.");
+    expect(answerVariants("It takes 2 hours.")).toContain("It takes two hours.");
+    expect(answerVariants("It takes an hour.")).toContain("It takes one hour.");
+  });
+
+  it("échange le lexique américain et britannique dans les deux sens", () => {
+    expect(answerVariants("We rented a car downtown.")).toContain("We hired a car in the city centre.");
+    expect(answerVariants("I love this color.")).toContain("I love this colour.");
+    expect(answerVariants("Take the lift to your flat.")).toContain("Take the elevator to your apartment.");
+  });
+
+  it("borne le nombre de variantes générées", () => {
+    expect(answerVariants("I'd like to rent a car for two days downtown, it's my favorite vacation.").length).toBeLessThan(40);
   });
 });

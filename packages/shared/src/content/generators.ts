@@ -33,6 +33,10 @@ export function chunkForPairs<T>(items: T[], size = 4): T[][] {
   return groups.filter((group) => group.length >= 3);
 }
 
+const PRONOUN = "(I|you|he|she|we|they|it)";
+/** Participe passé reconnaissable après « 'd » / « had » (liste courte + terminaison -ed). */
+const PARTICIPLE = "(?:already |never |just |not |always )?(?:been|done|gone|seen|had|known|taken|made|given|left|forgotten|written|told|thought|said|come|become|heard|found|got|gotten|lost|met|put|read|run|sent|spent|won|\\w+ed)\\b";
+
 const CONTRACTIONS: Array<[RegExp, string, RegExp, string]> = [
   [/\bcan't\b/gi, "cannot", /\bcannot\b/gi, "can't"],
   [/\bwon't\b/gi, "will not", /\bwill not\b/gi, "won't"],
@@ -41,14 +45,86 @@ const CONTRACTIONS: Array<[RegExp, string, RegExp, string]> = [
   [/\b(you|we|they)'re\b/gi, "$1 are", /\b(you|we|they) are\b/gi, "$1're"],
   [/\b(I|you|we|they)'ve\b/gi, "$1 have", /\b(I|you|we|they) have\b(?! to)/gi, "$1've"],
   [/\b(I|you|he|she|we|they|it)'ll\b/gi, "$1 will", /\b(I|you|he|she|we|they|it) will\b/gi, "$1'll"],
-  [/\b(it|that|there|what|he|she)'s\b(?= (?!been\b|got\b))/gi, "$1 is", /\b(it|that|there|what|he|she) is\b/gi, "$1's"]
+  [/\b(it|that|there|what|he|she)'s\b(?= (?!been\b|got\b))/gi, "$1 is", /\b(it|that|there|what|he|she) is\b/gi, "$1's"],
+  [/\b(would|should|could|might|must)'ve\b/gi, "$1 have", /\b(would|should|could|might|must) have\b/gi, "$1've"],
+  [/\b(l)et's\b/gi, "$1et us", /\b(l)et us\b/gi, "$1et's"],
+  // « 'd » : would devant like/rather/better/prefer…, had devant un participe passé, would sinon.
+  [new RegExp(`\\b${PRONOUN}'d\\b(?= (?:like|love|rather|better|prefer|sooner|hate)\\b)`, "gi"), "$1 would", new RegExp(`\\b${PRONOUN} would\\b`, "gi"), "$1'd"],
+  [new RegExp(`\\b${PRONOUN}'d\\b(?= ${PARTICIPLE})`, "gi"), "$1 had", new RegExp(`\\b${PRONOUN} had\\b(?= ${PARTICIPLE})`, "gi"), "$1'd"],
+  [new RegExp(`\\b${PRONOUN}'d\\b`, "gi"), "$1 would", /$^/g, ""]
 ];
+
+/** Forme entièrement développée d'une phrase (« I'd like » → « I would like »). */
+export function expandContractions(sentence: string): string {
+  return CONTRACTIONS.reduce((text, [contracted, expansion]) => text.replace(contracted, expansion), sentence);
+}
 
 /** Variantes équivalentes (contractée / développée) pour ne pas pénaliser « I am » au lieu de « I'm ». */
 export function contractionVariants(sentence: string): string[] {
-  const expanded = CONTRACTIONS.reduce((text, [contracted, expansion]) => text.replace(contracted, expansion), sentence);
+  const expanded = expandContractions(sentence);
   const contracted = CONTRACTIONS.reduce((text, [, , full, contraction]) => text.replace(full, contraction), sentence);
-  return [...new Set([expanded, contracted])].filter((variant) => variant !== sentence);
+  // « 'd » devant un participe (« I'd seen ») : « had » est produit ci-dessus, on accepte aussi « would ».
+  const ambiguous = sentence.replace(/\b(I|you|he|she|we|they|it)'d\b/gi, "$1 would");
+  return [...new Set([expanded, contracted, ambiguous])].filter((variant) => variant !== sentence);
+}
+
+const NUMBER_WORDS: Array<[number, string]> = [
+  [0, "zero"], [1, "one"], [2, "two"], [3, "three"], [4, "four"], [5, "five"], [6, "six"], [7, "seven"], [8, "eight"],
+  [9, "nine"], [10, "ten"], [11, "eleven"], [12, "twelve"], [13, "thirteen"], [14, "fourteen"], [15, "fifteen"],
+  [16, "sixteen"], [17, "seventeen"], [18, "eighteen"], [19, "nineteen"], [20, "twenty"], [21, "twenty-one"],
+  [22, "twenty-two"], [23, "twenty-three"], [24, "twenty-four"], [25, "twenty-five"], [26, "twenty-six"],
+  [27, "twenty-seven"], [28, "twenty-eight"], [29, "twenty-nine"], [30, "thirty"], [40, "forty"], [50, "fifty"], [100, "a hundred"]
+];
+const WORD_TO_DIGIT = new Map<string, string>([
+  ...NUMBER_WORDS.map(([digit, word]): [string, string] => [word, String(digit)]),
+  ["one hundred", "100"], ["twenty one", "21"], ["twenty two", "22"], ["twenty three", "23"], ["twenty four", "24"],
+  ["twenty five", "25"], ["twenty six", "26"], ["twenty seven", "27"], ["twenty eight", "28"], ["twenty nine", "29"]
+]);
+const WORD_PATTERN = new RegExp(`\\b(${[...WORD_TO_DIGIT.keys()].sort((left, right) => right.length - left.length).join("|")})\\b`, "gi");
+const DIGIT_TO_WORD = new Map(NUMBER_WORDS.map(([digit, word]) => [String(digit), word]));
+
+/** Variantes chiffres ↔ mots (0–30, 40, 50, 100) et « an hour » ↔ « one hour ». */
+export function numberVariants(sentence: string): string[] {
+  const inDigits = sentence.replace(WORD_PATTERN, (word) => WORD_TO_DIGIT.get(word.toLowerCase()) ?? word);
+  const inWords = sentence.replace(/\b(\d+)\b/g, (digits) => DIGIT_TO_WORD.get(digits) ?? digits);
+  const hour = sentence.replace(/\b(an|one) hour\b/gi, (_, article: string) => `${article.toLowerCase() === "an" ? "one" : "an"} hour`);
+  return [...new Set([inDigits, inWords, hour])].filter((variant) => variant !== sentence);
+}
+
+/** Lexique US ↔ UK : chaque entrée est acceptée dans les deux sens (« the check » ↔ « the bill »). */
+const US_UK: Array<[string, string]> = [
+  ["the check", "the bill"], ["gas station", "petrol station"], ["gas", "petrol"], ["movie", "film"], ["subway", "underground"],
+  ["downtown", "in the city centre"], ["rent a car", "hire a car"], ["rented a car", "hired a car"], ["appetizer", "starter"],
+  ["apartment", "flat"], ["elevator", "lift"], ["vacation", "holiday"], ["cell phone", "mobile"], ["in line", "in the queue"],
+  ["restroom", "toilet"], ["schedule", "timetable"], ["store", "shop"], ["pharmacy", "chemist's"], ["drugstore", "chemist's"],
+  ["fall", "autumn"], ["truck", "lorry"], ["trucks", "lorries"], ["parking lot", "car park"], ["candy", "sweets"],
+  ["cookie", "biscuit"], ["soccer", "football"], ["color", "colour"], ["favorite", "favourite"], ["center", "centre"],
+  ["traveling", "travelling"], ["organize", "organise"]
+];
+const escapePattern = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const usToUk = US_UK.map(([us, uk]): [RegExp, string] => [new RegExp(`\\b${escapePattern(us)}(s?)\\b`, "gi"), `${uk}$1`]);
+const ukToUs = [...US_UK].reverse().map(([us, uk]): [RegExp, string] => [new RegExp(`\\b${escapePattern(uk)}(s?)\\b`, "gi"), `${us}$1`]);
+
+/** Variantes lexicales : la phrase entièrement « britannique » et entièrement « américaine ». */
+export function dialectVariants(sentence: string): string[] {
+  const british = usToUk.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), sentence);
+  const american = ukToUs.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), sentence);
+  return [...new Set([british, american])].filter((variant) => variant !== sentence);
+}
+
+/**
+ * Toutes les formulations acceptées pour une dictée : contractions, chiffres et lexique US/UK se
+ * combinent (chaque famille est appliquée aux variantes déjà obtenues), sans la phrase d'origine.
+ */
+export function answerVariants(sentence: string): string[] {
+  let variants = new Set([sentence]);
+  for (const family of [contractionVariants, numberVariants, dialectVariants]) {
+    const next = new Set(variants);
+    for (const variant of variants) for (const produced of family(variant)) next.add(produced);
+    variants = next;
+  }
+  variants.delete(sentence);
+  return [...variants];
 }
 
 /** Mots d'une phrase tels qu'affichés sur les étiquettes (ponctuation finale retirée). */
@@ -87,7 +163,7 @@ export function sentenceExercises(items: SentenceItem[]): TopicExercise[] {
     const candidates = [...new Set(pool.filter((word) => !present.has(word) && word.length > 2))];
     const start = candidates.length ? hash(item.id) % candidates.length : 0;
     const distractors = candidates.length >= 2 ? [candidates[start]!, candidates[(start + 7) % candidates.length]!].filter((word, index, all) => all.indexOf(word) === index) : [];
-    const variants = contractionVariants(item.en);
+    const variants = answerVariants(item.en);
     const base = { language: LANGUAGE, level: item.level, topic: item.topic, explanation: item.note, focus: "Phrases en contexte" } as const;
     return [
       {

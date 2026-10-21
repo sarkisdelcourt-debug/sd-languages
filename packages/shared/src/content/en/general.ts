@@ -323,7 +323,7 @@ export const GRAMMAR_EXERCISES: HandwrittenExercise[] = [
     type: "fill-gap",
     prompt: "Complétez avec un modal de conseil : You look tired. You ___ go to bed earlier.",
     answer: "should",
-    acceptedAnswers: ["ought to"],
+    acceptedAnswers: ["ought to", "had better"],
     explanation: "Should (ou ought to) + base verbale exprime un conseil : tu devrais.",
     hint: "Tu devrais…",
     focus: "Modaux : conseil"
@@ -930,7 +930,8 @@ export const GRAMMAR_EXERCISES: HandwrittenExercise[] = [
     acceptedAnswers: [
       "Do you know where the drugstore is?",
       "Do you know where the pharmacy is located?",
-      "Do you know where the drugstore is located?"
+      "Do you know where the drugstore is located?",
+      "Do you know where the chemist's is?"
     ],
     explanation: "Après Do you know, l'ordre est sujet + verbe : where the pharmacy is (et non « where is the pharmacy »).",
     hint: "Le verbe is va à la fin.",

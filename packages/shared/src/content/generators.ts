@@ -1,5 +1,5 @@
 import { matchPairsAnswer } from "../learning.js";
-import type { LanguageCode } from "../types.js";
+import type { Exercise, LanguageCode } from "../types.js";
 import type { IrregularVerbItem, PhrasalVerbItem, SentenceItem, TopicExercise, VocabSet } from "./types.js";
 
 /**
@@ -65,6 +65,20 @@ export function contractionVariants(sentence: string): string[] {
   const contracted = CONTRACTIONS.reduce((text, [, , full, contraction]) => text.replace(full, contraction), sentence);
   // « 'd » devant un participe (« I'd seen ») ne vaut que « had » : « I would seen » serait une faute acceptée.
   return [...new Set([expanded, contracted])].filter((variant) => variant !== sentence);
+}
+
+/**
+ * Texte à trous (22/10/2026) : la réponse attendue accepte aussi sa forme contractée ou développée
+ * (« would have left » ⟷ « would've left »), sans jamais retirer une variante déjà listée.
+ */
+export function withContractionVariants<T extends Exercise>(exercise: T): T {
+  if (exercise.type !== "fill-gap") return exercise;
+  const listed = [exercise.answer, ...(exercise.acceptedAnswers ?? [])];
+  const known = new Set(listed);
+  const variants = listed
+    .flatMap((candidate) => contractionVariants(candidate))
+    .filter((variant, index, all) => !known.has(variant) && all.indexOf(variant) === index);
+  return variants.length ? { ...exercise, acceptedAnswers: [...(exercise.acceptedAnswers ?? []), ...variants] } : exercise;
 }
 
 const NUMBER_WORDS: Array<[number, string]> = [

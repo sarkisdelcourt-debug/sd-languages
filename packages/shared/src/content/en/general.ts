@@ -1,3 +1,4 @@
+import { withContractionVariants } from "../generators.js";
 import type { HandwrittenExercise, SentenceItem, VocabSet } from "../types.js";
 
 /**
@@ -8,7 +9,7 @@ import type { HandwrittenExercise, SentenceItem, VocabSet } from "../types.js";
 // ---------------------------------------------------------------------------------------------
 // Grammaire : 14 points × 5 exercices (≈ 41 B1, 29 B2)
 // ---------------------------------------------------------------------------------------------
-export const GRAMMAR_EXERCISES: HandwrittenExercise[] = [
+const GRAMMAR_SOURCE: HandwrittenExercise[] = [
   // --- Present perfect vs prétérit ---------------------------------------------------------
   {
     id: "en-hw-g-001",
@@ -1017,6 +1018,9 @@ export const GRAMMAR_EXERCISES: HandwrittenExercise[] = [
     focus: "Used to / be used to"
   }
 ];
+
+/** Grammaire rédigée : chaque texte à trous accepte aussi la forme contractée ou développée de sa réponse. */
+export const GRAMMAR_EXERCISES: HandwrittenExercise[] = GRAMMAR_SOURCE.map(withContractionVariants);
 
 // ---------------------------------------------------------------------------------------------
 // Phrases de la vie courante (B1–B2)

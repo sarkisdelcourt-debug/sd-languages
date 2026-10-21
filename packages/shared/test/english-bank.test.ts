@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ENGLISH_BANK } from "../src/content/en/index.js";
-import { expandContractions } from "../src/content/generators.js";
+import { contractionVariants, expandContractions } from "../src/content/generators.js";
 import { normalizeAnswer, evaluateAnswer } from "../src/learning.js";
 import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../src/curriculum.js";
 
@@ -105,5 +105,24 @@ describe("drills de verbes irréguliers (21/10/2026)", () => {
     const trivial = ENGLISH_BANK.filter((exercise) => exercise.id.startsWith("en-irr-") && exercise.id.endsWith("-past") && exercise.id === `en-irr-${exercise.answer}-past`);
     expect(trivial.map((exercise) => exercise.id)).toEqual([]);
     expect(ENGLISH_BANK.some((exercise) => exercise.id === "en-irr-put-pp")).toBe(true);
+  });
+});
+
+describe("textes à trous et contractions (22/10/2026)", () => {
+  it("accepte « would've left » pour le diagnostic B2 sur le troisième conditionnel", () => {
+    const diagnostic = DIAGNOSTIC_QUESTIONS.find((question) => question.id === "diag-en-b2-condition")!;
+    expect(evaluateAnswer(diagnostic, "would've left").correct).toBe(true);
+    expect(evaluateAnswer(diagnostic, "would have left").verdict).toBe("exact");
+  });
+
+  it("accepte pour chaque texte à trous anglais la variante contractée ou développée de sa réponse", () => {
+    const problems: string[] = [];
+    for (const exercise of [...DIAGNOSTIC_QUESTIONS, ...EXERCISES].filter((item) => item.language === "en" && item.type === "fill-gap")) {
+      for (const variant of contractionVariants(exercise.answer)) {
+        if (!evaluateAnswer(exercise, variant).correct) problems.push(`${exercise.id} : « ${variant} »`);
+      }
+    }
+    expect(problems).toEqual([]);
+    expect(EXERCISES.find((item) => item.id === "en-hw-g-023")?.acceptedAnswers).toContain("had better");
   });
 });

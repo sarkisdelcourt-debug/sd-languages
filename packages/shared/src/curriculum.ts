@@ -5,6 +5,7 @@ import type {
   LanguageCode
 } from "./types.js";
 import { ENGLISH_BANK } from "./content/en/index.js";
+import { withContractionVariants } from "./content/generators.js";
 import { SPANISH_A1_EXERCISES } from "./spanish-a1.js";
 
 const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
@@ -824,13 +825,13 @@ const EXERCISES_BY_LANGUAGE: Record<LanguageCode, Exercise[]> = {
 };
 
 export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
-  ...DIAGNOSTIC_BY_LANGUAGE.en,
+  ...DIAGNOSTIC_BY_LANGUAGE.en.map(withContractionVariants),
   ...DIAGNOSTIC_BY_LANGUAGE.de,
   ...DIAGNOSTIC_BY_LANGUAGE.es
 ];
 
 export const EXERCISES: Exercise[] = [
-  ...EXERCISES_BY_LANGUAGE.en,
+  ...EXERCISES_BY_LANGUAGE.en.map(withContractionVariants),
   ...EXERCISES_BY_LANGUAGE.de,
   ...EXERCISES_BY_LANGUAGE.es,
   ...SPANISH_A1_EXERCISES,

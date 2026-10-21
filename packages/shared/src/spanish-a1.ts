@@ -127,8 +127,8 @@ export const SPANISH_A1_EXERCISES: Exercise[] = [
   }
 ];
 
-type LessonRevision = Pick<GuidedLessonDefinition, "id" | "revision" | "estimatedMinutes" | "microCourse" | "exerciseIds">
-  & Partial<Pick<GuidedLessonDefinition, "objective" | "focus">>;
+type LessonRevision = Pick<GuidedLessonDefinition, "id" | "revision">
+  & Partial<Pick<GuidedLessonDefinition, "estimatedMinutes" | "microCourse" | "exerciseIds" | "objective" | "focus" | "scenarioId">>;
 
 export const SPANISH_A1_LESSON_REVISIONS: LessonRevision[] = [
   {
@@ -191,5 +191,8 @@ export const SPANISH_A1_LESSON_REVISIONS: LessonRevision[] = [
       "es-a1-l3-match-hotel", "es-a1-mcq-hotel-room", "es-a1-l3-wordbank-nights",
       "es-a1-l3-listen-breakfast", "es-a1-l3-gap-number", "es-a1-l3-translation-key"
     ]
-  }
+  },
+  // Révision 3 (22/10/2026) : la leçon 3 déroule enfin un scénario d'hôtel (es-hotel-check-in) au lieu
+  // de celui des voisins ; exercices et micro-cours de la révision 2 inchangés.
+  { id: "lesson-es-arrive-at-a-hotel", revision: 3, scenarioId: "es-hotel-check-in" }
 ];

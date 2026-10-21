@@ -1,5 +1,6 @@
 import { irregularVerbExercises, phrasalVerbExercises, sentenceExercises, vocabExercises } from "../generators.js";
 import type { TopicExercise } from "../types.js";
+import { BEGINNER_EXERCISES } from "./beginner.js";
 import { EVERYDAY_SENTENCES, GENERAL_VOCAB, GRAMMAR_EXERCISES, TRAVEL_SENTENCES } from "./general.js";
 import { MEDICAL_SENTENCES, MEDICAL_VOCAB } from "./medical.js";
 import { FALSE_FRIENDS, IRREGULAR_VERBS, PHRASAL_VERBS } from "./verbs.js";
@@ -12,6 +13,7 @@ export const ENGLISH_BANK: TopicExercise[] = [
   ...sentenceExercises(EVERYDAY_SENTENCES),
   ...sentenceExercises(TRAVEL_SENTENCES),
   ...GRAMMAR_EXERCISES,
+  ...BEGINNER_EXERCISES,
   ...phrasalVerbExercises(PHRASAL_VERBS),
   ...irregularVerbExercises(IRREGULAR_VERBS),
   ...FALSE_FRIENDS

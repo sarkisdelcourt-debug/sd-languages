@@ -131,13 +131,13 @@ describe("curriculum integrity", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("provides four well-formed conversation scenarios per language", () => {
+  it("provides at least four well-formed conversation scenarios per language", () => {
     const scenarioIds = CONVERSATION_SCENARIOS.map((scenario) => scenario.id);
     const stepIds = CONVERSATION_SCENARIOS.flatMap((scenario) => scenario.steps.map((step) => step.id));
     expect(new Set(scenarioIds).size).toBe(scenarioIds.length);
     expect(new Set(stepIds).size).toBe(stepIds.length);
     for (const language of ["en", "de", "es"] as const) {
-      expect(CONVERSATION_SCENARIOS.filter((scenario) => scenario.language === language)).toHaveLength(4);
+      expect(CONVERSATION_SCENARIOS.filter((scenario) => scenario.language === language).length).toBeGreaterThanOrEqual(4);
     }
     for (const scenario of CONVERSATION_SCENARIOS) {
       expect(scenario.steps).toHaveLength(4);

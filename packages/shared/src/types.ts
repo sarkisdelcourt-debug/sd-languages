@@ -170,6 +170,11 @@ export interface GuidedLessonDefinition {
   exerciseIds: string[];
   scenarioId: string;
   conversationTurnGoal: number;
+  /**
+   * Pertinence vérifiable (22/10/2026) : chaque exercice de la leçon doit porter l'un de ces mots-clés
+   * (dans son id, sa consigne, sa réponse, son point central ou ses paires) ou l'un de ces thèmes.
+   */
+  relevance?: { keywords: string[]; topics?: ExerciseTopic[] };
 }
 
 export interface GuidedLessonAttempt {

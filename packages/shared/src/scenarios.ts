@@ -242,6 +242,36 @@ export const CONVERSATION_SCENARIOS: ConversationScenario[] = [
     ]
   },
   {
+    id: "es-hotel-check-in",
+    language: "es",
+    title: "Arriver à l'hôtel",
+    description: "Annoncer sa réservation, préciser la durée du séjour et demander le petit-déjeuner et la clé.",
+    level: "A1",
+    openingPrompt: "Buenas tardes, bienvenido al Hotel Sol. ¿Tiene una reserva?",
+    steps: [
+      {
+        id: "es-hotel-check-in-reservation",
+        keywords: ["reserva", "sí", "si", "tengo", "nombre"],
+        reply: "Muy bien. ¿A nombre de quién está la reserva?"
+      },
+      {
+        id: "es-hotel-check-in-name",
+        keywords: ["a nombre de", "me llamo", "soy", "nombre", "apellido"],
+        reply: "Perfecto, aquí está. ¿Cuántas noches se queda?"
+      },
+      {
+        id: "es-hotel-check-in-nights",
+        keywords: ["noche", "noches", "una", "dos", "tres", "cuatro", "semana"],
+        reply: "De acuerdo. El desayuno es de siete a diez. ¿Quiere la llave ahora?"
+      },
+      {
+        id: "es-hotel-check-in-key",
+        keywords: ["llave", "sí", "si", "por favor", "gracias", "desayuno", "habitación", "habitacion"],
+        reply: "Aquí tiene la llave. Su habitación es la doce, en la primera planta. ¡Buena estancia!"
+      }
+    ]
+  },
+  {
     id: "es-work-interview",
     language: "es",
     title: "Entretien professionnel",

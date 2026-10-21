@@ -376,7 +376,7 @@ describe("SD Languages API", () => {
     const resumed = await request(app).get("/api/lessons/en").expect(200);
     expect(resumed.body).toMatchObject({
       lesson: { id: "lesson-en-routine-travel", level: "A2" },
-      session: { id: sessionId, lessonId: "lesson-en-routine-travel", lessonRevision: 2 }
+      session: { id: sessionId, lessonId: "lesson-en-routine-travel", lessonRevision: 3 }
     });
     const practice = await request(app).post("/api/lessons/en/continue").expect(200);
     expect(practice.body.currentExercise.id).toBe(lessonExercises("lesson-en-routine-travel")[0]);

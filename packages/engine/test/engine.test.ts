@@ -230,3 +230,25 @@ describe("série « Recommandé » équilibrée (21/10/2026)", () => {
     expect(dailyTieBreaker("x", days[0]!)).toBe(dailyTieBreaker("x", days[0]!));
   });
 });
+
+describe("révisions retirées (22/10/2026)", () => {
+  it("laisse la séance réelle « Faire un point projet clair » commencée en révision 2 se poursuivre avec ses exercices", async () => {
+    const store = new MemoryStore();
+    store.state.settings.en.declaredLevel = "B1";
+    const engine = createEngine(store);
+    const started = await engine.handle("POST", "/api/lessons/en/start", { lessonId: "lesson-en-project-update" });
+    expect(started.status).toBe(201);
+    expect(store.state.lessonSessions[0]!.lessonRevision).toBe(3);
+    // Simule la séance de Sarkis : commencée en révision 2, premier exercice « en-hw-g-001 ».
+    store.state.lessonSessions[0]!.lessonRevision = 2;
+    await engine.handle("POST", "/api/lessons/en/continue");
+    const view = (await engine.handle("GET", "/api/lessons/en")).body as { lesson: { revision: number; exerciseIds: string[] }; currentExercise?: { id: string } };
+    expect(view.lesson.revision).toBe(2);
+    expect(view.currentExercise?.id).toBe("en-hw-g-001");
+    const answered = await engine.handle("POST", "/api/lessons/en/answer", {
+      answer: "have been", attemptId: "retired-revision-en-001", sessionId: store.state.lessonSessions[0]!.id, exerciseId: "en-hw-g-001"
+    });
+    expect(answered.status).toBe(200);
+    expect((answered.body as { evaluation: { verdict: string } }).evaluation.verdict).toBe("exact");
+  });
+});

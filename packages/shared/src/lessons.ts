@@ -697,16 +697,23 @@ const REVISIONS: Array<Pick<GuidedLessonDefinition, "id" | "revision"> & Partial
   ...ENGLISH_LESSON_REVISIONS
 ];
 
+/**
+ * Une révision n'écrit que ce qu'elle change : la définition d'une révision n se lit en appliquant
+ * dans l'ordre la révision 1 puis toutes les révisions publiées jusqu'à n (la révision 3 anglaise
+ * garde ainsi le micro-cours de la révision 1, la révision 3 espagnole les exercices de la 2).
+ */
+function revisionsOf(lesson: GuidedLessonDefinition): GuidedLessonDefinition[] {
+  const published = REVISIONS.filter((candidate) => candidate.id === lesson.id).sort((left, right) => left.revision - right.revision);
+  const materialized: GuidedLessonDefinition[] = [lesson];
+  for (const revision of published) materialized.push({ ...materialized.at(-1)!, ...revision });
+  return materialized;
+}
+
 /** Catalogue courant : une seule révision par leçon, la plus récente. */
-export const GUIDED_LESSONS: GuidedLessonDefinition[] = FIRST_REVISIONS.map((lesson) => {
-  const revision = REVISIONS.find((candidate) => candidate.id === lesson.id);
-  return revision ? { ...lesson, ...revision } : lesson;
-});
+export const GUIDED_LESSONS: GuidedLessonDefinition[] = FIRST_REVISIONS.map((lesson) => revisionsOf(lesson).at(-1)!);
 
 /**
- * Révisions remplacées, gardées pour qu'une séance commencée avant une mise à jour se termine avec
- * exactement les exercices qu'elle a commencés (ne jamais casser une séance en cours).
+ * Révisions remplacées (toutes, pas seulement la première), gardées pour qu'une séance commencée
+ * avant une mise à jour se termine avec exactement les exercices et le scénario qu'elle a commencés.
  */
-export const RETIRED_LESSON_REVISIONS: GuidedLessonDefinition[] = FIRST_REVISIONS.filter(
-  (lesson) => REVISIONS.some((candidate) => candidate.id === lesson.id)
-);
+export const RETIRED_LESSON_REVISIONS: GuidedLessonDefinition[] = FIRST_REVISIONS.flatMap((lesson) => revisionsOf(lesson).slice(0, -1));

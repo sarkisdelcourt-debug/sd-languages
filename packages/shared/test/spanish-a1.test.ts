@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EXERCISES } from "../src/curriculum.js";
 import { evaluateAnswer, matchPairsAnswer, normalizeAnswer } from "../src/learning.js";
 import { GUIDED_LESSONS, RETIRED_LESSON_REVISIONS } from "../src/lessons.js";
+import { CONVERSATION_SCENARIOS } from "../src/scenarios.js";
 import type { Exercise } from "../src/types.js";
 
 const exercise = (id: string) => {
@@ -36,7 +37,7 @@ describe("formats d'exercice à la Duolingo", () => {
 
 describe("tranche espagnol A1", () => {
   it("donne à chaque leçon A1 au moins six exercices dont quatre qui lui sont propres", () => {
-    expect(spanishA1Lessons.map((lesson) => lesson.revision)).toEqual([2, 2, 2]);
+    expect(spanishA1Lessons.map((lesson) => lesson.revision)).toEqual([2, 2, 3]);
     const usage = new Map<string, number>();
     for (const lesson of GUIDED_LESSONS) for (const id of lesson.exerciseIds) usage.set(id, (usage.get(id) ?? 0) + 1);
     for (const lesson of spanishA1Lessons) {
@@ -76,5 +77,31 @@ describe("tranche espagnol A1", () => {
     expect(retired?.revision).toBe(1);
     expect(retired?.exerciseIds).toEqual(["es-a1-mcq-gender", "es-a1-gap-present", "es-a1-mcq-hotel-room"]);
     expect(GUIDED_LESSONS.filter((lesson) => lesson.id === "lesson-es-daily-basics")).toHaveLength(1);
+  });
+});
+
+describe("scénario hôtel de la leçon 3 (22/10/2026)", () => {
+  it("branche « Donner son nom à l'hôtel » sur un vrai scénario d'hôtel, sans toucher à ses exercices", () => {
+    const lesson = GUIDED_LESSONS.find((candidate) => candidate.id === "lesson-es-arrive-at-a-hotel")!;
+    expect(lesson.revision).toBe(3);
+    expect(lesson.scenarioId).toBe("es-hotel-check-in");
+    const scenario = CONVERSATION_SCENARIOS.find((candidate) => candidate.id === lesson.scenarioId)!;
+    expect(scenario.language).toBe("es");
+    expect(scenario.level).toBe("A1");
+    expect(scenario.steps.map((step) => step.id)).toEqual([
+      "es-hotel-check-in-reservation", "es-hotel-check-in-name", "es-hotel-check-in-nights", "es-hotel-check-in-key"
+    ]);
+    // Le vocabulaire de la leçon (reserva, noches, desayuno, llave) fait avancer le scénario.
+    for (const word of ["reserva", "noches", "desayuno", "llave"]) {
+      expect(scenario.steps.some((step) => step.keywords.includes(word)), word).toBe(true);
+    }
+    expect(lesson.exerciseIds).toEqual([
+      "es-a1-l3-match-hotel", "es-a1-mcq-hotel-room", "es-a1-l3-wordbank-nights",
+      "es-a1-l3-listen-breakfast", "es-a1-l3-gap-number", "es-a1-l3-translation-key"
+    ]);
+    // La révision 2 (scénario des voisins) reste lisible pour une séance commencée avant.
+    const retired = RETIRED_LESSON_REVISIONS.find((candidate) => candidate.id === lesson.id && candidate.revision === 2)!;
+    expect(retired.scenarioId).toBe("es-daily-neighbours");
+    expect(retired.exerciseIds).toEqual(lesson.exerciseIds);
   });
 });

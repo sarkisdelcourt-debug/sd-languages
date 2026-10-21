@@ -26,7 +26,12 @@ const viewLabels: Record<View, string> = {
   data: "Mes données"
 };
 
-const navViews = ["home", "lesson", "review", "conversation", "settings", "data"] as const;
+/**
+ * Navigation (21/10/2026) : sur ordinateur, tous les écrans sont listés ; sur téléphone, la barre
+ * garde 4 onglets + « Plus » (qui regroupe Parler, Mes objectifs, Mes données, Diagnostic).
+ */
+const primaryViews = ["home", "lesson", "practice", "review"] as const;
+const secondaryViews = ["conversation", "settings", "data", "diagnostic"] as const;
 
 function readSavedLanguage(): LanguageCode {
   try {
@@ -45,6 +50,7 @@ export function App() {
   const [relay, setRelay] = useState<RelayStatus>();
   const [externalChange, setExternalChange] = useState(false);
   const [error, setError] = useState<string>();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const refreshDashboard = useCallback(() => {
     api.dashboard().then(setDashboard).catch((reason: Error) => setError(reason.message));
@@ -62,6 +68,7 @@ export function App() {
 
   useEffect(() => {
     document.querySelector<HTMLElement>("#view-title")?.focus();
+    setMoreOpen(false);
   }, [view]);
 
   const chooseLanguage = (next: LanguageCode) => {
@@ -84,8 +91,13 @@ export function App() {
           <span>Languages</span>
         </div>
         <nav aria-label="Navigation principale">
-          {navViews.map((item) => (
-            <button className={view === item ? "nav-item active" : "nav-item"} onClick={() => setView(item)} key={item} aria-current={view === item ? "page" : undefined}>
+          {[...primaryViews, ...secondaryViews].map((item) => (
+            <button
+              className={`nav-item${view === item ? " active" : ""}${(secondaryViews as readonly View[]).includes(item) ? " nav-secondary" : ""}`}
+              onClick={() => setView(item)}
+              key={item}
+              aria-current={view === item ? "page" : undefined}
+            >
               <NavIcon name={item} />
               {viewLabels[item]}
               {item === "review" && dashboard && dashboard.dueReviews[language] > 0 ? (
@@ -93,7 +105,27 @@ export function App() {
               ) : null}
             </button>
           ))}
+          <button
+            type="button"
+            className={`nav-item nav-more${(secondaryViews as readonly View[]).includes(view) ? " active" : ""}`}
+            onClick={() => setMoreOpen((open) => !open)}
+            aria-expanded={moreOpen}
+            aria-controls="more-sheet"
+          >
+            <NavIcon name="more" />
+            Plus
+          </button>
         </nav>
+        {moreOpen ? (
+          <div className="more-sheet" id="more-sheet" role="group" aria-label="Autres écrans">
+            {secondaryViews.map((item) => (
+              <button className={view === item ? "nav-item active" : "nav-item"} onClick={() => setView(item)} key={item} aria-current={view === item ? "page" : undefined}>
+                <NavIcon name={item} />
+                {viewLabels[item]}
+              </button>
+            ))}
+          </div>
+        ) : null}
         <div className="local-note">
           <span className="status-dot" />
           {unsent > 0 ? `${unsent} changement${unsent > 1 ? "s" : ""} à envoyer` : `Sur cet appareil${relay ? ` · ${relay.device}` : ""}`}

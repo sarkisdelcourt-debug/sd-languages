@@ -7,6 +7,8 @@ const directory = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: directory,
+  // Sur GitHub Pages, l'application vit sous /sd-languages/ ; en local, à la racine.
+  base: process.env.SD_LANGUAGES_BASE ?? "/",
   plugins: [react()],
   resolve: {
     alias: {

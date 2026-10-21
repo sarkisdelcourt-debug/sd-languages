@@ -8,6 +8,29 @@
 4. **Une seule source pédagogique** : le catalogue TypeScript partagé alimente l'API et ses tests.
 5. **Progression isolée par langue** : les métriques, diagnostics, révisions et conversations ne se mélangent pas.
 
+## Mode téléphone (21/10/2026)
+
+```text
+Interface React ── api.ts garde les chemins « /api/… » ──► moteur (packages/engine, dans l'onglet)
+                                                               │  StateStore
+                       iPhone / navigateur du PC ──────────────┤  BrowserStore : IndexedDB, Web Locks,
+                                                               │  copies quotidiennes + avant remplacement
+                       Node (tests, PC)        ────────────────┘  JsonStore : data/sd-languages.json
+
+Relais entre appareils : « Envoyer » ─ fichier sd-languages-backup v1 ─► « Reprendre » (aperçu, avertissements)
+```
+
+- `packages/engine/src/router.ts` reprend une à une les anciennes routes Express sous forme
+  « méthode + chemin + corps → statut + corps ». L'adaptateur Express (`apps/api/src/app.ts`) et le
+  client (`apps/web/src/api.ts`) appellent le même moteur : les tests HTTP historiques garantissent la parité.
+- `packages/engine/src/backup.ts` (pur, testé) : format de fichier, validation, résumé, et règle de
+  relais. Chaque envoi/reprise pose un point de relais (`state.sync`). Une reprise est sans avertissement
+  si l'appareil est vierge, ou s'il n'a rien fait depuis son dernier point et que le fichier descend de
+  ce point. Sinon l'aperçu explique ce qui serait perdu ; une copie est toujours gardée.
+- Le service worker ne met en cache que l'application ; les données ne passent jamais par lui.
+
+Le schéma ci-dessous décrit les modules métier, aujourd'hui dans `packages/engine/src/modules`.
+
 ## Flux principal
 
 ```text

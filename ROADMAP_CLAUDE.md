@@ -15,6 +15,14 @@ Chaque lot doit rester exécutable à sa fin. Une fonctionnalité non testée ou
 
 ## Lot P0 — fiabiliser le mode hors ligne
 
+> **Révisé le 21/10/2026 (mode téléphone).** Le moteur tourne désormais dans l'appareil : il n'y a
+> plus d'outbox ni de conflits serveur. Fait : stockage IndexedDB exclusif entre onglets (Web Locks +
+> file locale), relais par fichier PC ⟷ iPhone avec aperçu et avertissements, sauvegardes
+> automatiques restaurables, reprise de l'ancien fichier PC, effacement complet en double
+> confirmation, test réel « serveur arrêté → rechargement » réussi. Reste : hébergement HTTPS
+> (décision de Sarkis), tests Playwright automatisés du service worker, thème sombre pour l'usage du
+> soir, synchro automatique éventuelle (P3). Les points 1 à 11 ci-dessous sont l'ancienne version.
+
 ### Objectif
 
 Garantir qu'une coupure, un redémarrage ou deux onglets ouverts ne puissent ni perdre une action ni doubler la progression.

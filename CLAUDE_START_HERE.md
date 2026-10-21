@@ -12,7 +12,19 @@ Faire évoluer SD Languages comme coach linguistique local-first, didactique et 
 
 L'application doit rester utile sans compte, sans abonnement et sans fournisseur d'IA. Toute intégration distante future doit être facultative, annoncée clairement et accompagnée d'un repli local.
 
-## État exécutable au 21 octobre 2026
+## Décision du 21 octobre 2026 : mode téléphone (prime sur le reste de ce document)
+
+Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le PC**. Décisions prises avec lui :
+
+1. **Tout tourne dans l'appareil.** Le moteur (`packages/engine`) s'exécute dans le navigateur ; la progression vit dans IndexedDB (`apps/web/src/local/browser-store.ts`). Aucune requête réseau pour apprendre : l'application marche en mode avion une fois installée.
+2. **Relais par fichier entre PC et iPhone** (pas de serveur de synchro, pas de fusion automatique). « Envoyer ma progression » produit un fichier ; l'autre appareil le « reprend » et remplace son état. `packages/engine/src/backup.ts` avertit si l'appareil perdrait des changements ou si le fichier est plus ancien. Une copie est gardée avant chaque remplacement + une par jour (10 max).
+3. **Le serveur Express n'est plus nécessaire à l'apprentissage.** Il sert le build sur le PC, garde les tests de parité HTTP et expose `/api/export` pour reprendre une fois l'ancien `data/sd-languages.json`.
+4. **L'ancienne outbox hors ligne est supprimée** (plus de serveur à rejoindre) ; les contraintes 5 et 6 ci-dessous ne concernent plus que l'historique.
+5. **Hébergement HTTPS à décider** avec Sarkis : l'iPhone a besoin d'une adresse HTTPS pour installer la PWA, le micro et le service worker. Aucune donnée n'est hébergée, seulement l'application.
+
+Vérifications : `npm run typecheck`, `npm test` (45 tests au 21/10), `npm run build`, `node --check apps/web/public/sw.js`.
+
+## État exécutable au 21 octobre 2026 (avant le mode téléphone)
 
 Le MVP fonctionne en React 19 + TypeScript, avec une API Express locale et une persistance JSON.
 

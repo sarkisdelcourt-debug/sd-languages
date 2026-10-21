@@ -5,6 +5,12 @@ import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { JsonStore } from "../src/data/json-store.js";
+import { EXERCISES } from "../../../packages/shared/src/curriculum.js";
+import { GUIDED_LESSONS } from "../../../packages/shared/src/lessons.js";
+
+// Les leçons évoluent par révisions : les tests lisent les exercices courants au lieu de les figer.
+const lessonExercises = (lessonId: string) => GUIDED_LESSONS.find((lesson) => lesson.id === lessonId)!.exerciseIds;
+const answerFor = (exerciseId: string) => EXERCISES.find((exercise) => exercise.id === exerciseId)!.answer;
 
 describe("SD Languages API", () => {
   let temporaryDirectory: string;
@@ -370,10 +376,10 @@ describe("SD Languages API", () => {
     const resumed = await request(app).get("/api/lessons/en").expect(200);
     expect(resumed.body).toMatchObject({
       lesson: { id: "lesson-en-routine-travel", level: "A2" },
-      session: { id: sessionId, lessonId: "lesson-en-routine-travel", lessonRevision: 1 }
+      session: { id: sessionId, lessonId: "lesson-en-routine-travel", lessonRevision: 2 }
     });
     const practice = await request(app).post("/api/lessons/en/continue").expect(200);
-    expect(practice.body.currentExercise.id).toBe("en-a2-translation-routine");
+    expect(practice.body.currentExercise.id).toBe(lessonExercises("lesson-en-routine-travel")[0]);
   });
 
   it("records a completed session without unlocking the next level when mastery is missing", async () => {
@@ -381,14 +387,10 @@ describe("SD Languages API", () => {
     const sessionId = started.body.session.id;
     await request(app).post("/api/lessons/en/continue").expect(200);
 
-    for (const [index, item] of [
-      { answer: "has", exerciseId: "en-a1-mcq-have" },
-      { answer: "children", exerciseId: "en-a1-gap-plural" },
-      { answer: "Where is gate twelve?", exerciseId: "en-a1-mcq-airport-gate" }
-    ].entries()) {
+    for (const [index, exerciseId] of lessonExercises("lesson-en-daily-basics").entries()) {
       await request(app)
         .post("/api/lessons/en/answer")
-        .send({ answer: item.answer, attemptId: `needs-review-answer-${index}`, sessionId, exerciseId: item.exerciseId })
+        .send({ answer: answerFor(exerciseId), attemptId: `needs-review-answer-${index}`, sessionId, exerciseId })
         .expect(200);
       await request(app).post("/api/lessons/en/continue").expect(200);
     }
@@ -444,10 +446,11 @@ describe("SD Languages API", () => {
     expect(started.body.session).toMatchObject({ phase: "intro", status: "active", currentExerciseIndex: 0 });
     const sessionId = started.body.session.id;
 
+    const [firstId, ...otherIds] = lessonExercises("lesson-en-daily-basics");
     const practice = await request(app).post("/api/lessons/en/continue").expect(200);
     expect(practice.body).toMatchObject({
       session: { id: sessionId, phase: "practice" },
-      currentExercise: { id: "en-a1-mcq-have" }
+      currentExercise: { id: firstId }
     });
     expect(practice.body.currentExercise).not.toHaveProperty("answer");
     expect(practice.body.currentExercise).not.toHaveProperty("acceptedAnswers");
@@ -455,20 +458,20 @@ describe("SD Languages API", () => {
     await request(app)
       .post("/api/lessons/en/answer")
       .send({
-        answer: "has",
+        answer: answerFor(firstId!),
         attemptId: "lesson-attempt-wrong-context",
         sessionId: "another-session",
-        exerciseId: "en-a1-mcq-have"
+        exerciseId: firstId
       })
       .expect(409);
 
     const first = await request(app)
       .post("/api/lessons/en/answer")
       .send({
-        answer: "has",
+        answer: answerFor(firstId!),
         attemptId: "lesson-attempt-en-001",
         sessionId,
-        exerciseId: "en-a1-mcq-have"
+        exerciseId: firstId
       })
       .expect(200);
     expect(first.body).toMatchObject({ evaluation: { verdict: "exact", correct: true }, duplicate: false });
@@ -476,7 +479,7 @@ describe("SD Languages API", () => {
 
     const duplicate = await request(app)
       .post("/api/lessons/en/answer")
-      .send({ answer: "has", attemptId: "lesson-attempt-en-001", sessionId, exerciseId: "en-a1-mcq-have" })
+      .send({ answer: answerFor(firstId!), attemptId: "lesson-attempt-en-001", sessionId, exerciseId: firstId })
       .expect(200);
     expect(duplicate.body.duplicate).toBe(true);
 
@@ -485,19 +488,15 @@ describe("SD Languages API", () => {
     expect(resumed.body.session).toMatchObject({ id: sessionId, phase: "correction" });
     expect(resumed.body.session.attempts).toHaveLength(1);
 
-    await request(reloadedApp).post("/api/lessons/en/continue").expect(200);
-    const second = await request(reloadedApp)
-      .post("/api/lessons/en/answer")
-      .send({ answer: "children", attemptId: "lesson-attempt-en-002", sessionId, exerciseId: "en-a1-gap-plural" })
-      .expect(200);
-    expect(second.body.evaluation.verdict).toBe("exact");
-
-    const thirdPractice = await request(reloadedApp).post("/api/lessons/en/continue").expect(200);
-    expect(thirdPractice.body.currentExercise.id).toBe("en-a1-mcq-airport-gate");
-    await request(reloadedApp)
-      .post("/api/lessons/en/answer")
-      .send({ answer: "Where is gate twelve?", attemptId: "lesson-attempt-en-003", sessionId, exerciseId: "en-a1-mcq-airport-gate" })
-      .expect(200);
+    for (const [index, exerciseId] of otherIds.entries()) {
+      const next = await request(reloadedApp).post("/api/lessons/en/continue").expect(200);
+      expect(next.body.currentExercise.id).toBe(exerciseId);
+      const answered = await request(reloadedApp)
+        .post("/api/lessons/en/answer")
+        .send({ answer: answerFor(exerciseId), attemptId: `lesson-attempt-en-00${index + 2}`, sessionId, exerciseId })
+        .expect(200);
+      expect(answered.body.evaluation.verdict).toBe("exact");
+    }
 
     const dialogue = await request(reloadedApp).post("/api/lessons/en/continue").expect(200);
     expect(dialogue.body.session).toMatchObject({ phase: "conversation", conversationTurns: 0 });
@@ -520,7 +519,7 @@ describe("SD Languages API", () => {
       id: sessionId,
       phase: "summary",
       status: "completed",
-      summary: { exact: 3, minor: 0, incorrect: 0, completedExercises: 3, conversationSteps: 4, conversationGoal: 4, outcome: "mastered" }
+      summary: { exact: 6, minor: 0, incorrect: 0, completedExercises: 6, conversationSteps: 4, conversationGoal: 4, outcome: "mastered" }
     });
     const completed = await request(reloadedApp).get("/api/lessons/en").expect(200);
     expect(completed.body).not.toHaveProperty("session");
@@ -532,7 +531,7 @@ describe("SD Languages API", () => {
     expect(completed.body.catalog.items[1]).toMatchObject({ status: "available", recommended: true });
 
     const dashboard = await request(reloadedApp).get("/api/dashboard").expect(200);
-    expect(dashboard.body.progress.en).toMatchObject({ xp: 30, completedExercises: 3, correctAnswers: 3 });
+    expect(dashboard.body.progress.en).toMatchObject({ xp: 60, completedExercises: 6, correctAnswers: 6 });
 
     const restarted = await request(reloadedApp).post("/api/lessons/en/start").expect(201);
     expect(restarted.body.session.id).not.toBe(sessionId);

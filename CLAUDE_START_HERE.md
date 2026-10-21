@@ -22,7 +22,11 @@ Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le
 4. **L'ancienne outbox hors ligne est supprimée** (plus de serveur à rejoindre) ; les contraintes 5 et 6 ci-dessous ne concernent plus que l'historique.
 5. **Hébergement HTTPS à décider** avec Sarkis : l'iPhone a besoin d'une adresse HTTPS pour installer la PWA, le micro et le service worker. Aucune donnée n'est hébergée, seulement l'application.
 
-Vérifications : `npm run typecheck`, `npm test` (45 tests au 21/10), `npm run build`, `node --check apps/web/public/sw.js`.
+6. **Pas d'API d'IA (22/10/2026).** Sarkis a refusé une clé API payante (son forfait claude.ai ne la couvre pas). Le dialogue reste local : `packages/engine/src/modules/coach.ts` (relances, indices, suivi du thème) + `language-checker.ts` (≈ 30 règles d'erreurs de francophones, testées aussi contre les faux positifs). Ne jamais le présenter comme une IA.
+7. **Niveau déclaré (22/10/2026).** `settings.declaredLevel` prime sur le diagnostic (`modules/level.ts` → `currentLevel`) ; les leçons des niveaux inférieurs deviennent « Acquis ». Sarkis s'est déclaré B1 en anglais.
+8. **En ligne** : https://sarkisdelcourt-debug.github.io/sd-languages/ — chaque envoi sur `main` republie (workflow `pages.yml`, tests compris).
+
+Vérifications : `npm run typecheck`, `npm test` (121 tests au 22/10), `npm run build`, `node --check apps/web/public/sw.js`.
 
 ## État exécutable au 21 octobre 2026 (avant le mode téléphone)
 

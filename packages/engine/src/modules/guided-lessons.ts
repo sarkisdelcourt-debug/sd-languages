@@ -1,3 +1,4 @@
+import { currentLevel } from "./level.js";
 import { EXERCISES } from "../../../shared/src/curriculum.js";
 import { GUIDED_LESSONS, RETIRED_LESSON_REVISIONS } from "../../../shared/src/lessons.js";
 import { CONVERSATION_SCENARIOS } from "../../../shared/src/scenarios.js";
@@ -62,10 +63,15 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
   const lessons = getLessons(language);
   if (!lessons.length) throw new Error(`Aucune leçon guidée disponible pour ${language}.`);
   const active = findActiveLessonSession(state, language);
-  const diagnosticLevel = state.progress[language].diagnostic?.estimatedLevel ?? "A1";
+  const diagnosticLevel = currentLevel(state, language) ?? "A1";
+  const declaredLevel = state.settings[language].declaredLevel;
   const targetLevel = state.settings[language].targetLevel;
   const assessedRank = Math.min(cefrRank[diagnosticLevel], cefrRank[targetLevel], cefrRank.B2);
   const assessedLevel = lessons.find((lesson) => cefrRank[lesson.level] === assessedRank)?.level ?? "A1";
+  // Un niveau déclaré (ex. B1) rend acquises les leçons des niveaux inférieurs : elles restent
+  // ouvertes, mais ne sont plus recommandées ni exigées pour avancer.
+  const acquiredByDeclaration = (lesson: GuidedLessonDefinition) => Boolean(declaredLevel)
+    && cefrRank[lesson.level] < cefrRank[declaredLevel!];
 
   const provisional: GuidedLessonCatalogItem[] = lessons.map((lesson) => {
     const progress = state.lessonProgress[lesson.id];
@@ -74,7 +80,7 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
       ? "active"
       : !unlocked
         ? "locked"
-        : (progress?.masteryCount ?? 0) > 0
+        : (progress?.masteryCount ?? 0) > 0 || acquiredByDeclaration(lesson)
           ? "completed"
           : "available";
     const statusDetail = status === "active"
@@ -82,7 +88,7 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
       : status === "locked"
         ? `Après « ${lessons.find((candidate) => candidate.id === lesson.prerequisiteLessonId)?.title ?? "l'étape précédente"} »`
         : status === "completed"
-          ? `Maîtrisée ${progress?.masteryCount ?? 0} fois`
+          ? (progress?.masteryCount ?? 0) > 0 ? `Maîtrisée ${progress?.masteryCount ?? 0} fois` : `Acquis · niveau ${declaredLevel} déclaré`
           : progress?.lastOutcome === "needs-review"
             ? "À consolider"
             : "Disponible";
@@ -107,7 +113,7 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
     let score = 0;
     if (item.status === "active") score += 10_000;
     if (mistakes > 0) score += 2_000 + mistakes * 50;
-    if (!progress?.masteryCount) score += 600;
+    if (!progress?.masteryCount && !acquiredByDeclaration(item.lesson)) score += 600;
     if (cefrRank[item.lesson.level] === assessedRank) score += 500;
     if (predecessorJustMastered && !progress?.masteryCount) score += 350;
     if (item.lesson.goalAffinity.includes(state.settings[language].goal)) score += 120;
@@ -125,7 +131,7 @@ export function createLessonCatalog(state: LearnerState, language: LanguageCode)
       : recommendation.predecessorJustMastered
         ? "La séance précédente est maîtrisée : celle-ci est la suite logique."
         : cefrRank[recommendation.item.lesson.level] === assessedRank
-          ? `Votre diagnostic et votre objectif placent cette séance au niveau ${recommendation.item.lesson.level}.`
+          ? `Votre niveau actuel et votre objectif placent cette séance au niveau ${recommendation.item.lesson.level}.`
           : "Cette séance est la meilleure étape disponible dans votre parcours.";
 
   return {

@@ -270,7 +270,7 @@ describe("SD Languages API", () => {
     expect(reply.body.learnerMessage).toMatchObject({
       role: "learner",
       text: "Soy 42 años",
-      correction: "tengo 42 años",
+      correction: "Tengo 42 años",
       explanation: expect.stringContaining("tener")
     });
     expect(reply.body.coachMessage).toMatchObject({

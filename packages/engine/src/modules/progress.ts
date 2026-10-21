@@ -1,3 +1,4 @@
+import { currentLevel } from "./level.js";
 import type { DashboardSnapshot, LanguageCode, LearnerState } from "../../../shared/src/types.js";
 import { LANGUAGE_CODES } from "../../../shared/src/catalog.js";
 import { isDue } from "../../../shared/src/learning.js";
@@ -38,6 +39,7 @@ export function createDashboard(state: LearnerState, now: Date = new Date()): Da
   return {
     progress: state.progress,
     dueReviews,
-    totalCards: state.reviewCards.length
+    totalCards: state.reviewCards.length,
+    levels: Object.fromEntries(LANGUAGE_CODES.map((language) => [language, currentLevel(state, language)])) as DashboardSnapshot["levels"]
   };
 }

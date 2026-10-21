@@ -304,3 +304,8 @@ main { min-width: 0; }
 .topic-chip.active small { color: #cfe7e3; }
 .series-summary h2 { margin: 6px 0 10px; font-size: 30px; }
 .series-summary p { color: var(--muted); line-height: 1.5; }
+
+/* Correction du coach dans le dialogue de leçon */
+.lesson-correction { margin-top: 8px; padding: 8px 10px; border-left: 4px solid var(--signal); border-radius: 6px; background: #fff7e6; color: #5c3d0c; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; }
+.lesson-correction span { color: #6e5a35; }
+.lesson-correction span, .correction small { white-space: pre-line; }

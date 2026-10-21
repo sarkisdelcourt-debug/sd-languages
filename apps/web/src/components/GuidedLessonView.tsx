@@ -294,7 +294,7 @@ export function GuidedLessonView({
             {session.conversation.messages.map((item) => (
               <div className={`lesson-message ${item.role}`} key={item.id}>
                 <span>{item.role === "coach" ? "Coach" : "Vous"}</span><p>{item.text}</p>
-                {item.correction ? <small>À reformuler : {item.correction}</small> : null}
+                {item.correction ? <small className="lesson-correction"><strong>Plutôt : {item.correction}</strong>{item.explanation ? <span>{item.explanation}</span> : null}</small> : null}
               </div>
             ))}
           </div>

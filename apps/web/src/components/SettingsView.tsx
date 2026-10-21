@@ -17,8 +17,10 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string>();
+  const [diagnosticLevel, setDiagnosticLevel] = useState<CefrLevel>();
   useEffect(() => {
     api.settings(language).then(setSettings).catch((reason: Error) => setError(reason.message));
+    api.dashboard().then((dashboard) => setDiagnosticLevel(dashboard.progress[language].diagnostic?.estimatedLevel)).catch(() => undefined);
   }, [language]);
   if (error) return <div className="alert" role="alert">{error}</div>;
   if (!settings) return <div className="loading-card">Chargement de vos objectifs…</div>;
@@ -26,7 +28,7 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
     setSaving(true);
     setSaved(false);
     try {
-      const next = await api.updateSettings(language, settings);
+      const next = await api.updateSettings(language, { ...settings, declaredLevel: settings.declaredLevel ?? null });
       setSettings(next);
       setSaved(true);
       onSaved();
@@ -50,7 +52,14 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
         </div>
         <div className="settings-section"><strong>Temps quotidien</strong><span>Un objectif réaliste vaut mieux qu'une longue session occasionnelle.</span></div>
         <div className="segmented-options">{MINUTES.map((minutes) => <button key={minutes} className={settings.dailyMinutes === minutes ? "selected" : ""} onClick={() => setSettings({ ...settings, dailyMinutes: minutes })}>{minutes} min</button>)}</div>
-        <div className="settings-section"><strong>Niveau visé</strong><span>Le niveau actuel reste déterminé par le diagnostic.</span></div>
+        <div className="settings-section"><strong>Mon niveau actuel</strong><span>Si le diagnostic vous sous-estime, indiquez votre vrai niveau : les leçons en dessous seront considérées comme acquises (toujours accessibles).</span></div>
+        <div className="level-options">
+          <button className={!settings.declaredLevel ? "selected" : ""} aria-pressed={!settings.declaredLevel} onClick={() => setSettings({ ...settings, declaredLevel: undefined })}>
+            Diagnostic{diagnosticLevel ? ` (${diagnosticLevel})` : ""}
+          </button>
+          {LEVELS.map((level) => <button key={level} className={settings.declaredLevel === level ? "selected" : ""} aria-pressed={settings.declaredLevel === level} onClick={() => setSettings({ ...settings, declaredLevel: level })}>{level}</button>)}
+        </div>
+        <div className="settings-section"><strong>Niveau visé</strong><span>Le cap que vous vous fixez pour cette langue.</span></div>
         <div className="level-options">{LEVELS.map((level) => <button key={level} className={settings.targetLevel === level ? "selected" : ""} onClick={() => setSettings({ ...settings, targetLevel: level })}>{level}</button>)}</div>
         <div className="settings-footer"><span>{saved ? "✓ Préférences enregistrées sur cet appareil" : "Aucune donnée envoyée dans le cloud"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : "Enregistrer"}</button></div>
       </article>

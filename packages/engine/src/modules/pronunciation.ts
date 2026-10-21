@@ -1,3 +1,4 @@
+import { currentLevel } from "./level.js";
 import { assessPronunciation } from "../../../shared/src/learning.js";
 import { PRONUNCIATION_PROMPTS } from "../../../shared/src/pronunciation.js";
 import type {
@@ -36,7 +37,7 @@ export function createPronunciationLab(state: LearnerState, language: LanguageCo
     .sort((left, right) => (
       (state.pronunciationProgress[left.id]?.bestScore ?? 0) - (state.pronunciationProgress[right.id]?.bestScore ?? 0)
     ))[0];
-  const referenceLevel = state.progress[language].diagnostic?.estimatedLevel ?? state.settings[language].targetLevel;
+  const referenceLevel = currentLevel(state, language) ?? state.settings[language].targetLevel;
   const untried = prompts
     .filter((prompt) => !state.pronunciationProgress[prompt.id])
     .sort((left, right) => (

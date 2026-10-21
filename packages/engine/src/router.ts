@@ -373,12 +373,20 @@ export function createEngine(store: StateStore): Engine {
     const goals = new Set<LearningGoal>(["fluency", "travel", "work", "basics"]);
     const minutes = new Set([5, 10, 15, 20]);
     const levels = new Set<CefrLevel>(["A1", "A2", "B1", "B2", "C1"]);
-    const { goal, dailyMinutes, targetLevel } = body ?? {};
+    const { goal, dailyMinutes, targetLevel, declaredLevel } = body ?? {};
     if (!goals.has(goal) || !minutes.has(dailyMinutes) || !levels.has(targetLevel)) {
       return fail(400, "Réglages d'apprentissage invalides.");
     }
+    // declaredLevel : absent = inchangé, null = revenir au diagnostic, sinon un niveau CECRL.
+    if (declaredLevel !== undefined && declaredLevel !== null && !levels.has(declaredLevel)) {
+      return fail(400, "Niveau actuel invalide.");
+    }
     return ok(await store.update((state) => {
-      state.settings[language] = { language, goal, dailyMinutes, targetLevel, onboardingCompleted: true };
+      const keptLevel = declaredLevel === undefined ? state.settings[language].declaredLevel : declaredLevel ?? undefined;
+      state.settings[language] = {
+        language, goal, dailyMinutes, targetLevel, onboardingCompleted: true,
+        ...(keptLevel ? { declaredLevel: keptLevel } : {})
+      };
       return state.settings[language];
     }));
   });

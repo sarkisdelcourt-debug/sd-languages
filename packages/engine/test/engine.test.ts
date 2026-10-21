@@ -94,6 +94,35 @@ describe("transport-free engine", () => {
     expect(topics.every((topic) => topic.count > 0)).toBe(true);
   });
 
+  it("lets the learner declare B1 over an A2 diagnostic: A1–A2 lessons count as acquired", async () => {
+    const store = new MemoryStore();
+    store.state.progress.en.diagnostic = { language: "en", score: 4, total: 12, percentage: 33, estimatedLevel: "A2", completedAt: "2026-10-19T20:42:51.953Z" };
+    const engine = createEngine(store);
+    const settings = { goal: "fluency", dailyMinutes: 15, targetLevel: "B2" };
+
+    expect((await engine.handle("PATCH", "/api/settings/en", { ...settings, declaredLevel: "Z9" })).status).toBe(400);
+    const saved = await engine.handle("PATCH", "/api/settings/en", { ...settings, declaredLevel: "B1" });
+    expect(saved.body).toMatchObject({ declaredLevel: "B1" });
+
+    const view = (await engine.handle("GET", "/api/lessons/en")).body as {
+      catalog: { recommendedLessonId: string; items: Array<{ lesson: { level: string }; status: string; statusDetail: string }> };
+    };
+    const lower = view.catalog.items.filter((item) => item.lesson.level === "A1" || item.lesson.level === "A2");
+    expect(lower).toHaveLength(6);
+    expect(lower.every((item) => item.status === "completed" && item.statusDetail.includes("niveau B1 déclaré"))).toBe(true);
+    expect(view.catalog.recommendedLessonId).toBe("lesson-en-project-update");
+
+    const plan = (await engine.handle("GET", "/api/plan/en")).body as { items: Array<{ kind: string }> };
+    expect(plan.items.map((item) => item.kind)).not.toContain("diagnostic");
+    const dashboard = (await engine.handle("GET", "/api/dashboard")).body as { levels: Record<string, string | undefined> };
+    expect(dashboard.levels.en).toBe("B1");
+
+    // Revenir au diagnostic : on efface le niveau déclaré.
+    const cleared = await engine.handle("PATCH", "/api/settings/en", { ...settings, declaredLevel: null });
+    expect(cleared.body).not.toHaveProperty("declaredLevel");
+    expect(((await engine.handle("GET", "/api/dashboard")).body as { levels: Record<string, string> }).levels.en).toBe("A2");
+  });
+
   it("returns a 500 with a neutral message when a rule throws", async () => {
     const broken: StateStore = {
       read: async () => { throw new Error("disque plein"); },

@@ -1,4 +1,5 @@
 import type { CefrLevel, Exercise, LanguageCode, LearnerState, LearningGoal } from "../../../shared/src/types.js";
+import { currentLevel } from "./level.js";
 
 const LEVEL_RANK: Record<CefrLevel, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5 };
 
@@ -27,7 +28,7 @@ export function rankExercises(
   language: LanguageCode,
   now: Date = new Date()
 ): RankedExercise[] {
-  const estimatedLevel = state.progress[language].diagnostic?.estimatedLevel;
+  const estimatedLevel = currentLevel(state, language);
   const targetRank = estimatedLevel ? LEVEL_RANK[estimatedLevel] : 1;
 
   return exercises
@@ -128,7 +129,7 @@ export function selectAdaptiveExercises(
   language: LanguageCode,
   now: Date = new Date()
 ): RankedExercise[] {
-  const estimatedLevel = state.progress[language].diagnostic?.estimatedLevel;
+  const estimatedLevel = currentLevel(state, language);
   const currentRank = estimatedLevel ? LEVEL_RANK[estimatedLevel] : 1;
   const targetRank = LEVEL_RANK[state.settings[language].targetLevel];
   const upperRank = targetRank >= currentRank ? Math.min(currentRank + 1, targetRank) : currentRank;

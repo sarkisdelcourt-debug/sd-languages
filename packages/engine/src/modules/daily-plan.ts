@@ -1,3 +1,4 @@
+import { currentLevel } from "./level.js";
 import type { DailyPlan, DailyPlanItem, LanguageCode, LearnerState } from "../../../shared/src/types.js";
 import { isDue } from "../../../shared/src/learning.js";
 import { createLessonCatalog } from "./guided-lessons.js";
@@ -19,7 +20,7 @@ export function createDailyPlan(
   const lesson = catalog.items.find((item) => item.lesson.id === catalog.recommendedLessonId)?.lesson;
   const goalMinutes = state.settings[language].dailyMinutes;
 
-  if (!progress.diagnostic) {
+  if (!currentLevel(state, language)) {
     items.push({
       id: `${language}-diagnostic`,
       kind: "diagnostic",
@@ -48,7 +49,7 @@ export function createDailyPlan(
     description: frequentMistake
       ? `Cette notion sera retravaillée dans une séance complète : explication, exercice et dialogue.`
       : catalog.recommendationReason,
-    estimatedMinutes: progress.diagnostic ? Math.min(lesson?.estimatedMinutes ?? 10, goalMinutes) : Math.max(5, goalMinutes - 5),
+    estimatedMinutes: currentLevel(state, language) ? Math.min(lesson?.estimatedMinutes ?? 10, goalMinutes) : Math.max(5, goalMinutes - 5),
     priority: frequentMistake ? 80 : 60
   });
 

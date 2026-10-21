@@ -57,7 +57,7 @@ export const api = {
   dashboard: () => request<DashboardSnapshot>("/api/dashboard"),
   plan: (language: string) => request<DailyPlan>(`/api/plan/${language}`),
   settings: (language: string) => request<LanguageSettings>(`/api/settings/${language}`),
-  updateSettings: (language: string, payload: { goal: LearningGoal; dailyMinutes: number; targetLevel: string }) =>
+  updateSettings: (language: string, payload: { goal: LearningGoal; dailyMinutes: number; targetLevel: string; declaredLevel?: string | null }) =>
     request<LanguageSettings>(`/api/settings/${language}`, { method: "PATCH", body: JSON.stringify(payload) }),
   diagnostic: (language: string) => request<PublicDiagnosticQuestion[]>(`/api/diagnostic/${language}`),
   submitDiagnostic: (language: string, answers: Record<string, string>) =>

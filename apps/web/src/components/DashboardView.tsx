@@ -40,10 +40,10 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
       <section className="hero-card">
         <div>
           <p className="eyebrow dark">Aujourd'hui · {LANGUAGES[language].nativeName}</p>
-          <h2>{progress.diagnostic ? (progress.completedExercises ? "Continuez sur votre lancée." : "Votre première leçon est prête.") : "Commençons par situer votre niveau."}</h2>
+          <h2>{dashboard.levels?.[language] ? (progress.completedExercises ? "Continuez sur votre lancée." : "Votre première leçon est prête.") : "Commençons par situer votre niveau."}</h2>
           <p>{LANGUAGES[language].suggestedGoal}</p>
-          <button className="primary-button light" onClick={() => onNavigate(progress.diagnostic ? "lesson" : "diagnostic")}>
-            {progress.diagnostic ? "Commencer ma leçon" : "Faire le diagnostic"} <span aria-hidden="true">→</span>
+          <button className="primary-button light" onClick={() => onNavigate(dashboard.levels?.[language] ? "lesson" : "diagnostic")}>
+            {dashboard.levels?.[language] ? "Commencer ma leçon" : "Faire le diagnostic"} <span aria-hidden="true">→</span>
           </button>
         </div>
         <div className="hero-score" aria-label={`${progress.xp} points d'expérience`}>
@@ -86,7 +86,7 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
         </article>
         <article className="metric-card">
           <span className="metric-icon amber" aria-hidden="true">NV</span>
-          <div><strong>{progress.diagnostic?.estimatedLevel ?? "—"}</strong><span>Niveau indicatif</span></div>
+          <div><strong>{dashboard.levels?.[language] ?? "—"}</strong><span>Niveau actuel</span></div>
         </article>
       </section>
 

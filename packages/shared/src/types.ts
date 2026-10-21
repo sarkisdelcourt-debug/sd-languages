@@ -291,12 +291,16 @@ export interface LanguageSettings {
   dailyMinutes: 5 | 10 | 15 | 20;
   targetLevel: CefrLevel;
   onboardingCompleted: boolean;
+  /** Niveau actuel déclaré par l'apprenant ; prime sur le diagnostic (22/10/2026). */
+  declaredLevel?: CefrLevel;
 }
 
 export interface DashboardSnapshot {
   progress: Record<LanguageCode, LanguageProgress>;
   dueReviews: Record<LanguageCode, number>;
   totalCards: number;
+  /** Niveau actuel par langue : déclaré, sinon diagnostic, sinon inconnu. */
+  levels: Record<LanguageCode, CefrLevel | undefined>;
 }
 
 export type DailyPlanKind = "diagnostic" | "lesson" | "practice" | "review" | "conversation";

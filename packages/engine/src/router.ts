@@ -7,6 +7,7 @@ import { rankExercises, selectAdaptiveExercises, selectTopicExercises } from "./
 import { LocalCoachProvider } from "./modules/coach.js";
 import { createDailyPlan } from "./modules/daily-plan.js";
 import {
+  abandonLessonSession,
   completeLessonSession,
   createLessonCatalog,
   findActiveLessonSession,
@@ -284,6 +285,18 @@ export function createEngine(store: StateStore): Engine {
       }
       session.updatedAt = new Date().toISOString();
       return { view: toLessonView(state, language, session) } as const;
+    });
+    return "error" in result ? ok(result, 409) : ok(result.view);
+  });
+
+  route("POST", "/api/lessons/:language/abandon", async ({ params }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const result = await store.update((state) => {
+      const session = findActiveLessonSession(state, language);
+      if (!session) return { error: "Aucune leçon active." } as const;
+      abandonLessonSession(session, findLessonById(session.lessonId, session.lessonRevision));
+      return { view: toLessonView(state, language) } as const;
     });
     return "error" in result ? ok(result, 409) : ok(result.view);
   });

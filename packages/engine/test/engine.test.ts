@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { LearnerState } from "../../shared/src/types.js";
+import type { GuidedLessonSession, LearnerState } from "../../shared/src/types.js";
 import { createInitialState } from "../src/initial-state.js";
 import { createEngine } from "../src/router.js";
+import { buildLessonSummary } from "../src/modules/guided-lessons.js";
+import { GUIDED_LESSONS } from "../../shared/src/lessons.js";
 import type { StateStore } from "../src/state.js";
 
 export class MemoryStore implements StateStore {
@@ -136,5 +138,53 @@ describe("transport-free engine", () => {
     } finally {
       console.error = original;
     }
+  });
+});
+
+describe("leçons guidées : maîtrise tolérante et abandon (21/10/2026)", () => {
+  it("compte un accent oublié (verdict « minor ») comme acquis pour la maîtrise", () => {
+    const lesson = GUIDED_LESSONS.find((candidate) => candidate.id === "lesson-en-project-update")!;
+    const verdicts = ["exact", "exact", "exact", "minor", "minor", "minor"] as const;
+    const session: GuidedLessonSession = {
+      id: "s-1", lessonId: lesson.id, lessonRevision: lesson.revision, language: "en", status: "active", phase: "conversation",
+      currentExerciseIndex: lesson.exerciseIds.length, conversationTurns: 3, startedAt: "2026-10-21T20:00:00.000Z", updatedAt: "2026-10-21T20:00:00.000Z",
+      conversation: { language: "en", messages: [], scenarioStepIndex: 3 },
+      attempts: lesson.exerciseIds.map((exerciseId, index) => ({
+        attemptId: `a-${index}`, exerciseId, submittedAnswer: "x", createdAt: "2026-10-21T20:00:00.000Z",
+        evaluation: { correct: true, verdict: verdicts[index % verdicts.length]!, normalizedAnswer: "x", expectedAnswer: "x", explanation: "", feedback: "", issues: [] }
+      }))
+    };
+    expect(buildLessonSummary(session, lesson)).toMatchObject({ exact: 3, minor: 3, incorrect: 0, outcome: "mastered" });
+    session.attempts[0]!.evaluation = { ...session.attempts[0]!.evaluation, correct: false, verdict: "incorrect" };
+    expect(buildLessonSummary(session, lesson).outcome).toBe("needs-review");
+  });
+
+  it("abandonne la leçon en cours : elle redevient disponible, rien d'autre n'est effacé", async () => {
+    const store = new MemoryStore();
+    const engine = createEngine(store);
+    expect((await engine.handle("POST", "/api/lessons/en/abandon")).status).toBe(409);
+    await engine.handle("POST", "/api/lessons/en/start", { lessonId: "lesson-en-daily-basics" });
+    await engine.handle("POST", "/api/lessons/en/continue");
+    const session = store.state.lessonSessions[0]!;
+    const exerciseId = GUIDED_LESSONS.find((candidate) => candidate.id === "lesson-en-daily-basics")!.exerciseIds[0]!;
+    await engine.handle("POST", "/api/lessons/en/answer", { answer: "zzz", attemptId: "abandon-attempt-01", sessionId: session.id, exerciseId });
+    const mistakesBefore = store.state.mistakes.length;
+    expect(mistakesBefore).toBeGreaterThan(0);
+
+    // Avant l'abandon, la séance reste reprenable (cas de la séance réelle de Sarkis).
+    expect(((await engine.handle("GET", "/api/lessons/en")).body as { session?: { status: string } }).session?.status).toBe("active");
+
+    const abandoned = await engine.handle("POST", "/api/lessons/en/abandon");
+    expect(abandoned.status).toBe(200);
+    const stored = store.state.lessonSessions.find((candidate) => candidate.id === session.id)!;
+    expect(stored.status).toBe("completed");
+    expect(stored.summary?.outcome).toBe("abandoned");
+    expect(store.state.lessonProgress["lesson-en-daily-basics"]).toBeUndefined();
+    expect(store.state.mistakes).toHaveLength(mistakesBefore);
+
+    const view = (await engine.handle("GET", "/api/lessons/en")).body as { session?: unknown; catalog: { items: Array<{ lesson: { id: string }; status: string }> } };
+    expect(view.session).toBeUndefined();
+    expect(view.catalog.items.find((item) => item.lesson.id === "lesson-en-daily-basics")?.status).toBe("available");
+    expect((await engine.handle("POST", "/api/lessons/en/start", { lessonId: "lesson-en-daily-basics" })).status).toBe(201);
   });
 });

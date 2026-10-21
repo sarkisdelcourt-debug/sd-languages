@@ -195,10 +195,11 @@ export function buildLessonSummary(session: GuidedLessonSession, lesson: GuidedL
     conversationGoal: scenarioSteps,
     outcome: "needs-review"
   };
-  const requiredExact = Math.ceil(lesson.exerciseIds.length * 2 / 3);
+  // Un accent oublié (verdict « minor ») n'est pas une erreur : exact + minor comptent pour la maîtrise.
+  const requiredCorrect = Math.ceil(lesson.exerciseIds.length * 2 / 3);
   if (
     summary.completedExercises === lesson.exerciseIds.length
-    && summary.exact >= requiredExact
+    && summary.exact + summary.minor >= requiredCorrect
     && summary.incorrect === 0
     && summary.conversationSteps >= Math.min(3, scenarioSteps)
   ) summary.outcome = "mastered";
@@ -224,8 +225,21 @@ export function completeLessonSession(
     masteryCount: (previous?.masteryCount ?? 0) + (session.summary.outcome === "mastered" ? 1 : 0),
     bestExact: Math.max(previous?.bestExact ?? 0, session.summary.exact),
     lastCompletedAt: timestamp,
-    lastOutcome: session.summary.outcome
+    lastOutcome: session.summary.outcome === "mastered" ? "mastered" : "needs-review"
   };
+}
+
+/**
+ * Abandon : la séance est close avec le bilan « abandoned » ; la progression de la leçon, les
+ * erreurs mémorisées et les cartes de révision ne sont pas touchées, la leçon redevient disponible.
+ */
+export function abandonLessonSession(session: GuidedLessonSession, lesson: GuidedLessonDefinition, now = new Date()) {
+  const timestamp = now.toISOString();
+  session.phase = "summary";
+  session.status = "completed";
+  session.updatedAt = timestamp;
+  session.completedAt = timestamp;
+  session.summary = { ...buildLessonSummary(session, lesson), outcome: "abandoned" };
 }
 
 export function toLessonView(

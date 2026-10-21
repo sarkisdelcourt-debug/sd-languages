@@ -187,7 +187,7 @@ export interface GuidedLessonSummary {
   completedExercises: number;
   conversationSteps: number;
   conversationGoal: number;
-  outcome: "mastered" | "needs-review";
+  outcome: "mastered" | "needs-review" | "abandoned";
 }
 
 export interface GuidedLessonProgress {
@@ -196,7 +196,7 @@ export interface GuidedLessonProgress {
   masteryCount: number;
   bestExact: number;
   lastCompletedAt: string;
-  lastOutcome: GuidedLessonSummary["outcome"];
+  lastOutcome: "mastered" | "needs-review";
 }
 
 export type GuidedLessonCatalogStatus = "locked" | "available" | "active" | "completed";

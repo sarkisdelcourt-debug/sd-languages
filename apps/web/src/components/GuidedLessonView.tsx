@@ -178,6 +178,15 @@ export function GuidedLessonView({
       return result.view;
     });
   };
+  const abandonLesson = () => {
+    if (!window.confirm("Abandonner cette leçon ? Elle redeviendra disponible ; vos erreurs mémorisées et vos révisions sont conservées.")) return;
+    return run(async () => {
+      const next = await api.abandonLesson(language);
+      setAnswer("");
+      setMessage("");
+      return next;
+    });
+  };
   const sendMessage = async () => {
     if (!message.trim() || busyRef.current) return;
     const text = message;
@@ -226,6 +235,9 @@ export function GuidedLessonView({
       <header className="lesson-progress-head">
         <div><span>{lesson.level}</span><strong>{lesson.title}</strong></div>
         <span>{lesson.estimatedMinutes} min</span>
+        {session.status === "active" ? (
+          <button type="button" className="text-button abandon-lesson" onClick={() => void abandonLesson()} disabled={loading}>Abandonner cette leçon</button>
+        ) : null}
       </header>
       <ol className="lesson-stepper" aria-label="Progression de la leçon">
         {phaseLabels.map((label, index) => (

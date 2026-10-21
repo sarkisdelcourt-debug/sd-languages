@@ -25,7 +25,7 @@ export function migrateState(value: Partial<LearnerState>): LearnerState {
   const lessonSessions = value.lessonSessions ?? [];
   const derivedLessonProgress: LearnerState["lessonProgress"] = { ...(value.lessonProgress ?? {}) };
   for (const session of lessonSessions) {
-    if (session.status !== "completed" || !session.completedAt || !session.summary) continue;
+    if (session.status !== "completed" || !session.completedAt || !session.summary || session.summary.outcome === "abandoned") continue;
     if (derivedLessonProgress[session.lessonId]) continue;
     const inferredOutcome = session.summary.outcome ?? (
       session.summary.incorrect === 0
@@ -40,7 +40,7 @@ export function migrateState(value: Partial<LearnerState>): LearnerState {
       masteryCount: inferredOutcome === "mastered" ? 1 : 0,
       bestExact: session.summary.exact,
       lastCompletedAt: session.completedAt,
-      lastOutcome: inferredOutcome
+      lastOutcome: inferredOutcome === "mastered" ? "mastered" : "needs-review"
     };
   }
   const pronunciationAttempts = Array.isArray(value.pronunciationAttempts)

@@ -96,6 +96,7 @@ export const api = {
     body: JSON.stringify({ lessonId })
   }),
   continueLesson: (language: string) => request<GuidedLessonView>(`/api/lessons/${language}/continue`, { method: "POST" }),
+  abandonLesson: (language: string) => request<GuidedLessonView>(`/api/lessons/${language}/abandon`, { method: "POST" }),
   answerLesson: (language: string, answer: string, attemptId: string, sessionId: string, exerciseId: string) =>
     request<{ view: GuidedLessonView; evaluation: AnswerEvaluation; duplicate: boolean }>(`/api/lessons/${language}/answer`, {
       method: "POST",

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnswerEvaluation, GuidedLessonCatalogItem, GuidedLessonView as LessonView, LanguageCode } from "@shared/types";
 import { api } from "../api";
-import { OfflineQueuedError } from "../offline";
 
 const phaseIndex = { intro: 0, practice: 1, correction: 2, conversation: 3, summary: 4 } as const;
 const phaseLabels = ["Comprendre", "Pratiquer", "Corriger", "Dialoguer", "Retenir"];
@@ -107,7 +106,6 @@ export function GuidedLessonView({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const [answerQueued, setAnswerQueued] = useState(false);
   const busyRef = useRef(false);
   const attemptRef = useRef<{ key: string; id: string } | undefined>(undefined);
 
@@ -125,7 +123,6 @@ export function GuidedLessonView({
   }, [view?.session?.phase, view?.session?.currentExerciseIndex]);
 
   useEffect(() => {
-    setAnswerQueued(false);
   }, [view?.session?.id, view?.session?.currentExerciseIndex, view?.session?.attempts.length]);
 
   const currentAttempts = useMemo(() => {
@@ -162,26 +159,21 @@ export function GuidedLessonView({
     return next;
   });
   const submitAnswer = async () => {
-    if (!answer.trim() || loading || answerQueued || !view?.session || !view.currentExercise) return;
+    if (!answer.trim() || loading || !view?.session || !view.currentExercise) return;
     const attemptKey = `${view.session.id}:${view.currentExercise.id}:${currentAttempts.length}`;
     if (attemptRef.current?.key !== attemptKey) {
       attemptRef.current = { key: attemptKey, id: crypto.randomUUID() };
     }
     await run(async () => {
-      try {
-        const result = await api.answerLesson(
-          language,
-          answer,
-          attemptRef.current!.id,
-          view.session!.id,
-          view.currentExercise!.id
-        );
-        onProgress();
-        return result.view;
-      } catch (reason) {
-        if (reason instanceof OfflineQueuedError) setAnswerQueued(true);
-        throw reason;
-      }
+      const result = await api.answerLesson(
+        language,
+        answer,
+        attemptRef.current!.id,
+        view.session!.id,
+        view.currentExercise!.id
+      );
+      onProgress();
+      return result.view;
     });
   };
   const sendMessage = async () => {
@@ -268,18 +260,18 @@ export function GuidedLessonView({
           {currentExercise.choices ? (
             <div className="choice-list" role="group" aria-label="Choisissez une réponse">
               {currentExercise.choices.map((choice) => (
-                <button key={choice} className={answer === choice ? "choice selected" : "choice"} aria-pressed={answer === choice} onClick={() => setAnswer(choice)} disabled={loading || answerQueued}>
+                <button key={choice} className={answer === choice ? "choice selected" : "choice"} aria-pressed={answer === choice} onClick={() => setAnswer(choice)} disabled={loading}>
                   <span className="radio" aria-hidden="true" />{choice}
                 </button>
               ))}
             </div>
           ) : (
             <label className="answer-field">Votre réponse
-              <input value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void submitAnswer(); }} disabled={loading || answerQueued} autoFocus />
+              <input value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void submitAnswer(); }} disabled={loading} autoFocus />
             </label>
           )}
           <p className="hint">Indice : {currentExercise.hint}</p>
-          <footer><button className="primary-button" onClick={submitAnswer} disabled={!answer.trim() || loading || answerQueued}>{answerQueued ? "Réponse en attente" : loading ? "Vérification…" : "Vérifier ma réponse"}</button></footer>
+          <footer><button className="primary-button" onClick={submitAnswer} disabled={!answer.trim() || loading}>{loading ? "Vérification…" : "Vérifier ma réponse"}</button></footer>
         </article>
       ) : null}
 

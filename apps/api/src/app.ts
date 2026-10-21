@@ -30,7 +30,9 @@ export function createApp(store: StateStore) {
     if (existsSync(webDirectory)) {
       app.use(express.static(webDirectory));
       app.use((request, response, next) => {
-        if (request.method !== "GET") return next();
+        // Un fichier absent (icône, script) doit rester un 404, jamais la page : sinon le cache hors
+        // ligne garderait du HTML à la place d'une image.
+        if (request.method !== "GET" || path.extname(request.path)) return next();
         return response.sendFile(path.join(webDirectory, "index.html"));
       });
     }

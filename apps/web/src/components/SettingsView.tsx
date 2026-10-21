@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import type { CefrLevel, LanguageCode, LanguageSettings, LearningGoal } from "@shared/types";
 import { api } from "../api";
-import { OfflineQueuedError } from "../offline";
 
 const GOALS: Array<{ id: LearningGoal; title: string; description: string; mark: string }> = [
   { id: "fluency", title: "Aisance générale", description: "Parler et écrire avec plus de naturel", mark: "AI" },
@@ -17,7 +16,6 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
   const [settings, setSettings] = useState<LanguageSettings>();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
   useEffect(() => {
     api.settings(language).then(setSettings).catch((reason: Error) => setError(reason.message));
@@ -27,18 +25,13 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
   const save = async () => {
     setSaving(true);
     setSaved(false);
-    setPending(false);
     try {
       const next = await api.updateSettings(language, settings);
       setSettings(next);
       setSaved(true);
       onSaved();
     } catch (reason) {
-      if (reason instanceof OfflineQueuedError) {
-        setPending(true);
-      } else {
-        setError((reason as Error).message);
-      }
+      setError((reason as Error).message);
     } finally {
       setSaving(false);
     }
@@ -59,7 +52,7 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
         <div className="segmented-options">{MINUTES.map((minutes) => <button key={minutes} className={settings.dailyMinutes === minutes ? "selected" : ""} onClick={() => setSettings({ ...settings, dailyMinutes: minutes })}>{minutes} min</button>)}</div>
         <div className="settings-section"><strong>Niveau visé</strong><span>Le niveau actuel reste déterminé par le diagnostic.</span></div>
         <div className="level-options">{LEVELS.map((level) => <button key={level} className={settings.targetLevel === level ? "selected" : ""} onClick={() => setSettings({ ...settings, targetLevel: level })}>{level}</button>)}</div>
-        <div className="settings-footer"><span>{pending ? "↻ Préférences gardées, en attente de synchronisation" : saved ? "✓ Préférences enregistrées localement" : "Aucune donnée envoyée dans le cloud"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : pending ? "Mettre à jour" : "Enregistrer"}</button></div>
+        <div className="settings-footer"><span>{saved ? "✓ Préférences enregistrées sur cet appareil" : "Aucune donnée envoyée dans le cloud"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : "Enregistrer"}</button></div>
       </article>
     </section>
   );

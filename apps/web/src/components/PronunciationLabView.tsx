@@ -7,7 +7,6 @@ import type {
   PronunciationLabView
 } from "@shared/types";
 import { api } from "../api";
-import { OfflineQueuedError } from "../offline";
 import { useLocalRecorder } from "../hooks/useLocalRecorder";
 import {
   createRecognition,
@@ -41,7 +40,6 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<string>();
   const [error, setError] = useState<string>();
-  const [queued, setQueued] = useState(false);
   const recognitionRef = useRef<BrowserSpeechRecognition | undefined>(undefined);
   const resultTitleRef = useRef<HTMLHeadingElement>(null);
   const attemptRef = useRef<{ promptId: string; id: string } | undefined>(undefined);
@@ -80,7 +78,6 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
     setResult(undefined);
     setStatus(undefined);
     setError(undefined);
-    setQueued(false);
   };
 
   const startRecognition = () => {
@@ -137,7 +134,7 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
 
   const analyze = async (event: FormEvent) => {
     event.preventDefault();
-    if (!prompt || !transcript.trim() || submitting || queued) return;
+    if (!prompt || !transcript.trim() || submitting) return;
     if (attemptRef.current?.promptId !== prompt.id) {
       attemptRef.current = { promptId: prompt.id, id: crypto.randomUUID() };
     }
@@ -155,7 +152,6 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
       setLab(nextLab);
       window.requestAnimationFrame(() => resultTitleRef.current?.focus());
     } catch (reason) {
-      if (reason instanceof OfflineQueuedError) setQueued(true);
       setError((reason as Error).message);
     } finally {
       setSubmitting(false);
@@ -265,12 +261,11 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
               maxLength={500}
               placeholder="La transcription apparaîtra ici. Vous pouvez aussi la saisir manuellement."
               aria-describedby="transcript-help"
-              disabled={queued}
             />
             <div className="transcript-footer">
               <span id="transcript-help">Le score compare les mots. Il ne mesure ni votre accent ni vos phonèmes.</span>
-              <button className="primary-button" disabled={!transcript.trim() || submitting || queued}>
-                {queued ? "Analyse en attente" : submitting ? "Analyse…" : "Comparer les mots"}
+              <button className="primary-button" disabled={!transcript.trim() || submitting}>
+                {submitting ? "Analyse…" : "Comparer les mots"}
               </button>
             </div>
           </form>

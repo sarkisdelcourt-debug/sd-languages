@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnswerEvaluation, LanguageCode } from "@shared/types";
 import { api, type PublicExercise } from "../api";
-import { OfflineQueuedError } from "../offline";
 
 export function PracticeView({ language, onProgress }: { language: LanguageCode; onProgress: () => void }) {
   const [exercises, setExercises] = useState<PublicExercise[]>([]);
@@ -10,7 +9,6 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
   const [evaluation, setEvaluation] = useState<AnswerEvaluation>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const [queued, setQueued] = useState(false);
   const attemptRef = useRef<{ exerciseId: string; id: string } | undefined>(undefined);
 
   useEffect(() => {
@@ -19,7 +17,7 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
 
   const exercise = exercises[index];
   const validate = async () => {
-    if (!exercise || !answer.trim() || evaluation || queued) return;
+    if (!exercise || !answer.trim() || evaluation) return;
     if (attemptRef.current?.exerciseId !== exercise.id) {
       attemptRef.current = { exerciseId: exercise.id, id: crypto.randomUUID() };
     }
@@ -29,7 +27,6 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
       setEvaluation(result.evaluation);
       onProgress();
     } catch (reason) {
-      if (reason instanceof OfflineQueuedError) setQueued(true);
       setError((reason as Error).message);
     } finally {
       setLoading(false);
@@ -40,7 +37,6 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
     setAnswer("");
     setEvaluation(undefined);
     setError(undefined);
-    setQueued(false);
   };
 
   if (error && !exercise) return <div className="alert" role="alert">{error}</div>;
@@ -58,13 +54,13 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
         {exercise.choices ? (
           <div className="choice-list">
             {exercise.choices.map((choice) => (
-              <button disabled={Boolean(evaluation) || queued} key={choice} className={answer === choice ? "choice selected" : "choice"} onClick={() => setAnswer(choice)}>
+              <button disabled={Boolean(evaluation)} key={choice} className={answer === choice ? "choice selected" : "choice"} onClick={() => setAnswer(choice)}>
                 <span className="radio" />{choice}
               </button>
             ))}
           </div>
         ) : (
-          <label className="answer-field">Votre réponse<input disabled={Boolean(evaluation) || queued} value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void validate(); }} autoFocus /></label>
+          <label className="answer-field">Votre réponse<input disabled={Boolean(evaluation)} value={answer} onChange={(event) => setAnswer(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void validate(); }} autoFocus /></label>
         )}
         {!evaluation ? <p className="hint">Indice : {exercise.hint}</p> : null}
         {evaluation ? (
@@ -80,7 +76,7 @@ export function PracticeView({ language, onProgress }: { language: LanguageCode;
         ) : null}
         {error ? <div className="alert" role="alert">{error}</div> : null}
         <div className="exercise-actions end">
-          {evaluation ? <button className="primary-button" onClick={next}>Exercice suivant</button> : <button className="primary-button" disabled={!answer.trim() || loading || queued} onClick={validate}>{queued ? "Réponse en attente" : loading ? "Vérification…" : "Vérifier"}</button>}
+          {evaluation ? <button className="primary-button" onClick={next}>Exercice suivant</button> : <button className="primary-button" disabled={!answer.trim() || loading} onClick={validate}>{loading ? "Vérification…" : "Vérifier"}</button>}
         </div>
       </article>
     </section>

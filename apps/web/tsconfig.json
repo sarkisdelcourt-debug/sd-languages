@@ -8,7 +8,8 @@
     "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../../packages/shared/src/*"]
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@engine/*": ["../../packages/engine/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "../../packages/shared/src/**/*.ts", "../../packages/engine/src/**/*.ts"]

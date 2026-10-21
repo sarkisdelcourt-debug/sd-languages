@@ -19,7 +19,7 @@ import type {
   ReviewCard,
   ReviewRating
 } from "@shared/types";
-import { OfflineQueuedError, queueMutation, reportCachedRead } from "./offline";
+import { engine } from "./local/device";
 
 export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers"> & {
   recommendationScore?: number;
@@ -31,20 +31,17 @@ export type PublicConversationScenario = ConversationScenario & {
   recommendationReason?: string;
 };
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(path, {
-      ...options,
-      headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) }
-    });
-  } catch (reason) {
-    if (options && await queueMutation(path, options)) throw new OfflineQueuedError();
-    throw reason instanceof Error ? reason : new Error("Le serveur local est indisponible.");
+/**
+ * Les vues gardent leurs appels « /api/… », mais le moteur s'exécute dans l'appareil : aucune
+ * requête réseau, donc la même expérience en ligne, hors ligne ou en mode avion.
+ */
+async function request<T>(path: string, options?: { method?: string; body?: string }): Promise<T> {
+  const response = await engine.handle(options?.method ?? "GET", path, options?.body ? JSON.parse(options.body) : undefined);
+  const body = response.body as T | { error?: string };
+  if (response.status >= 400) {
+    const message = body && typeof body === "object" && "error" in body ? body.error : undefined;
+    throw new Error(message ?? "Erreur locale inattendue.");
   }
-  if (response.headers.get("X-SD-Data-Source")) reportCachedRead();
-  const body = (await response.json()) as T | { error: string };
-  if (!response.ok) throw new Error("error" in (body as object) ? (body as { error: string }).error : "Erreur de communication.");
   return body as T;
 }
 

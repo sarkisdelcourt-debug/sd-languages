@@ -1,11 +1,13 @@
+// Depuis le mode téléphone, le moteur et la progression vivent dans l'appareil (IndexedDB).
+// Le service worker ne garde donc que l'application elle-même : page, scripts, styles, icônes.
+// Les appels /api restants (reprise de l'ancien fichier du PC) passent toujours par le réseau.
 const CACHE_PREFIX = "sd-languages-";
-const SHELL_CACHE = `${CACHE_PREFIX}shell-v4`;
-const API_CACHE = `${CACHE_PREFIX}api-v4`;
-const SHELL = ["/", "/manifest.webmanifest", "/icons/icon.svg"];
+const SHELL_CACHE = `${CACHE_PREFIX}shell-v6`;
+const SHELL = ["/", "/manifest.webmanifest", "/icons/icon.svg", "/icons/apple-touch-icon.png", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 async function precacheShell() {
   const cache = await caches.open(SHELL_CACHE);
-  const response = await fetch("/");
+  const response = await fetch("/", { cache: "no-store" });
   if (!response.ok) throw new Error("Le shell de l'application n'est pas disponible.");
   const html = await response.clone().text();
   await cache.put("/", response);
@@ -21,37 +23,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE && key !== API_CACHE)
-        .map((key) => caches.delete(key))
+      keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE).map((key) => caches.delete(key))
     ))
   );
   self.clients.claim();
 });
-
-async function withCacheMarker(response) {
-  const headers = new Headers(response.headers);
-  headers.set("X-SD-Data-Source", "cache");
-  return new Response(await response.arrayBuffer(), {
-    status: response.status,
-    statusText: response.statusText,
-    headers
-  });
-}
-
-async function apiResponse(request) {
-  try {
-    const response = await fetch(request);
-    if (response.ok) (await caches.open(API_CACHE)).put(request, response.clone());
-    return response;
-  } catch {
-    const cached = await caches.match(request);
-    if (cached) return withCacheMarker(cached);
-    return new Response(JSON.stringify({ error: "Cette donnée n'a pas encore été préparée pour le mode hors ligne." }), {
-      status: 503,
-      headers: { "Content-Type": "application/json", "X-SD-Data-Source": "offline-miss" }
-    });
-  }
-}
 
 async function navigationResponse(request) {
   try {
@@ -67,22 +43,15 @@ async function assetResponse(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok) (await caches.open(SHELL_CACHE)).put(request, response.clone());
+  const isPage = response.headers.get("content-type")?.includes("text/html");
+  if (response.ok && !isPage) (await caches.open(SHELL_CACHE)).put(request, response.clone());
   return response;
 }
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
   const requestUrl = new URL(event.request.url);
-
-  if (requestUrl.pathname === "/api/health" || requestUrl.pathname === "/api/export") {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-  if (requestUrl.pathname.startsWith("/api/")) {
-    event.respondWith(apiResponse(event.request));
-    return;
-  }
+  if (requestUrl.pathname.startsWith("/api/")) return;
   if (event.request.mode === "navigate") {
     event.respondWith(navigationResponse(event.request));
     return;

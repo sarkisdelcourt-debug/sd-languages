@@ -237,6 +237,22 @@ export interface LearnerState {
   lessonProgress: Record<string, GuidedLessonProgress>;
   pronunciationAttempts: PronunciationAttempt[];
   pronunciationProgress: Record<string, PronunciationProgress>;
+  /** Relais entre appareils (PC ⟷ iPhone). Absent dans les profils antérieurs au mode téléphone. */
+  sync?: SyncMeta;
+}
+
+/**
+ * Chaque envoi ou reprise de fichier crée un « point de relais ». Un fichier peut remplacer sans
+ * avertissement l'état d'un appareil seulement s'il descend du dernier point de cet appareil et si
+ * celui-ci n'a rien fait depuis.
+ */
+export interface SyncMeta {
+  checkpointId?: string;
+  /** Points de relais successifs de cette lignée, du plus ancien au plus récent (bornés). */
+  checkpointHistory: string[];
+  changesSinceCheckpoint: number;
+  lastCheckpointAt?: string;
+  lastChangeAt?: string;
 }
 
 export interface LanguageSettings {

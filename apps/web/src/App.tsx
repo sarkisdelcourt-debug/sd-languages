@@ -3,6 +3,7 @@ import { isLanguageCode, LANGUAGES } from "@shared/catalog";
 import type { DashboardSnapshot, LanguageCode } from "@shared/types";
 import { api } from "./api";
 import { DashboardView } from "./components/DashboardView";
+import { DataView } from "./components/DataView";
 import { DiagnosticView } from "./components/DiagnosticView";
 import { GuidedLessonView } from "./components/GuidedLessonView";
 import { NavIcon } from "./components/NavIcon";
@@ -10,14 +11,9 @@ import { PracticeView } from "./components/PracticeView";
 import { ReviewView } from "./components/ReviewView";
 import { SettingsView } from "./components/SettingsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
-import {
-  flushOfflineQueue,
-  getOfflineSnapshot,
-  OFFLINE_STATUS_EVENT,
-  prepareOfflineLibrary
-} from "./offline";
+import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
-type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "conversation" | "settings";
+type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "conversation" | "settings" | "data";
 
 const viewLabels: Record<View, string> = {
   home: "Vue d'ensemble",
@@ -26,100 +22,58 @@ const viewLabels: Record<View, string> = {
   practice: "S'entraîner",
   review: "Réviser",
   conversation: "Parler",
-  settings: "Mes objectifs"
+  settings: "Mes objectifs",
+  data: "Mes données"
 };
 
-const navViews = ["home", "lesson", "review", "conversation", "settings"] as const;
+const navViews = ["home", "lesson", "review", "conversation", "settings", "data"] as const;
 
-interface ConnectionState {
-  reachable: boolean;
-  syncing: boolean;
-  pending: number;
-  failed: number;
-  justSynced: number;
+function readSavedLanguage(): LanguageCode {
+  try {
+    const saved = localStorage.getItem("sd-language");
+    return saved && isLanguageCode(saved) ? saved : "en";
+  } catch {
+    return "en";
+  }
 }
 
 export function App() {
-  const [language, setLanguage] = useState<LanguageCode>(() => {
-    const saved = localStorage.getItem("sd-language");
-    return saved && isLanguageCode(saved) ? saved : "en";
-  });
+  const [language, setLanguage] = useState<LanguageCode>(readSavedLanguage);
   const [view, setView] = useState<View>("home");
   const [speakingMode, setSpeakingMode] = useState<SpeakingMode>("pronunciation");
   const [dashboard, setDashboard] = useState<DashboardSnapshot>();
+  const [relay, setRelay] = useState<RelayStatus>();
+  const [externalChange, setExternalChange] = useState(false);
   const [error, setError] = useState<string>();
-  const [connection, setConnection] = useState<ConnectionState>({
-    reachable: navigator.onLine,
-    syncing: false,
-    pending: 0,
-    failed: 0,
-    justSynced: 0
-  });
 
   const refreshDashboard = useCallback(() => {
     api.dashboard().then(setDashboard).catch((reason: Error) => setError(reason.message));
+    getRelayStatus().then(setRelay).catch(() => undefined);
   }, []);
-
-  const synchronize = useCallback(async () => {
-    setConnection((current) => ({ ...current, syncing: true, justSynced: 0 }));
-    const result = await flushOfflineQueue();
-    setConnection({
-      reachable: result.reachable,
-      syncing: false,
-      pending: result.pending,
-      failed: result.failed,
-      justSynced: result.synced
-    });
-    if (result.reachable) {
-      if (result.synced > 0) refreshDashboard();
-      void prepareOfflineLibrary();
-    }
-  }, [refreshDashboard]);
 
   useEffect(() => {
     refreshDashboard();
-    void synchronize();
-    const handleConnectivity = () => void synchronize();
-    const handleQueueChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ reachable?: boolean }>).detail;
-      getOfflineSnapshot().then((snapshot) => setConnection((current) => ({
-        ...current,
-        ...snapshot,
-        reachable: detail?.reachable ?? current.reachable,
-        justSynced: 0
-      })));
-    };
-    window.addEventListener("online", handleConnectivity);
-    window.addEventListener("offline", handleConnectivity);
-    window.addEventListener(OFFLINE_STATUS_EVENT, handleQueueChange);
-    return () => {
-      window.removeEventListener("online", handleConnectivity);
-      window.removeEventListener("offline", handleConnectivity);
-      window.removeEventListener(OFFLINE_STATUS_EVENT, handleQueueChange);
-    };
-  }, [refreshDashboard, synchronize]);
+    void requestPersistentStorage();
+    return store.onExternalChange(() => {
+      setExternalChange(true);
+      refreshDashboard();
+    });
+  }, [refreshDashboard]);
 
   useEffect(() => {
     document.querySelector<HTMLElement>("#view-title")?.focus();
   }, [view]);
 
-  useEffect(() => {
-    if (!connection.justSynced) return;
-    const timeout = window.setTimeout(() => {
-      setConnection((current) => ({ ...current, justSynced: 0 }));
-    }, 4_000);
-    return () => window.clearTimeout(timeout);
-  }, [connection.justSynced]);
-
-  useEffect(() => {
-    if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
-    void navigator.serviceWorker.ready.then(() => prepareOfflineLibrary());
-  }, []);
-
   const chooseLanguage = (next: LanguageCode) => {
     setLanguage(next);
-    localStorage.setItem("sd-language", next);
+    try {
+      localStorage.setItem("sd-language", next);
+    } catch {
+      // Préférence de confort seulement.
+    }
   };
+
+  const unsent = relay?.changesSinceCheckpoint ?? 0;
 
   return (
     <div className="app-shell">
@@ -131,7 +85,7 @@ export function App() {
         </div>
         <nav aria-label="Navigation principale">
           {navViews.map((item) => (
-            <button className={view === item ? "nav-item active" : "nav-item"} onClick={() => setView(item)} key={item}>
+            <button className={view === item ? "nav-item active" : "nav-item"} onClick={() => setView(item)} key={item} aria-current={view === item ? "page" : undefined}>
               <NavIcon name={item} />
               {viewLabels[item]}
               {item === "review" && dashboard && dashboard.dueReviews[language] > 0 ? (
@@ -141,14 +95,8 @@ export function App() {
           ))}
         </nav>
         <div className="local-note">
-          <span className={connection.reachable ? "status-dot" : "status-dot offline"} />
-          {connection.syncing
-            ? "Synchronisation…"
-            : !connection.reachable
-              ? "Mode hors ligne"
-              : connection.pending > 0
-                ? `${connection.pending} en attente`
-                : "Local et synchronisé"}
+          <span className="status-dot" />
+          {unsent > 0 ? `${unsent} changement${unsent > 1 ? "s" : ""} à envoyer` : `Sur cet appareil${relay ? ` · ${relay.device}` : ""}`}
         </div>
       </aside>
 
@@ -158,45 +106,31 @@ export function App() {
             <p className="eyebrow">Votre espace d'apprentissage</p>
             <h1 id="view-title" tabIndex={-1}>{viewLabels[view]}</h1>
           </div>
-          <div className="language-switcher" aria-label="Langue active">
-            {(Object.keys(LANGUAGES) as LanguageCode[]).map((code) => (
-              <button
-                key={code}
-                className={language === code ? "language-pill active" : "language-pill"}
-                onClick={() => chooseLanguage(code)}
-                aria-pressed={language === code}
-              >
-                <span aria-hidden="true">{code.toUpperCase()}</span>
-                {LANGUAGES[code].name}
-              </button>
-            ))}
-          </div>
+          {view !== "data" ? (
+            <div className="language-switcher" aria-label="Langue active">
+              {(Object.keys(LANGUAGES) as LanguageCode[]).map((code) => (
+                <button
+                  key={code}
+                  className={language === code ? "language-pill active" : "language-pill"}
+                  onClick={() => chooseLanguage(code)}
+                  aria-pressed={language === code}
+                >
+                  <span aria-hidden="true">{code.toUpperCase()}</span>
+                  {LANGUAGES[code].name}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </header>
 
-        {(!connection.reachable || connection.pending > 0 || connection.failed > 0 || connection.syncing || connection.justSynced > 0) ? (
-          <aside className={`offline-banner${connection.reachable ? "" : " is-offline"}`} aria-live="polite">
-            <span className="offline-symbol" aria-hidden="true">{connection.reachable ? "↻" : "↓"}</span>
+        {externalChange ? (
+          <aside className="offline-banner" aria-live="polite">
+            <span className="offline-symbol" aria-hidden="true">↻</span>
             <div>
-              <strong>
-                {connection.syncing
-                  ? "Synchronisation en cours"
-                  : connection.failed > 0
-                    ? `${connection.failed} action${connection.failed > 1 ? "s" : ""} à vérifier`
-                    : connection.pending > 0
-                      ? `${connection.pending} action${connection.pending > 1 ? "s" : ""} gardée${connection.pending > 1 ? "s" : ""} sur cet appareil`
-                      : connection.justSynced > 0
-                        ? `${connection.justSynced} action${connection.justSynced > 1 ? "s" : ""} synchronisée${connection.justSynced > 1 ? "s" : ""}`
-                        : "Mode hors ligne actif"}
-              </strong>
-              <span>
-                {connection.reachable
-                  ? "Votre progression locale est à jour."
-                  : "Les contenus déjà préparés restent consultables. Les réponses compatibles partiront au retour du serveur local."}
-              </span>
+              <strong>Progression modifiée dans un autre onglet</strong>
+              <span>Rechargez pour afficher la version la plus récente de cet écran.</span>
             </div>
-            {!connection.syncing && (connection.pending > 0 || !connection.reachable) ? (
-              <button type="button" onClick={() => void synchronize()}>Réessayer</button>
-            ) : null}
+            <button type="button" onClick={() => window.location.reload()}>Recharger</button>
           </aside>
         ) : null}
 
@@ -219,6 +153,7 @@ export function App() {
           {view === "review" ? <ReviewView language={language} onProgress={refreshDashboard} /> : null}
           {view === "conversation" ? <SpeakingView language={language} mode={speakingMode} onModeChange={setSpeakingMode} /> : null}
           {view === "settings" ? <SettingsView language={language} onSaved={refreshDashboard} /> : null}
+          {view === "data" ? <DataView onChanged={refreshDashboard} /> : null}
           {view === "home" && !dashboard ? <div className="loading-card">Chargement de votre progression…</div> : null}
         </section>
       </main>

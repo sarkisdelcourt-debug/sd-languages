@@ -8,7 +8,7 @@ interface Props {
   dashboard: DashboardSnapshot;
   language: LanguageCode;
   onNavigate: (
-    view: "lesson" | "diagnostic" | "practice" | "review" | "conversation" | "settings",
+    view: "lesson" | "diagnostic" | "practice" | "vocabulary" | "review" | "conversation" | "settings",
     speakingMode?: "pronunciation" | "conversation"
   ) => void;
 }
@@ -134,6 +134,9 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
           </button>
           <button className="action-card" onClick={() => onNavigate("practice")}>
             <span className="action-index">MODE LIBRE</span><strong>Exercices ciblés</strong><span>Grammaire, vocabulaire et traduction</span>
+          </button>
+          <button className="action-card" onClick={() => onNavigate("vocabulary")}>
+            <span className="action-index">VOCABULAIRE</span><strong>Tests de mots</strong><span>Langue → français et français → langue, en QCM ou en saisie</span>
           </button>
           <button className="action-card" onClick={() => onNavigate("conversation", "pronunciation")}>
             <span className="action-index">ENTRAÎNEMENT ORAL</span><strong>Prononciation</strong><span>Écouter, vous enregistrer et comparer les mots</span>

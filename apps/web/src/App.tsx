@@ -10,13 +10,14 @@ import { NavIcon } from "./components/NavIcon";
 import { PracticeView } from "./components/PracticeView";
 import { ReviewView } from "./components/ReviewView";
 import { SettingsView } from "./components/SettingsView";
+import { VocabularyView } from "./components/VocabularyView";
 import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
 import { AI_NOTICE_EVENT } from "./ai/settings";
 import { warmUpAi } from "./ai/conversation";
 import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
-type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "conversation" | "settings" | "data";
+type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "vocabulary" | "conversation" | "settings" | "data";
 
 const viewLabels: Record<View, string> = {
   home: "Vue d'ensemble",
@@ -25,6 +26,7 @@ const viewLabels: Record<View, string> = {
   practice: "S'entraîner",
   review: "Réviser",
   skills: "Mes acquis",
+  vocabulary: "Vocabulaire",
   conversation: "Parler",
   settings: "Mes objectifs",
   data: "Mes données"
@@ -35,7 +37,7 @@ const viewLabels: Record<View, string> = {
  * garde 4 onglets + « Plus » (qui regroupe Mes acquis, Parler, Mes objectifs, Mes données, Diagnostic).
  */
 const primaryViews = ["home", "lesson", "practice", "review"] as const;
-const secondaryViews = ["skills", "conversation", "settings", "data", "diagnostic"] as const;
+const secondaryViews = ["skills", "vocabulary", "conversation", "settings", "data", "diagnostic"] as const;
 
 function readSavedLanguage(): LanguageCode {
   try {
@@ -210,6 +212,7 @@ export function App() {
           {view === "diagnostic" ? <DiagnosticView language={language} onComplete={refreshDashboard} /> : null}
           {view === "lesson" ? <GuidedLessonView language={language} onProgress={refreshDashboard} onHome={() => setView("home")} /> : null}
           {view === "practice" ? <PracticeView language={language} onProgress={refreshDashboard} target={practiceTarget} /> : null}
+          {view === "vocabulary" ? <VocabularyView language={language} onProgress={refreshDashboard} /> : null}
           {view === "skills" ? <SkillsView language={language} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}
           {view === "review" ? <ReviewView language={language} onProgress={refreshDashboard} /> : null}
           {view === "conversation" ? <SpeakingView language={language} mode={speakingMode} onModeChange={setSpeakingMode} /> : null}

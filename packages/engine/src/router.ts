@@ -1,4 +1,6 @@
 import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../../shared/src/curriculum.js";
+import { drillCandidates, drillSets, findDrillExercise, type VocabDirection, type VocabMode } from "../../shared/src/content/vocab-drills.js";
+import { slug } from "../../shared/src/content/generators.js";
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
 import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/catalog.js";
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
@@ -160,8 +162,48 @@ export function createEngine(store: StateStore): Engine {
     return ok(topics);
   });
 
+  // Tests de vocabulaire (22/10/2026) : listes, séries dans les deux sens, réponses via la route des exercices.
+  route("GET", "/api/vocabulary/:language", async ({ params }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const state = await store.read();
+    const answered = (setId: string, slugs: string[]) => slugs.filter((word) => Object.keys(state.exerciseHistory ?? {}).some((id) => id.includes(`~${setId}~${word}`))).length;
+    return ok({
+      language,
+      sets: drillSets(language).map((set) => ({
+        id: set.id, title: set.title, topic: set.topic, level: set.level, count: set.items.length,
+        seen: answered(set.id, set.items.map((item) => slug(item.en)))
+      }))
+    });
+  });
+
+  route("GET", "/api/vocabulary/:language/drill", async ({ params, query }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const direction = (query.get("direction") ?? "mixed") as VocabDirection;
+    const mode = (query.get("mode") ?? "choice") as VocabMode;
+    if (!["to-target", "to-french", "mixed"].includes(direction) || !["choice", "typing"].includes(mode)) return fail(400, "Sens ou mode invalide.");
+    const setId = query.get("set") ?? undefined;
+    if (setId && !drillSets(language, setId).length) return fail(404, "Liste introuvable.");
+    const count = Math.min(20, Math.max(5, Number(query.get("count")) || 10));
+    const excluded = new Set((query.get("exclude") ?? "").split(",").filter(Boolean));
+    const state = await store.read();
+    const day = new Date().toISOString().slice(0, 10);
+    const daily = (id: string) => Array.from(`${day}${id}`).reduce((sum, character) => (sum * 31 + (character.codePointAt(0) ?? 0)) >>> 0, 7);
+    // Priorité : ce qui vient d'être raté, puis ce qui n'a jamais été vu, puis le reste ; ce qui est réussi attend.
+    const rank = (id: string) => {
+      const seen = state.exerciseHistory?.[id];
+      return !seen ? 1 : seen.lastCorrect ? 2 : 0;
+    };
+    const all = drillCandidates(language, direction, mode, setId);
+    const fresh = all.filter((exercise) => !excluded.has(exercise.id));
+    const pool = fresh.length >= Math.min(count, all.length) ? fresh : all;
+    const series = [...pool].sort((a, b) => rank(a.id) - rank(b.id) || daily(a.id) - daily(b.id)).slice(0, count);
+    return ok(series.map(({ answer: _answer, acceptedAnswers: _accepted, ...publicExercise }) => publicExercise));
+  });
+
   route("POST", "/api/practice/:exerciseId/answer", async ({ params, body }) => {
-    const exercise = EXERCISES.find((candidate) => candidate.id === params.exerciseId);
+    const exercise = EXERCISES.find((candidate) => candidate.id === params.exerciseId) ?? findDrillExercise(params.exerciseId);
     if (!exercise) return fail(404, "Exercice introuvable.");
     const answer = body?.answer;
     const attemptId = body?.attemptId;

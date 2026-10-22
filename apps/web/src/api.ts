@@ -29,6 +29,14 @@ export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers"> & {
   recommendationScore?: number;
   recommendationReason?: string;
 };
+export interface VocabularySet {
+  id: string;
+  title: string;
+  topic: string;
+  level: string;
+  count: number;
+  seen: number;
+}
 export interface PracticeTopic {
   topic: ExerciseTopic;
   label: string;
@@ -73,11 +81,18 @@ export const api = {
     const suffix = query.toString();
     return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
   },
+  vocabulary: (language: string) => request<{ language: string; sets: VocabularySet[] }>(`/api/vocabulary/${language}`),
+  vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[] }) => {
+    const query = new URLSearchParams({ direction: options.direction, mode: options.mode });
+    if (options.setId) query.set("set", options.setId);
+    if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
+    return request<PublicExercise[]>(`/api/vocabulary/${language}/drill?${query.toString()}`);
+  },
   practiceTopics: (language: string) => request<PracticeTopic[]>(`/api/practice-topics/${language}`),
   skills: (language: string) => request<SkillsView>(`/api/skills/${language}`),
   submitAnswer: (exerciseId: string, answer: string, attemptId: string) =>
     request<{ evaluation: AnswerEvaluation; duplicate: boolean; dashboard: DashboardSnapshot }>(
-      `/api/practice/${exerciseId}/answer`,
+      `/api/practice/${encodeURIComponent(exerciseId)}/answer`,
       { method: "POST", body: JSON.stringify({ answer, attemptId }) }
     ),
   reviews: (language: string) => request<ReviewCard[]>(`/api/reviews/${language}`),

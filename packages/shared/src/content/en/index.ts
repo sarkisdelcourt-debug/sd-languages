@@ -7,9 +7,9 @@ import { FALSE_FRIENDS, IRREGULAR_VERBS, PHRASAL_VERBS } from "./verbs.js";
 
 /** Banque anglaise générée et rédigée (22/10/2026), ajoutée au catalogue d'exercices. */
 export const ENGLISH_BANK: TopicExercise[] = [
-  ...MEDICAL_VOCAB.flatMap(vocabExercises),
+  ...MEDICAL_VOCAB.flatMap((set) => vocabExercises(set)),
   ...sentenceExercises(MEDICAL_SENTENCES),
-  ...GENERAL_VOCAB.flatMap(vocabExercises),
+  ...GENERAL_VOCAB.flatMap((set) => vocabExercises(set)),
   ...sentenceExercises(EVERYDAY_SENTENCES),
   ...sentenceExercises(TRAVEL_SENTENCES),
   ...GRAMMAR_EXERCISES,

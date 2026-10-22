@@ -209,11 +209,13 @@ export function deduceSentenceSkills(sentence: string): string[] {
 
 const vocabSkills = (topic: ExerciseTopic): string[] => [TOPIC_SKILL[topic] ?? "everyday-vocabulary"];
 
-export function vocabExercises(set: VocabSet): TopicExercise[] {
+export function vocabExercises(set: VocabSet, language: LanguageCode = LANGUAGE): TopicExercise[] {
+  // Hors anglais, la compétence vient de la liste elle-même (skills.ts est propre à chaque langue).
+  const skills = set.skill ? [set.skill] : vocabSkills(set.topic);
   const pairs = chunkForPairs(set.items).map((group, index): TopicExercise => {
     const items = group.map((item) => ({ target: item.en, native: item.fr }));
     return {
-      id: `${set.id}-pairs-${index + 1}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "match-pairs", skillTags: vocabSkills(set.topic),
+      id: `${set.id}-pairs-${index + 1}`, language, level: set.level, topic: set.topic, type: "match-pairs", skillTags: skills,
       prompt: "Associez chaque mot à sa traduction.", pairs: items, answer: matchPairsAnswer(items),
       explanation: `Vocabulaire : ${set.title.toLowerCase()}.`, hint: "Commencez par les mots que vous reconnaissez.", focus: set.title
     };
@@ -224,7 +226,7 @@ export function vocabExercises(set: VocabSet): TopicExercise[] {
     const distractors = [0, 1, 2].map((offset) => others[(start + offset * 3) % others.length]!.fr);
     const choices = [...new Set([item.fr, ...distractors])].sort((left, right) => hash(`${item.en}${left}`) - hash(`${item.en}${right}`));
     return {
-      id: `${set.id}-${slug(item.en)}`, language: LANGUAGE, level: set.level, topic: set.topic, type: "multiple-choice", skillTags: vocabSkills(set.topic),
+      id: `${set.id}-${slug(item.en)}`, language, level: set.level, topic: set.topic, type: "multiple-choice", skillTags: skills,
       prompt: `Que signifie « ${item.en} » ?`, choices, answer: item.fr,
       explanation: `« ${item.en} » se traduit par « ${item.fr} ».`, hint: `Thème : ${set.title.toLowerCase()}.`, focus: set.title
     };
@@ -232,25 +234,27 @@ export function vocabExercises(set: VocabSet): TopicExercise[] {
   return [...pairs, ...meanings];
 }
 
-export function sentenceExercises(items: SentenceItem[]): TopicExercise[] {
+export function sentenceExercises(items: SentenceItem[], language: LanguageCode = LANGUAGE): TopicExercise[] {
+  // Les règles de distracteurs, contractions et compétences déduites sont propres à l'anglais.
+  const english = language === "en";
   const pool = items.flatMap((item) => sentenceTiles(item.en).slice(1).map((word) => word.toLowerCase()));
   return items.flatMap((item): TopicExercise[] => {
     const words = sentenceTiles(item.en);
     const present = new Set(words.map((word) => word.toLowerCase()));
     // Distracteurs : d'abord grammaticaux (auxiliaire, préposition, article de la phrase), sinon deux mots de la banque.
-    const grammatical = grammarDistractors(words, item.id);
+    const grammatical = english ? grammarDistractors(words, item.id) : [];
     const candidates = [...new Set(pool.filter((word) => !present.has(word) && word.length > 2 && !grammatical.includes(word)))];
     const start = candidates.length ? hash(item.id) % candidates.length : 0;
     const fallback = candidates.length >= 2 ? [candidates[start]!, candidates[(start + 7) % candidates.length]!].filter((word, index, all) => all.indexOf(word) === index) : [];
     const distractors = [...grammatical, ...fallback].slice(0, 2);
-    const variants = answerVariants(item.en);
-    const base = { language: LANGUAGE, level: item.level, topic: item.topic, explanation: item.note, focus: "Phrases en contexte" } as const;
-    const skills = [...vocabSkills(item.topic), ...deduceSentenceSkills(item.en)];
+    const variants = english ? answerVariants(item.en) : [];
+    const base = { language, level: item.level, topic: item.topic, explanation: item.note, focus: "Phrases en contexte" } as const;
+    const skills = english ? [...vocabSkills(item.topic), ...deduceSentenceSkills(item.en)] : (item.skills ?? ["everyday-vocabulary"]);
     return [
       {
         ...base, id: `${item.id}-build`, type: "word-bank", skillTags: [...skills, "sentence-building"],
         prompt: `Construisez : « ${item.fr} »`, tiles: [...words, ...distractors], answer: item.en,
-        hint: buildHint(item.en)
+        hint: english ? buildHint(item.en) : "Commencez par le sujet, puis le verbe conjugué."
       },
       {
         // La traduction n'est révélée qu'après validation (explication), pas dans l'indice.

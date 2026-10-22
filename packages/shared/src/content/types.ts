@@ -25,6 +25,7 @@ export interface VocabSet {
   topic: ExerciseTopic;
   level: CefrLevel;
   title: string;         // ex. "Anatomie et organes"
+  skill?: string;        // compétence de skills.ts (obligatoire hors anglais)
   items: VocabItem[];    // 8 à 24 éléments, traductions `fr` toutes différentes dans la liste
 }
 
@@ -39,6 +40,7 @@ export interface SentenceItem {
   level: CefrLevel;
   en: string;
   fr: string;
+  skills?: string[];     // compétences de skills.ts (obligatoire hors anglais)
   note: string;          // une phrase d'explication en français (tournure, faux ami, grammaire)
 }
 

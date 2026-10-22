@@ -68,7 +68,10 @@ export const SKILLS: Record<LanguageCode, SkillDefinition[]> = {
     { id: "comparison", label: "Comparaison (je…, desto…)", group: "grammar" },
     { id: "travel-vocabulary", label: "Voyage, gare et hôtel", group: "vocabulary" },
     { id: "health-vocabulary", label: "Santé et pharmacie", group: "vocabulary" },
-    { id: "work-vocabulary", label: "Travail et réunions", group: "vocabulary" }
+    { id: "work-vocabulary", label: "Travail et réunions", group: "vocabulary" },
+    { id: "everyday-vocabulary", label: "Vocabulaire et tournures du quotidien", group: "vocabulary" },
+    { id: "listening", label: "Compréhension orale (dictées)", group: "communication" },
+    { id: "sentence-building", label: "Construire une phrase", group: "communication" }
   ],
   es: [
     { id: "ser-estar", label: "Ser et estar", group: "grammar" },
@@ -91,7 +94,8 @@ export const SKILLS: Record<LanguageCode, SkillDefinition[]> = {
     { id: "hotel-travel-vocabulary", label: "Hôtel et voyage", group: "vocabulary" },
     { id: "family-vocabulary", label: "Famille et entourage", group: "vocabulary" },
     { id: "health-vocabulary", label: "Santé et symptômes", group: "vocabulary" },
-    { id: "work-vocabulary", label: "Travail et échéances", group: "vocabulary" }
+    { id: "work-vocabulary", label: "Travail et échéances", group: "vocabulary" },
+    { id: "everyday-vocabulary", label: "Vocabulaire et tournures du quotidien", group: "vocabulary" }
   ]
 };
 

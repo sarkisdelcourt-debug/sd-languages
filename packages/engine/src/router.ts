@@ -48,7 +48,7 @@ interface Route {
 
 const reviewRatings = new Set<ReviewRating>(["again", "hard", "good", "easy"]);
 export const TOPIC_LABELS: Record<ExerciseTopic, string> = {
-  medical: "Anglais médical",
+  medical: "Médical",
   everyday: "Conversation",
   travel: "Voyage",
   grammar: "Grammaire",

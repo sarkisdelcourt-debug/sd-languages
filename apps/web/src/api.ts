@@ -82,9 +82,10 @@ export const api = {
     return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
   },
   vocabulary: (language: string) => request<{ language: string; sets: VocabularySet[] }>(`/api/vocabulary/${language}`),
-  vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[] }) => {
+  vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[]; random?: boolean }) => {
     const query = new URLSearchParams({ direction: options.direction, mode: options.mode });
     if (options.setId) query.set("set", options.setId);
+    if (options.random) query.set("order", "random");
     if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
     return request<PublicExercise[]>(`/api/vocabulary/${language}/drill?${query.toString()}`);
   },

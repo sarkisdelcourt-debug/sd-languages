@@ -29,6 +29,19 @@ describe("route des tests de vocabulaire", () => {
     expect((await engine.handle("GET", "/api/vocabulary/xx")).status).toBe(404);
   });
 
+  it("tire des mots au hasard dans toutes les listes, dans le sens choisi, sans répéter les mots déjà vus", async () => {
+    const engine = createEngine(new MemoryStore());
+    const first = await drillOf(engine, "direction=to-french&mode=choice&order=random");
+    expect(first).toHaveLength(10);
+    expect(first.every((item) => item.prompt.startsWith("Que signifie"))).toBe(true);
+    const lists = new Set(first.map((item) => item.id.split("~")[3]));
+    expect(lists.size).toBeGreaterThan(1);
+    const second = await drillOf(engine, `direction=to-target&mode=typing&order=random&exclude=${first.map((item) => item.id).join(",")}`);
+    expect(second.every((item) => item.prompt.startsWith("Traduisez en anglais"))).toBe(true);
+    const other = await drillOf(engine, "direction=to-french&mode=choice&order=random");
+    expect(other.map((item) => item.id)).not.toEqual(first.map((item) => item.id));
+  });
+
   it("fabrique une série de 10 sans jamais révéler la réponse", async () => {
     const engine = createEngine(new MemoryStore());
     const series = await drillOf(engine, "direction=to-target&mode=choice&set=en-med-v-anatomy");

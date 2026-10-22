@@ -198,7 +198,10 @@ export function createEngine(store: StateStore): Engine {
     const all = drillCandidates(language, direction, mode, setId);
     const fresh = all.filter((exercise) => !excluded.has(exercise.id));
     const pool = fresh.length >= Math.min(count, all.length) ? fresh : all;
-    const series = [...pool].sort((a, b) => rank(a.id) - rank(b.id) || daily(a.id) - daily(b.id)).slice(0, count);
+    // « Mot au hasard » : tirage aléatoire dans le périmètre, sans priorité de révision.
+    const random = query.get("order") === "random";
+    const shuffled = random ? [...pool].map((exercise) => ({ exercise, key: Math.random() })).sort((a, b) => a.key - b.key).map((entry) => entry.exercise) : undefined;
+    const series = (shuffled ?? [...pool].sort((a, b) => rank(a.id) - rank(b.id) || daily(a.id) - daily(b.id))).slice(0, count);
     return ok(series.map(({ answer: _answer, acceptedAnswers: _accepted, ...publicExercise }) => publicExercise));
   });
 

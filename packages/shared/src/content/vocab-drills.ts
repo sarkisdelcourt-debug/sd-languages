@@ -2,6 +2,12 @@ import type { Exercise, LanguageCode } from "../types.js";
 import { slug } from "./generators.js";
 import type { VocabItem, VocabSet } from "./types.js";
 import { DE_VOCAB } from "./de/bank.js";
+import { DE_VERB_SETS } from "./de/verb-lists.js";
+import { DE_VOCAB_EXTRA } from "./de/vocab-extra.js";
+import { EN_VERB_SETS } from "./en/verb-lists.js";
+import { ES_VERB_SETS } from "./es/verb-lists.js";
+import { EN_VOCAB_EXTRA } from "./en/vocab-extra.js";
+import { ES_VOCAB_EXTRA } from "./es/vocab-extra.js";
 import { GENERAL_VOCAB } from "./en/general.js";
 import { MEDICAL_VOCAB } from "./en/medical.js";
 import { ES_VOCAB } from "./es/bank.js";
@@ -19,9 +25,9 @@ export type VocabMode = "choice" | "typing";
 export type ConcreteDirection = Exclude<VocabDirection, "mixed">;
 
 export const VOCAB_SETS: Record<LanguageCode, VocabSet[]> = {
-  en: [...MEDICAL_VOCAB, ...GENERAL_VOCAB],
-  de: DE_VOCAB,
-  es: ES_VOCAB
+  en: [...MEDICAL_VOCAB, ...GENERAL_VOCAB, ...EN_VOCAB_EXTRA, ...EN_VERB_SETS],
+  de: [...DE_VOCAB, ...DE_VOCAB_EXTRA, ...DE_VERB_SETS],
+  es: [...ES_VOCAB, ...ES_VOCAB_EXTRA, ...ES_VERB_SETS]
 };
 
 const LANGUAGE_NAMES: Record<LanguageCode, string> = { en: "anglais", de: "allemand", es: "espagnol" };
@@ -30,7 +36,7 @@ const ID_PREFIX = "vd";
 
 const ARTICLES: Record<LanguageCode, RegExp> = {
   en: /^(?:the|an?|to)\s+/i,
-  de: /^(?:der|die|das|ein|eine)\s+/i,
+  de: /^(?:der|die|das|ein|eine|sich)\s+/i,
   es: /^(?:el|la|los|las|un|una|unos|unas)\s+/i
 };
 const FRENCH_ARTICLES = /^(?:le|la|les|l'|un|une|des|du|de la|de l'|d')\s*/i;

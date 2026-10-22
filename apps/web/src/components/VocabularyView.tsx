@@ -20,6 +20,7 @@ interface Settings {
   direction: VocabDirection;
   mode: VocabMode;
   setId?: string;
+  random?: boolean;
 }
 interface Miss {
   prompt: string;
@@ -33,7 +34,8 @@ function readSettings(): Settings {
     return {
       direction: DIRECTIONS.some((item) => item.id === saved.direction) ? saved.direction! : "to-french",
       mode: MODES.some((item) => item.id === saved.mode) ? saved.mode! : "choice",
-      setId: saved.setId
+      setId: saved.random ? undefined : saved.setId,
+      random: Boolean(saved.random)
     };
   } catch {
     return { direction: "to-french", mode: "choice" };
@@ -54,6 +56,8 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
   const [evaluation, setEvaluation] = useState<AnswerEvaluation>();
   const [misses, setMisses] = useState<Miss[]>([]);
   const [correct, setCorrect] = useState(0);
+  const [answered, setAnswered] = useState(0);
+  const [ended, setEnded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const attemptRef = useRef<{ exerciseId: string; id: string } | undefined>(undefined);
@@ -83,18 +87,23 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
     });
   };
 
-  const start = async (exclude: string[] = []) => {
+  // `keepScore` : en mode « mot au hasard », la série suivante se charge sans remettre le score à zéro.
+  const start = async (exclude: string[] = [], keepScore = false) => {
     setLoading(true);
     setError(undefined);
     try {
-      const drill = await api.vocabularyDrill(language, { ...settings, exclude });
+      const drill = await api.vocabularyDrill(language, { direction: settings.direction, mode: settings.mode, setId: settings.random ? undefined : settings.setId, random: settings.random, exclude });
       setSeries(drill);
       setSeen([...exclude, ...drill.map((item) => item.id)]);
       setIndex(0);
       setAnswer("");
       setEvaluation(undefined);
-      setMisses([]);
-      setCorrect(0);
+      if (!keepScore) {
+        setMisses([]);
+        setCorrect(0);
+        setAnswered(0);
+        setEnded(false);
+      }
     } catch (reason) {
       setError((reason as Error).message);
     } finally {
@@ -118,6 +127,7 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
     try {
       const result = await api.submitAnswer(exercise.id, answer, attemptRef.current.id);
       setEvaluation(result.evaluation);
+      setAnswered((value) => value + 1);
       if (result.evaluation.correct) setCorrect((value) => value + 1);
       else setMisses((current) => [...current, { prompt: exercise.prompt, answer: result.evaluation.expectedAnswer, typed: answer }]);
       onProgress();
@@ -128,17 +138,21 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
     }
   };
   const next = () => {
+    setError(undefined);
+    if (settings.random && index + 1 >= (series?.length ?? 0)) {
+      void start(seen, true);
+      return;
+    }
     setIndex((value) => value + 1);
     setAnswer("");
     setEvaluation(undefined);
-    setError(undefined);
   };
 
-  const total = series?.length ?? 0;
-  const finished = Boolean(series) && index >= total;
+  const total = settings.random ? answered : series?.length ?? 0;
+  const finished = Boolean(series) && (ended || (!settings.random && index >= (series?.length ?? 0)));
   const languageName = LANGUAGES[language].name.toLowerCase();
   const chosenSet = sets.find((set) => set.id === settings.setId);
-  const scopeLabel = chosenSet ? chosenSet.title : "Toutes les listes";
+  const scopeLabel = settings.random ? "Mot au hasard" : chosenSet ? chosenSet.title : "Toutes les listes";
 
   // --- Réglages ---------------------------------------------------------------------------
   if (!series) {
@@ -164,18 +178,21 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
           </div>
           <div className="settings-section"><strong>Liste</strong></div>
           <div className="vocab-sets" role="group" aria-label="Liste de vocabulaire">
-            <button className={!settings.setId ? "vocab-set selected" : "vocab-set"} aria-pressed={!settings.setId} onClick={() => update({ setId: undefined })}>
+            <button className={settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={Boolean(settings.random)} onClick={() => update({ random: true, setId: undefined })}>
+              <strong>Mot au hasard</strong><small>Un mot après l'autre, tiré dans toutes les listes, sans fin</small>
+            </button>
+            <button className={!settings.setId && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={!settings.setId && !settings.random} onClick={() => update({ setId: undefined, random: false })}>
               <strong>Toutes les listes</strong><small>{sets.reduce((sum, set) => sum + set.count, 0)} mots</small>
             </button>
             {sets.map((set) => (
-              <button key={set.id} className={settings.setId === set.id ? "vocab-set selected" : "vocab-set"} aria-pressed={settings.setId === set.id} onClick={() => update({ setId: set.id })}>
+              <button key={set.id} className={settings.setId === set.id && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={settings.setId === set.id && !settings.random} onClick={() => update({ setId: set.id, random: false })}>
                 <strong>{set.title}</strong><small>{set.level} · {set.seen}/{set.count} vus</small>
               </button>
             ))}
           </div>
           {error ? <div className="alert" role="alert">{error}</div> : null}
           <div className="relay-actions">
-            <button className="primary-button" disabled={loading || !sets.length} onClick={() => void start()}>{loading ? "Préparation…" : "Commencer une série de 10"}</button>
+            <button className="primary-button" disabled={loading || !sets.length} onClick={() => void start()}>{loading ? "Préparation…" : settings.random ? "Tirer des mots au hasard" : "Commencer une série de 10"}</button>
           </div>
         </article>
       </section>
@@ -198,7 +215,7 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
             </ul>
           ) : null}
           <div className="relay-actions">
-            <button className="primary-button" disabled={loading} onClick={() => void start(seen)}>Nouvelle série</button>
+            <button className="primary-button" disabled={loading} onClick={() => void start(seen)}>{settings.random ? "Continuer au hasard" : "Nouvelle série"}</button>
             <button className="secondary-button" onClick={() => { setSeries(undefined); void refreshSets(); }}>Changer de liste</button>
           </div>
         </article>
@@ -211,7 +228,7 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
     <section className="exercise-layout">
       <div className="session-head">
         <div><p className="eyebrow">{scopeLabel}</p><h2>{exercise.focus}</h2></div>
-        <span>{index + 1} / {total}</span>
+        <span>{settings.random ? `Mot ${answered + (evaluation ? 0 : 1)} · ${correct} justes` : `${index + 1} / ${total}`}</span>
       </div>
       <article className="exercise-card">
         <div className="exercise-meta"><span>{exercise.level}</span><span>{exercise.type === "multiple-choice" ? "QCM" : "Saisie"}</span></div>
@@ -230,8 +247,9 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
         ) : null}
         {error ? <div className="alert" role="alert">{error}</div> : null}
         <div className="exercise-actions end">
+          {settings.random && answered > 0 ? <button className="secondary-button" onClick={() => setEnded(true)}>Terminer</button> : null}
           {evaluation
-            ? <button className="primary-button" ref={nextRef} onClick={next}>{index + 1 < total ? "Mot suivant" : "Voir le bilan"}</button>
+            ? <button className="primary-button" ref={nextRef} onClick={next}>{settings.random || index + 1 < total ? "Mot suivant" : "Voir le bilan"}</button>
             : <button className="primary-button" disabled={!answer.trim() || loading} onClick={() => void validate()}>{loading ? "Vérification…" : "Vérifier"}</button>}
         </div>
       </article>

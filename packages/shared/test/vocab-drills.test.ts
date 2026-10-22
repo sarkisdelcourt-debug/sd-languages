@@ -105,6 +105,37 @@ describe("tests de vocabulaire dans les deux sens", () => {
     expect(problems).toEqual([]);
   });
 
+  it("garde des listes saines : 14 à 16 mots, traductions et mots distincts, ids uniques", () => {
+    const problems: string[] = [];
+    for (const language of LANGUAGES) {
+      const ids = new Set<string>();
+      for (const set of VOCAB_SETS[language]) {
+        if (ids.has(set.id)) problems.push(`${set.id} : id en double`);
+        ids.add(set.id);
+        if (set.items.length < 8 || set.items.length > 24) problems.push(`${set.id} : ${set.items.length} mots`);
+        const fr = set.items.map((item) => item.fr.toLowerCase());
+        const target = set.items.map((item) => item.en.toLowerCase());
+        if (new Set(fr).size !== fr.length) problems.push(`${set.id} : traductions en double`);
+        if (new Set(target).size !== target.length) problems.push(`${set.id} : mots en double`);
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it("n'ajoute aucun mot déjà présent dans une autre liste (les listes publiées avant le 22/10 gardent leurs rares doublons)", () => {
+    const repeated: string[] = [];
+    for (const language of LANGUAGES) {
+      const owners = new Map<string, string>();
+      for (const set of VOCAB_SETS[language]) for (const item of set.items) {
+        const key = item.en.toLowerCase();
+        const previous = owners.get(key);
+        if (previous && (set.id.includes("-v-x-") || previous.includes("-v-x-"))) repeated.push(`${language} « ${item.en} » : ${owners.get(key)} et ${set.id}`);
+        owners.set(key, set.id);
+      }
+    }
+    expect(repeated).toEqual([]);
+  });
+
   it("couvre au moins 300 mots répartis sur les trois langues", () => {
     for (const language of LANGUAGES) expect(drillCandidates(language, "to-target", "choice").length, language).toBeGreaterThanOrEqual(100);
   });

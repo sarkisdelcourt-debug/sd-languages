@@ -432,3 +432,21 @@ main { min-width: 0; }
 .vocab-misses li { padding: 10px 12px; border-left: 4px solid var(--signal); border-radius: 6px; background: #fff7e6; display: grid; gap: 2px; font-size: 14px; }
 .vocab-misses small { color: var(--muted); }
 .segmented-options small { opacity: .75; font-weight: 500; }
+
+/* Ambiance par langue (22/10/2026) : un dégradé et un liseré de couleur différents pour savoir d'un coup d'œil
+   dans quelle langue on travaille. Anglais = bleu, allemand = ambre, espagnol = corail. Le nom de la langue
+   reste affiché partout : la couleur n'est jamais le seul indice (daltonisme). */
+.app-shell { --lang-a: #e6eefb; --lang-b: #f6f9fe; --lang-bar: #3b6fd4; }
+.app-shell[data-language="de"] { --lang-a: #fbefd3; --lang-b: #fdf8ea; --lang-bar: #c98a12; }
+.app-shell[data-language="es"] { --lang-a: #fbe3de; --lang-b: #fef3f0; --lang-bar: #d2503c; }
+.app-shell > main {
+  background: linear-gradient(165deg, var(--lang-a) 0%, var(--lang-b) 55%, var(--bg) 100%);
+  border-top: 4px solid var(--lang-bar);
+  transition: background .35s ease, border-color .35s ease;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-shell { --lang-a: #14284a; --lang-b: #111d2e; --lang-bar: #6f9cf0; }
+  :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-a: #3a2c0d; --lang-b: #241d10; --lang-bar: #e3a834; }
+  :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-a: #3d1b16; --lang-b: #26171a; --lang-bar: #f08470; }
+}
+@media (prefers-reduced-motion: reduce) { .app-shell > main { transition: none; } }

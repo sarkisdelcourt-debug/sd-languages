@@ -100,7 +100,7 @@ export function App() {
   const unsent = relay?.changesSinceCheckpoint ?? 0;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-language={language}>
       <a className="skip-link" href="#main-content">Aller au contenu principal</a>
       <aside className="sidebar">
         <div className="brand" aria-label="SD Languages">

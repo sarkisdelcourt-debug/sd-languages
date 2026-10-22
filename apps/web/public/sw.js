@@ -3,7 +3,7 @@
 // Toutes les adresses sont relatives à sa portée : « / » sur le PC, « /sd-languages/ » sur GitHub Pages.
 // Les appels /api restants (reprise de l'ancien fichier du PC) passent toujours par le réseau.
 const CACHE_PREFIX = "sd-languages-";
-const SHELL_CACHE = `${CACHE_PREFIX}shell-v7`;
+const SHELL_CACHE = `${CACHE_PREFIX}shell-v8`;
 const SCOPE = new URL(self.registration.scope);
 const at = (relative) => new URL(relative, SCOPE).href;
 const PAGE = at("./");

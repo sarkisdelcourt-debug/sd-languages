@@ -425,11 +425,11 @@ main { min-width: 0; }
 .vocab-layout { max-width: 900px; margin: 0 auto; display: grid; gap: 22px; }
 .vocab-setup { display: grid; gap: 14px; }
 .vocab-sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
-.vocab-set { min-height: 58px; padding: 8px 12px; border: 1px solid #cfd1d3; border-radius: 10px; background: white; color: var(--ink); text-align: left; display: grid; gap: 2px; }
+.vocab-set { min-height: 58px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); text-align: left; display: grid; gap: 2px; }
 .vocab-set small { color: var(--muted); font-size: 12px; }
-.vocab-set.selected { border-color: var(--accent); border-width: 2px; background: #eaf6f3; }
+.vocab-set.selected { border-color: var(--accent); border-width: 2px; background: var(--tint-accent); }
 .vocab-misses { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.vocab-misses li { padding: 10px 12px; border-left: 4px solid var(--signal); border-radius: 6px; background: #fff7e6; display: grid; gap: 2px; font-size: 14px; }
+.vocab-misses li { padding: 10px 12px; border-left: 4px solid var(--signal); border-radius: 6px; background: var(--tint-warn); display: grid; gap: 2px; font-size: 14px; }
 .vocab-misses small { color: var(--muted); }
 .segmented-options small { opacity: .75; font-weight: 500; }
 
@@ -445,8 +445,18 @@ main { min-width: 0; }
   transition: background .35s ease, border-color .35s ease;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .app-shell { --lang-a: #14284a; --lang-b: #111d2e; --lang-bar: #6f9cf0; }
-  :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-a: #3a2c0d; --lang-b: #241d10; --lang-bar: #e3a834; }
-  :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-a: #3d1b16; --lang-b: #26171a; --lang-bar: #f08470; }
+  :root:not([data-theme="light"]) .app-shell { --lang-a: #14233b; --lang-b: var(--bg); --lang-bar: #6f9cf0; }
+  :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-a: #2b2412; --lang-b: var(--bg); --lang-bar: #e3a834; }
+  :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-a: #2d1c1f; --lang-b: var(--bg); --lang-bar: #f08470; }
 }
 @media (prefers-reduced-motion: reduce) { .app-shell > main { transition: none; } }
+
+/* Tests de mots sur téléphone : choix empilés, grands et lisibles (22/10/2026). */
+.vocab-setup .segmented-options { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.vocab-setup .segmented-options button { min-height: 48px; padding: 8px 12px; text-align: center; }
+.vocab-set { min-height: 64px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.vocab-set:active { transform: scale(.98); }
+@media (max-width: 600px) {
+  .vocab-setup .segmented-options { grid-template-columns: 1fr; }
+  .vocab-sets { grid-template-columns: 1fr; }
+}

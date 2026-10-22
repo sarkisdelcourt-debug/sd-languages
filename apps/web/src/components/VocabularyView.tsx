@@ -87,12 +87,19 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
     });
   };
 
+  // Un appui sur une liste la choisit ET lance la série : sur téléphone, rien n'indiquait qu'il fallait ensuite « Commencer ».
+  const pick = (patch: Partial<Settings>) => {
+    update(patch);
+    void start([], false, patch);
+  };
+
   // `keepScore` : en mode « mot au hasard », la série suivante se charge sans remettre le score à zéro.
-  const start = async (exclude: string[] = [], keepScore = false) => {
+  const start = async (exclude: string[] = [], keepScore = false, override: Partial<Settings> = {}) => {
+    const chosen = { ...settings, ...override };
     setLoading(true);
     setError(undefined);
     try {
-      const drill = await api.vocabularyDrill(language, { direction: settings.direction, mode: settings.mode, setId: settings.random ? undefined : settings.setId, random: settings.random, exclude });
+      const drill = await api.vocabularyDrill(language, { direction: chosen.direction, mode: chosen.mode, setId: chosen.random ? undefined : chosen.setId, random: chosen.random, exclude });
       setSeries(drill);
       setSeen([...exclude, ...drill.map((item) => item.id)]);
       setIndex(0);
@@ -161,7 +168,7 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
         <div className="settings-intro">
           <p className="eyebrow">Tests de vocabulaire</p>
           <h2>Révisez vos mots en {languageName}</h2>
-          <p>Choisissez le sens, le format et une liste thématique. Les mots ratés reviennent en premier la fois suivante et alimentent vos révisions.</p>
+          <p>Réglez le sens et le format, puis touchez une liste pour commencer. Les mots ratés reviennent en premier la fois suivante et alimentent vos révisions.</p>
         </div>
         <article className="settings-card vocab-setup">
           <div className="settings-section"><strong>Sens</strong></div>
@@ -178,14 +185,14 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
           </div>
           <div className="settings-section"><strong>Liste</strong></div>
           <div className="vocab-sets" role="group" aria-label="Liste de vocabulaire">
-            <button className={settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={Boolean(settings.random)} onClick={() => update({ random: true, setId: undefined })}>
+            <button className={settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={Boolean(settings.random)} onClick={() => pick({ random: true, setId: undefined })}>
               <strong>Mot au hasard</strong><small>Un mot après l'autre, tiré dans toutes les listes, sans fin</small>
             </button>
-            <button className={!settings.setId && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={!settings.setId && !settings.random} onClick={() => update({ setId: undefined, random: false })}>
+            <button className={!settings.setId && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={!settings.setId && !settings.random} onClick={() => pick({ setId: undefined, random: false })}>
               <strong>Toutes les listes</strong><small>{sets.reduce((sum, set) => sum + set.count, 0)} mots</small>
             </button>
             {sets.map((set) => (
-              <button key={set.id} className={settings.setId === set.id && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={settings.setId === set.id && !settings.random} onClick={() => update({ setId: set.id, random: false })}>
+              <button key={set.id} className={settings.setId === set.id && !settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={settings.setId === set.id && !settings.random} onClick={() => pick({ setId: set.id, random: false })}>
                 <strong>{set.title}</strong><small>{set.level} · {set.seen}/{set.count} vus</small>
               </button>
             ))}

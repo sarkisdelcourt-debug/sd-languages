@@ -12,7 +12,7 @@ export const MEDICAL_VOCAB: VocabSet[] = [
     title: "Consultation et symptômes",
     items: [
       { en: "shortness of breath", fr: "essoufflement" },
-      { en: "dizziness", fr: "vertiges" },
+      { en: "dizziness", fr: "étourdissements, vertiges" },
       { en: "a rash", fr: "une éruption cutanée" },
       { en: "swelling", fr: "un gonflement" },
       { en: "to faint", fr: "s'évanouir" },

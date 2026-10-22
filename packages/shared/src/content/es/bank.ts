@@ -32,7 +32,7 @@ export const ES_VOCAB: VocabSet[] = [
     ["el tren", "le train"], ["el autobús", "le bus"], ["el avión", "l'avion"], ["el taxi", "le taxi"],
     ["el billete", "le billet"], ["la estación", "la gare"], ["el aeropuerto", "l'aéroport"], ["la parada", "l'arrêt"],
     ["el andén", "le quai"], ["la maleta", "la valise"], ["el metro", "le métro"], ["el retraso", "le retard"],
-    ["la salida", "la sortie"], ["el coche", "la voiture"]
+    ["la salida", "le départ, la sortie"], ["el coche", "la voiture"]
   ]),
   vocab("es-v-hotel", "travel", "A2", "À l'hôtel", "hotel-travel-vocabulary", [
     ["la habitación", "la chambre"], ["la llave", "la clé"], ["el desayuno", "le petit-déjeuner"], ["la reserva", "la réservation"],
@@ -50,7 +50,7 @@ export const ES_VOCAB: VocabSet[] = [
     ["el dolor", "la douleur"], ["la fiebre", "la fièvre"], ["la tos", "la toux"], ["el médico", "le médecin"],
     ["la farmacia", "la pharmacie"], ["la receta", "l'ordonnance"], ["el resfriado", "le rhume"], ["el estómago", "l'estomac"],
     ["la cabeza", "la tête"], ["la garganta", "la gorge"], ["el medicamento", "le médicament"], ["la alergia", "l'allergie"],
-    ["la cita", "le rendez-vous"], ["el pecho", "la poitrine"], ["mareado", "étourdi"]
+    ["la cita", "le rendez-vous"], ["el pecho", "la poitrine"], ["mareado", "pris de vertiges"]
   ]),
   vocab("es-v-travail-bureau", "everyday", "B1", "Travail et bureau", "work-vocabulary", [
     ["la oficina", "le bureau"], ["la reunión", "la réunion"], ["el jefe", "le chef"], ["el compañero", "le collègue"],

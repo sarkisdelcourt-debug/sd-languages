@@ -27,7 +27,7 @@ export const ES_VOCAB_EXTRA: VocabSet[] = [
     ["el análisis de sangre", "la prise de sang"], ["la radiografía", "la radiographie"], ["la ecografía", "l'échographie"], ["el escáner", "le scanner"],
     ["la resonancia magnética", "l'IRM"], ["el electrocardiograma", "l'électrocardiogramme"], ["la muestra", "l'échantillon"], ["el resultado", "le résultat"],
     ["la orina", "l'urine"], ["la tensión arterial", "la tension artérielle"], ["el diagnóstico", "le diagnostic"], ["en ayunas", "à jeun"],
-    ["el laboratorio", "le laboratoire"], ["la biopsia", "la biopsie"], ["el pinchazo", "la piqûre de prélèvement"]
+    ["el laboratorio", "le laboratoire"], ["la biopsia", "la biopsie"], ["el pinchazo", "la piqûre"]
   ]),
   vocab("es-v-x-hopital-soins", "medical", "A2", "Hôpital et soins", "health-vocabulary", [
     ["el hospital", "l'hôpital"], ["la enfermera", "l'infirmière"], ["el paciente", "le patient"], ["la consulta", "la consultation"],
@@ -38,7 +38,7 @@ export const ES_VOCAB_EXTRA: VocabSet[] = [
   vocab("es-v-x-chirurgie", "medical", "B1", "Chirurgie", "health-vocabulary", [
     ["la operación", "l'opération"], ["el cirujano", "le chirurgien"], ["el quirófano", "le bloc opératoire"], ["la anestesia", "l'anesthésie"],
     ["la cicatriz", "la cicatrice"], ["el bisturí", "le scalpel"], ["la sutura", "la suture"], ["el postoperatorio", "les suites opératoires"],
-    ["la recuperación", "la convalescence"], ["el injerto", "la greffe"], ["el trasplante", "la transplantation"], ["la prótesis", "la prothèse"],
+    ["la recuperación", "le rétablissement"], ["el injerto", "la greffe (de tissu)"], ["el trasplante", "la transplantation (d'organe)"], ["la prótesis", "la prothèse"],
     ["operar", "opérer"], ["la hemorragia", "l'hémorragie"], ["la infección", "l'infection"]
   ]),
   vocab("es-v-x-urgences", "medical", "B1", "Urgences", "health-vocabulary", [
@@ -62,7 +62,7 @@ export const ES_VOCAB_EXTRA: VocabSet[] = [
   ]),
   vocab("es-v-x-demander-chemin", "travel", "A1", "Demander son chemin", "everyday-vocabulary", [
     ["perdido", "perdu"], ["girar", "tourner"], ["seguir", "continuer"], ["cruzar", "traverser"],
-    ["la manzana", "le pâté de maisons"], ["la cuadra", "le pâté de maisons (Amérique latine)"], ["enfrente", "en face"], ["al lado", "à côté"],
+    ["la manzana", "le pâté de maisons (Espagne)"], ["la cuadra", "le pâté de maisons (Amérique latine)"], ["enfrente", "en face"], ["al lado", "à côté"],
     ["detrás", "derrière"], ["delante", "devant"], ["la dirección", "l'adresse"], ["a pie", "à pied"],
     ["la rotonda", "le rond-point"], ["la acera", "le trottoir"], ["¿Cómo se llega?", "Comment y arrive-t-on ?"]
   ]),
@@ -80,14 +80,14 @@ export const ES_VOCAB_EXTRA: VocabSet[] = [
     ["los guantes", "les gants"], ["el cinturón", "la ceinture"], ["las gafas", "les lunettes"]
   ]),
   vocab("es-v-x-maison", "everyday", "A1", "La maison", "everyday-vocabulary", [
-    ["la casa", "la maison"], ["el piso", "l'appartement"], ["el salón", "le salon"], ["el dormitorio", "la chambre à coucher"],
+    ["la casa", "la maison"], ["el piso", "l'appartement (Espagne)"], ["el salón", "le salon"], ["el dormitorio", "la chambre à coucher"],
     ["la cocina", "la cuisine"], ["el jardín", "le jardin"], ["la puerta", "la porte"], ["la ventana", "la fenêtre"],
     ["la escalera", "l'escalier"], ["el techo", "le plafond"], ["el suelo", "le sol"], ["la pared", "le mur"],
     ["el sofá", "le canapé"], ["la silla", "la chaise"], ["el armario", "l'armoire"]
   ]),
   vocab("es-v-x-cuisine", "everyday", "A2", "Cuisine et cuisiner", "everyday-vocabulary", [
     ["cocinar", "cuisiner"], ["freír", "frire"], ["hervir", "faire bouillir"], ["asar", "rôtir"],
-    ["cortar", "couper"], ["la sartén", "la poêle"], ["la olla", "la casserole"], ["el horno", "le four"],
+    ["cortar", "couper"], ["la sartén", "la poêle"], ["la olla", "la marmite"], ["el horno", "le four"],
     ["la nevera", "le réfrigérateur"], ["el plato", "l'assiette"], ["el vaso", "le verre"], ["la cuchara", "la cuillère"],
     ["la sal", "le sel"], ["el aceite", "l'huile"], ["la receta de cocina", "la recette de cuisine"]
   ]),
@@ -100,14 +100,14 @@ export const ES_VOCAB_EXTRA: VocabSet[] = [
   vocab("es-v-x-banque-argent", "everyday", "A2", "Banque et argent", "everyday-vocabulary", [
     ["la cuenta bancaria", "le compte bancaire"], ["el cajero automático", "le distributeur de billets"], ["sacar dinero", "retirer de l'argent"], ["depositar", "déposer (sur un compte)"],
     ["la transferencia", "le virement"], ["el préstamo", "le prêt"], ["el saldo", "le solde"], ["la comisión", "les frais"],
-    ["el billete de euro", "le billet d'euro"], ["la moneda", "la pièce de monnaie"], ["pagar", "payer"], ["el ahorro", "l'épargne"],
+    ["el billete de euro", "le billet (de banque)"], ["la moneda", "la pièce de monnaie"], ["pagar", "payer"], ["el ahorro", "l'épargne"],
     ["la deuda", "la dette"], ["el impuesto", "l'impôt"], ["la factura", "la facture"]
   ]),
   vocab("es-v-x-telephone-courriel", "everyday", "B1", "Téléphone et courriel pro", "work-vocabulary", [
-    ["el teléfono móvil", "le téléphone portable"], ["marcar", "composer"], ["colgar", "raccrocher"], ["contestar", "répondre"],
+    ["el teléfono móvil", "le téléphone portable"], ["marcar", "composer"], ["colgar", "raccrocher"], ["contestar", "répondre (au téléphone)"],
     ["dejar un mensaje", "laisser un message"], ["el adjunto", "la pièce jointe"], ["enviar", "envoyer"], ["reenviar", "transférer"],
     ["el destinatario", "le destinataire"], ["el asunto", "l'objet"], ["Estimado señor", "Cher Monsieur"], ["Un cordial saludo", "Cordialement"],
-    ["la cobertura", "le réseau"], ["la bandeja de entrada", "la boîte de réception"], ["responder", "répondre par écrit"]
+    ["la cobertura", "le réseau"], ["la bandeja de entrada", "la boîte de réception"], ["responder", "répondre (à un message)"]
   ]),
   vocab("es-v-x-loisirs", "everyday", "A2", "Loisirs", "everyday-vocabulary", [
     ["el deporte", "le sport"], ["la música", "la musique"], ["leer", "lire"], ["la película", "le film"],

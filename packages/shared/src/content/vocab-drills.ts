@@ -60,6 +60,31 @@ export function typedVariants(answer: string, strip: RegExp): string[] {
   return [...variants];
 }
 
+/**
+ * Même sens dans une autre liste (« the operating theatre » / « the operating room ») : en saisie,
+ * quand on interroge toutes les listes ou au hasard, la réponse juste d'un synonyme d'une autre liste
+ * doit être acceptée. On compare les mots sans article ni précision entre parenthèses.
+ */
+// Comme FRENCH_ARTICLES, mais sans retirer le début d'un mot (« laboratoire » ne perd pas « la »).
+const FRENCH_KEY_ARTICLES = /^(?:(?:le|la|les|un|une|des|du|de la|de l')\s+|l'|d')/i;
+const meaningKey = (text: string, strip: RegExp) => text.replace(/\s*\([^)]*\)/g, "").trim().toLowerCase().replace(strip, "").trim();
+const meaningIndexes = new Map<string, Map<string, string[]>>();
+function sameMeaning(language: LanguageCode, toTarget: boolean, item: VocabItem): string[] {
+  const sets = VOCAB_SETS[language];
+  const key = (value: string) => meaningKey(value, toTarget ? FRENCH_KEY_ARTICLES : ARTICLES[language]);
+  const indexId = `${language}${toTarget}`;
+  let index = meaningIndexes.get(indexId);
+  if (!index) {
+    index = new Map();
+    for (const set of sets) for (const entry of set.items) {
+      const from = key(toTarget ? entry.fr : entry.en);
+      index.set(from, [...(index.get(from) ?? []), toTarget ? entry.en : entry.fr]);
+    }
+    meaningIndexes.set(indexId, index);
+  }
+  return index.get(key(toTarget ? item.fr : item.en)) ?? [];
+}
+
 /** Direction réelle d'un mot quand le sens demandé est « mélangé » : stable pour un même mot. */
 export function concreteDirection(direction: VocabDirection, item: VocabItem): ConcreteDirection {
   if (direction !== "mixed") return direction;
@@ -96,7 +121,9 @@ export function drillExercise(language: LanguageCode, set: VocabSet, item: Vocab
     };
   }
   const first = (answer.replace(toTarget ? ARTICLES[language] : FRENCH_ARTICLES, "").trim()[0] ?? "").toLowerCase();
-  const variants = typedVariants(answer, toTarget ? ARTICLES[language] : FRENCH_ARTICLES);
+  const strip = toTarget ? ARTICLES[language] : FRENCH_ARTICLES;
+  const equivalents = sameMeaning(language, toTarget, item).filter((other) => other !== answer);
+  const variants = [...new Set([...typedVariants(answer, strip), ...equivalents, ...equivalents.flatMap((other) => typedVariants(other, strip))])];
   return {
     ...base, type: "translation",
     ...(variants.length ? { acceptedAnswers: variants } : {}),

@@ -140,3 +140,14 @@ describe("tests de vocabulaire dans les deux sens", () => {
     for (const language of LANGUAGES) expect(drillCandidates(language, "to-target", "choice").length, language).toBeGreaterThanOrEqual(100);
   });
 });
+
+describe("synonymes d'autres listes en saisie", () => {
+  it("accepte « operating room » pour « le bloc opératoire » même si la liste interrogée contient « operating theatre »", () => {
+    const set = VOCAB_SETS.en.find((candidate) => candidate.items.some((entry) => entry.en === "the operating theatre"))!;
+    const item = set.items.find((entry) => entry.en === "the operating theatre")!;
+    const drill = drillExercise("en", set, item, "to-target", "typing");
+    expect(evaluateAnswer(drill, "the operating theatre").correct).toBe(true);
+    expect(evaluateAnswer(drill, "operating room").correct).toBe(true);
+    expect(evaluateAnswer(drill, "kitchen").correct).toBe(false);
+  });
+});

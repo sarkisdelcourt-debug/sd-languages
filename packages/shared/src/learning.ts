@@ -31,7 +31,7 @@ function tolerateSpelling(value: string): string {
 }
 
 export function normalizeAnswer(value: string): string {
-  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr"));
+  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr").replace(/œ/g, "oe").replace(/æ/g, "ae"));
 }
 
 function normalizeSurface(value: string): string {

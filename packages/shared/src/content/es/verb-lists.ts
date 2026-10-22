@@ -11,7 +11,7 @@ const vocab = (
 
 export const ES_VERB_SETS: VocabSet[] = [
   vocab("es-v-verbs-essentiels", "everyday", "A1", "Verbes : les indispensables", "everyday-vocabulary", [
-    ["ser", "être"], ["estar", "se trouver"], ["haber", "avoir (auxiliaire)"], ["vivir", "vivre"], ["hablar", "parler"],
+    ["ser", "être"], ["estar", "être (lieu, état)"], ["haber", "avoir (auxiliaire)"], ["vivir", "vivre"], ["hablar", "parler"],
     ["comer", "manger"], ["beber", "boire"], ["gustar", "plaire"], ["llamarse", "s'appeler"], ["trabajar", "travailler"],
     ["estudiar", "étudier"], ["llevar", "porter"], ["dejar", "laisser"], ["ayudar", "aider"], ["parecer", "sembler"]
   ]),
@@ -27,7 +27,7 @@ export const ES_VERB_SETS: VocabSet[] = [
   ]),
   vocab("es-v-verbs-communication", "everyday", "A2", "Verbes : communiquer", "everyday-vocabulary", [
     ["preguntar", "poser une question"], ["pedir", "demander"], ["contar", "raconter"], ["explicar", "expliquer"], ["llamar", "appeler"],
-    ["escribir", "écrire"], ["discutir", "discuter"], ["repetir", "répéter"], ["interrumpir", "interrompre"], ["avisar", "prévenir"],
+    ["escribir", "écrire"], ["discutir", "se disputer, débattre"], ["repetir", "répéter"], ["interrumpir", "interrompre"], ["avisar", "prévenir"],
     ["saludar", "saluer"], ["prometer", "promettre"], ["gritar", "crier"], ["mentir", "mentir"], ["agradecer", "remercier"]
   ]),
   vocab("es-v-verbs-pensee-emotion", "everyday", "B1", "Verbes : pensée et émotion", "everyday-vocabulary", [
@@ -38,7 +38,7 @@ export const ES_VERB_SETS: VocabSet[] = [
   vocab("es-v-verbs-travail", "everyday", "B1", "Verbes : le travail", "work-vocabulary", [
     ["contratar", "embaucher"], ["despedir", "licencier"], ["cobrar", "toucher (un salaire)"], ["ganar", "gagner"], ["jubilarse", "prendre sa retraite"],
     ["dirigir", "diriger"], ["organizar", "organiser"], ["entregar", "remettre"], ["firmar", "signer"], ["gestionar", "gérer"],
-    ["solicitar", "postuler"], ["ascender", "être promu"], ["renunciar", "démissionner"], ["atender", "s'occuper de (clients)"], ["reunirse", "se réunir"]
+    ["solicitar", "postuler"], ["ascender", "être promu"], ["renunciar", "renoncer, démissionner"], ["atender", "s'occuper de (clients)"], ["reunirse", "se réunir"]
   ]),
   vocab("es-v-verbs-medecine", "medical", "B1", "Verbes : médecine et soin", "health-vocabulary", [
     ["doler", "avoir mal"], ["toser", "tousser"], ["sangrar", "saigner"], ["respirar", "respirer"], ["vomitar", "vomir"],

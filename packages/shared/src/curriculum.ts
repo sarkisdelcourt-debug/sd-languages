@@ -5,6 +5,8 @@ import type {
   LanguageCode
 } from "./types.js";
 import { ENGLISH_BANK } from "./content/en/index.js";
+import { GERMAN_BANK } from "./content/de/index.js";
+import { SPANISH_BANK } from "./content/es/index.js";
 import { withContractionVariants } from "./content/generators.js";
 import { SPANISH_A1_EXERCISES } from "./spanish-a1.js";
 
@@ -835,7 +837,9 @@ export const EXERCISES: Exercise[] = [
   ...EXERCISES_BY_LANGUAGE.de,
   ...EXERCISES_BY_LANGUAGE.es,
   ...SPANISH_A1_EXERCISES,
-  ...ENGLISH_BANK
+  ...ENGLISH_BANK,
+  ...SPANISH_BANK,
+  ...GERMAN_BANK
 ];
 
 export function getDiagnosticQuestions(language: LanguageCode): DiagnosticQuestion[] {

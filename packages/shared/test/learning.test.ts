@@ -211,11 +211,11 @@ describe("cartes de révision lisibles (21/10/2026)", () => {
 });
 
 describe("couverture du contenu par langue (21/10/2026)", () => {
-  it("signale l'allemand et l'espagnol comme en construction (moins de 50 exercices), pas l'anglais", () => {
-    expect(contentCoverage("en")).toMatchObject({ language: "en", inConstruction: false });
-    expect(contentCoverage("en").exercises).toBeGreaterThan(50);
-    expect(contentCoverage("de")).toMatchObject({ inConstruction: true, exercises: EXERCISES.filter((item) => item.language === "de").length });
-    expect(contentCoverage("es").inConstruction).toBe(true);
-    expect(contentCoverage("de").exercises).toBeLessThan(contentCoverage("es").exercises);
+  it("ne signale « en construction » que les langues de moins de 50 exercices", () => {
+    for (const language of ["en", "de", "es"] as const) {
+      const exercises = EXERCISES.filter((item) => item.language === language).length;
+      expect(contentCoverage(language), language).toMatchObject({ language, exercises, inConstruction: exercises < 50 });
+    }
+    expect(contentCoverage("en").inConstruction).toBe(false);
   });
 });

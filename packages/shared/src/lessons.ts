@@ -1,4 +1,5 @@
 import { ENGLISH_LESSON_REVISIONS } from "./english-lessons.js";
+import { OTHER_LANGUAGE_LESSON_REVISIONS } from "./other-lessons.js";
 import { SPANISH_A1_LESSON_REVISIONS } from "./spanish-a1.js";
 import type { GuidedLessonDefinition } from "./types.js";
 
@@ -694,7 +695,8 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
 
 const REVISIONS: Array<Pick<GuidedLessonDefinition, "id" | "revision"> & Partial<GuidedLessonDefinition>> = [
   ...SPANISH_A1_LESSON_REVISIONS,
-  ...ENGLISH_LESSON_REVISIONS
+  ...ENGLISH_LESSON_REVISIONS,
+  ...OTHER_LANGUAGE_LESSON_REVISIONS
 ];
 
 /**

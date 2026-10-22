@@ -10,6 +10,7 @@ import type {
   Exercise,
   ExerciseTopic,
   GuidedLessonView,
+  LanguageCode,
   LanguageDefinition,
   LanguageSettings,
   LearningGoal,
@@ -22,6 +23,7 @@ import type {
   SkillsView
 } from "@shared/types";
 import { engine } from "./local/device";
+import { aiReplyFor } from "./ai/conversation";
 
 export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers"> & {
   recommendationScore?: number;
@@ -89,8 +91,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ scenarioId })
     }),
-  sendMessage: (language: string, text: string) =>
-    request<ConversationReply>(`/api/conversations/${language}`, { method: "POST", body: JSON.stringify({ text }) }),
+  sendMessage: async (language: string, text: string) =>
+    request<ConversationReply>(`/api/conversations/${language}`, {
+      method: "POST",
+      body: JSON.stringify({ text, ai: await aiReplyFor("conversation", language as LanguageCode, text) })
+    }),
   lesson: (language: string, lessonId?: string) => request<GuidedLessonView>(
     `/api/lessons/${language}${lessonId ? `?lessonId=${encodeURIComponent(lessonId)}` : ""}`
   ),
@@ -105,10 +110,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ answer, attemptId, sessionId, exerciseId })
     }),
-  messageLesson: (language: string, text: string) =>
+  messageLesson: async (language: string, text: string) =>
     request<{ view: GuidedLessonView; reply: ConversationReply }>(`/api/lessons/${language}/message`, {
       method: "POST",
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text, ai: await aiReplyFor("lesson", language as LanguageCode, text) })
     }),
   pronunciation: (language: string) => request<PronunciationLabView>(`/api/pronunciation/${language}`),
   assessPronunciation: (promptId: string, transcript: string, mode: PronunciationAttemptMode, attemptId: string) =>

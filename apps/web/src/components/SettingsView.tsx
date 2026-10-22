@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import type { CefrLevel, LanguageCode, LanguageSettings, LearningGoal } from "@shared/types";
 import { api } from "../api";
+import { AiCoachSettings } from "./AiCoachSettings";
 
 const GOALS: Array<{ id: LearningGoal; title: string; description: string; mark: string }> = [
   { id: "fluency", title: "Aisance générale", description: "Parler et écrire avec plus de naturel", mark: "AI" },
@@ -61,8 +62,9 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
         </div>
         <div className="settings-section"><strong>Niveau visé</strong><span>Le cap que vous vous fixez pour cette langue.</span></div>
         <div className="level-options">{LEVELS.map((level) => <button key={level} className={settings.targetLevel === level ? "selected" : ""} onClick={() => setSettings({ ...settings, targetLevel: level })}>{level}</button>)}</div>
-        <div className="settings-footer"><span>{saved ? "✓ Préférences enregistrées sur cet appareil" : "Aucune donnée envoyée dans le cloud"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : "Enregistrer"}</button></div>
+        <div className="settings-footer"><span>{saved ? "✓ Préférences enregistrées sur cet appareil" : "Rien ne quitte cet appareil, sauf si vous activez le coach IA"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : "Enregistrer"}</button></div>
       </article>
+      <AiCoachSettings />
     </section>
   );
 }

@@ -384,3 +384,13 @@ main { min-width: 0; }
 .path-chapter > summary::-webkit-details-marker { display: none; }
 .path-chapter > summary:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
 .path-chapter.acquired:not([open]) > summary { min-height: 0; }
+
+/* Coach IA facultatif */
+.ai-badge { margin-left: 6px; padding: 1px 6px; border: 1px solid currentColor; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .06em; vertical-align: middle; }
+.message .ai-badge { display: inline-block; margin: 0 0 4px; }
+.ai-settings { display: grid; gap: 14px; }
+.ai-help { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.ai-state { margin: 0; color: var(--muted); font-size: 13px; }
+.ai-consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 13px; line-height: 1.45; }
+.ai-consent input { width: 20px; height: 20px; margin-top: 2px; }
+.ai-settings .relay-actions .primary-button, .ai-settings .relay-actions .secondary-button { margin-top: 0; }

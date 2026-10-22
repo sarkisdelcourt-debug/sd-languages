@@ -125,6 +125,8 @@ export interface ConversationMessage {
   createdAt: string;
   correction?: string;
   explanation?: string;
+  /** « ai » quand la réponse du coach vient de l'IA facultative ; absent = coach local à règles. */
+  source?: "ai";
 }
 
 export interface ConversationThread {

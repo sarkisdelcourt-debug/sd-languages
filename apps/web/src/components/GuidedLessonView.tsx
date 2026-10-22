@@ -350,7 +350,7 @@ export function GuidedLessonView({
           <div className="lesson-messages" aria-live="polite">
             {session.conversation.messages.map((item) => (
               <div className={`lesson-message ${item.role}`} key={item.id}>
-                <span>{item.role === "coach" ? "Coach" : "Vous"}</span><p>{item.text}</p>
+                <span>{item.role === "coach" ? "Coach" : "Vous"}{item.source === "ai" ? <b className="ai-badge" title="Réponse générée par Claude Haiku">IA</b> : null}</span><p>{item.text}</p>
                 {item.correction ? <small className="lesson-correction"><strong>Plutôt : {item.correction}</strong>{item.explanation ? <span>{item.explanation}</span> : null}</small> : null}
               </div>
             ))}

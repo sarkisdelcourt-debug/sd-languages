@@ -2,9 +2,10 @@ import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../../shared/src/curriculum.js"
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
 import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/catalog.js";
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
-import type { CefrLevel, ExerciseTopic, LearningGoal, ReviewRating } from "../../shared/src/types.js";
+import type { CefrLevel, ConversationScenario, ExerciseTopic, LanguageCode, LearningGoal, ReviewRating } from "../../shared/src/types.js";
+import { parseAiReply } from "./modules/ai-coach.js";
 import { rankExercises, selectAdaptiveExercises, selectTopicExercises } from "./modules/adaptive-practice.js";
-import { LocalCoachProvider } from "./modules/coach.js";
+import { LocalCoachProvider, buildAiReply } from "./modules/coach.js";
 import { createDailyPlan } from "./modules/daily-plan.js";
 import {
   abandonLessonSession,
@@ -74,6 +75,11 @@ export interface Engine {
 
 export function createEngine(store: StateStore): Engine {
   const coach = new LocalCoachProvider();
+  // Une réponse IA déjà validée (ai-coach.ts) remplace la réponse locale ; sinon le coach à règles répond.
+  const respond = (language: LanguageCode, text: string, ai: unknown, options: { scenario?: ConversationScenario; scenarioStepIndex?: number }) => {
+    const validated = parseAiReply(ai);
+    return validated ? buildAiReply(language, text, validated, options) : coach.reply(language, text, options);
+  };
   const routes: Route[] = [];
   const route = (method: HttpMethod, pattern: string, handler: Handler) => {
     routes.push({ method, segments: pattern.split("/").filter(Boolean), handler });
@@ -366,7 +372,7 @@ export function createEngine(store: StateStore): Engine {
       const lesson = findLessonById(session.lessonId, session.lessonRevision);
       const scenario = CONVERSATION_SCENARIOS.find((candidate) => candidate.id === lesson.scenarioId);
       if (!scenario) return { error: "Scénario pédagogique introuvable." } as const;
-      const reply = coach.reply(language, text.trim(), {
+      const reply = respond(language, text.trim(), body?.ai, {
         scenario,
         scenarioStepIndex: session.conversation.scenarioStepIndex ?? 0
       });
@@ -477,7 +483,7 @@ export function createEngine(store: StateStore): Engine {
     return ok(await store.update((state) => {
       const thread = state.conversations[language];
       const scenario = CONVERSATION_SCENARIOS.find((candidate) => candidate.id === thread.activeScenarioId);
-      const result = coach.reply(language, text.trim(), {
+      const result = respond(language, text.trim(), body?.ai, {
         scenario,
         scenarioStepIndex: thread.scenarioStepIndex ?? 0
       });

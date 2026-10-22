@@ -156,3 +156,31 @@ export interface SpeechToTextProvider {
 export interface TextToSpeechProvider {
   synthesize(text: string, language: LanguageCode): Promise<Uint8Array>;
 }
+
+/**
+ * Réponse issue de l'IA (déjà validée par parseAiReply) mise au format du coach local. La progression
+ * reste déterministe : une étape n'avance que si l'IA le dit ET que le message contient au moins
+ * trois mots — jamais sur un « ok » ou un message vide, même si le modèle s'est trompé.
+ */
+export function buildAiReply(
+  language: LanguageCode,
+  text: string,
+  ai: { reply: string; correction: string; explanation: string; stepAchieved: boolean },
+  options: { now?: Date; scenario?: ConversationScenario; scenarioStepIndex?: number } = {}
+): ConversationReply {
+  const createdAt = (options.now ?? new Date()).toISOString();
+  const trimmed = text.trim();
+  const step = options.scenario?.steps[options.scenarioStepIndex ?? 0];
+  const sameAsInput = normalizeAnswer(ai.correction) === normalizeAnswer(trimmed);
+  return {
+    learnerMessage: {
+      id: crypto.randomUUID(),
+      role: "learner",
+      text,
+      createdAt,
+      ...(ai.correction && !sameAsInput ? { correction: ai.correction, explanation: ai.explanation } : {})
+    },
+    coachMessage: { id: crypto.randomUUID(), role: "coach", text: ai.reply, createdAt, source: "ai" },
+    scenarioAdvanced: Boolean(step && ai.stepAchieved && wordCount(trimmed) >= 3)
+  };
+}

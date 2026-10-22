@@ -1,0 +1,14 @@
+{
+ "lesson-de-daily-basics": {"skills": ["articles-gender","everyday-vocabulary","present-tense"], "keywords": ["kaufen","brot","wasser","käse","euro","kosten","nehme","möchte","kasse","bezahl","salat","fisch"]},
+ "lesson-de-check-in-politely": {"skills": ["possessives","articles-gender","travel-vocabulary"], "keywords": ["schlüssel","zimmer","reservierung","ihr","name","hotel","pass"]},
+ "lesson-de-build-basic-sentences": {"skills": ["present-tense","articles-gender","verb-second"], "keywords": ["ich wohne","ich esse","ich habe","wir ","familie","wohn","arbeit"]},
+ "lesson-de-train-ticket": {"skills": ["travel-vocabulary","verb-second","dative"], "keywords": ["fahrkarte","zug","bahnhof","gleis","verspätung","umsteig","ticket","nach "]},
+ "lesson-de-plan-a-trip": {"skills": ["modals","verb-second","travel-vocabulary"], "keywords": ["muss","kann","möchte","will","soll","reise","früh","morgen"]},
+ "lesson-de-pay-and-confirm": {"skills": ["dative","modals","everyday-vocabulary"], "keywords": ["bezahl","karte","mit ","bar","geldbeutel","brauche","rechnung","bestätig"]},
+ "lesson-de-explain-organise": {"skills": ["perfekt","subordinate-clauses","work-vocabulary"], "keywords": ["weil","dass","habe","bin ","besprechung","bericht","freitag","termin"]},
+ "lesson-de-explain-a-delay": {"skills": ["subordinate-clauses","work-vocabulary","separable-verbs"], "keywords": ["verspät","verschoben","weil","obwohl","später","montag","anfang","besprechung"]},
+ "lesson-de-explain-health-absence": {"skills": ["health-vocabulary","perfekt","dative"], "keywords": ["kopfschmerz","halsschmerz","gegen","krank","arzt","medikament","fieber","apotheke","untersuch"]},
+ "lesson-de-handle-disruption": {"skills": ["konjunktiv-2","subordinate-clauses","travel-vocabulary"], "keywords": ["wäre","hätte","würde","könnte","ausgefallen","verspätung","wenn "]},
+ "lesson-de-propose-an-alternative": {"skills": ["konjunktiv-2","separable-verbs","modals"], "keywords": ["hätten sie","könnten sie","würde","vielleicht","alternative","stattdessen","ausfall"]},
+ "lesson-de-clarify-a-disruption": {"skills": ["relative-clauses","dative","separable-verbs"], "keywords": ["der ","mit dem","bei der","den ","relativ","kollege","radiolog","fahren wollten"]}
+}

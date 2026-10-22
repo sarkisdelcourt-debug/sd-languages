@@ -12,6 +12,7 @@ import { ReviewView } from "./components/ReviewView";
 import { SettingsView } from "./components/SettingsView";
 import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
+import { AI_NOTICE_EVENT } from "./ai/settings";
 import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
 type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "conversation" | "settings" | "data";
@@ -51,6 +52,7 @@ export function App() {
   const [dashboard, setDashboard] = useState<DashboardSnapshot>();
   const [relay, setRelay] = useState<RelayStatus>();
   const [externalChange, setExternalChange] = useState(false);
+  const [aiNotice, setAiNotice] = useState<string>();
   const [error, setError] = useState<string>();
   const [moreOpen, setMoreOpen] = useState(false);
   /** Série ciblée demandée depuis « Mes acquis » ; effacée dès que l'écran S'entraîner est quitté. */
@@ -59,6 +61,12 @@ export function App() {
   const refreshDashboard = useCallback(() => {
     api.dashboard().then(setDashboard).catch((reason: Error) => setError(reason.message));
     getRelayStatus().then(setRelay).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const handleNotice = (event: Event) => setAiNotice(String((event as CustomEvent).detail ?? ""));
+    window.addEventListener(AI_NOTICE_EVENT, handleNotice);
+    return () => window.removeEventListener(AI_NOTICE_EVENT, handleNotice);
   }, []);
 
   useEffect(() => {
@@ -159,6 +167,17 @@ export function App() {
             </div>
           ) : null}
         </header>
+
+        {aiNotice ? (
+          <aside className="offline-banner is-offline" role="status">
+            <span className="offline-symbol" aria-hidden="true">!</span>
+            <div>
+              <strong>Coach IA non utilisé pour ce message</strong>
+              <span>{aiNotice}</span>
+            </div>
+            <button type="button" onClick={() => setAiNotice(undefined)}>OK</button>
+          </aside>
+        ) : null}
 
         {externalChange ? (
           <aside className="offline-banner" aria-live="polite">

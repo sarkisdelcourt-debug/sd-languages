@@ -146,6 +146,7 @@ export function ConversationView({ language }: { language: LanguageCode }) {
         {thread.messages.map((message) => (
           <div key={message.id} className={`message-row ${message.role}`}>
             <div className="message">
+              {message.source === "ai" ? <span className="ai-badge" title="Réponse générée par Claude Haiku">IA</span> : null}
               <p>{message.text}</p>
               {message.correction ? <aside className="correction"><strong>Suggestion</strong><span>{message.correction}</span><small>{message.explanation}</small></aside> : null}
               {message.role === "coach" && speechCapabilities.synthesis ? <button className="speak-button" onClick={() => speak(message.text)} aria-label="Écouter la réponse">Écouter</button> : null}

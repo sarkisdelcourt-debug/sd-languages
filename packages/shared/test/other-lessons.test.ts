@@ -17,10 +17,9 @@ const searchableText = (item: Exercise) => [
 describe.each(["de", "es"] as const)("leçons guidées %s reliées aux nouvelles banques", (language) => {
   const lessons = GUIDED_LESSONS.filter((lesson) => lesson.language === language);
 
-  it("donne six exercices distincts de la bonne langue à chaque leçon (hors B2 espagnol, banque trop mince)", () => {
+  it("donne six exercices distincts de la bonne langue à chaque leçon", () => {
     expect(lessons).toHaveLength(12);
     for (const lesson of lessons) {
-      if (language === "es" && lesson.level === "B2") continue;
       expect(lesson.exerciseIds, lesson.id).toHaveLength(6);
       expect(new Set(lesson.exerciseIds).size, lesson.id).toBe(6);
       expect(lesson.exerciseIds.every((id) => exercise(id).language === language), lesson.id).toBe(true);
@@ -30,7 +29,6 @@ describe.each(["de", "es"] as const)("leçons guidées %s reliées aux nouvelles
   it("reste au niveau exact de la leçon et n'emploie aucun exercice dans deux leçons", () => {
     const owners = new Map<string, string[]>();
     for (const lesson of lessons) {
-      if (language === "es" && lesson.level === "B2") continue;
       for (const id of lesson.exerciseIds) {
         expect(exercise(id).level, `${lesson.id} → ${id}`).toBe(lesson.level);
         owners.set(id, [...(owners.get(id) ?? []), lesson.id]);
@@ -41,7 +39,6 @@ describe.each(["de", "es"] as const)("leçons guidées %s reliées aux nouvelles
 
   it("varie les formats dans chaque leçon (au moins trois)", () => {
     for (const lesson of lessons) {
-      if (language === "es" && lesson.level === "B2") continue;
       expect(new Set(lesson.exerciseIds.map((id) => exercise(id).type)).size, lesson.id).toBeGreaterThanOrEqual(3);
     }
   });

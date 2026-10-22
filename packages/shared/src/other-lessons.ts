@@ -6,8 +6,8 @@ import type { GuidedLessonDefinition } from "./types.js";
  * Comme pour l'anglais : 6 exercices par leçon, choisis pour l'objectif de la leçon, au niveau
  * exact (A1 pour une leçon A1), formats variés, et aucun id dans deux leçons d'une même langue.
  * Les leçons A1 allemandes s'appuient sur `content/de/beginner.ts`. Les trois premières leçons
- * espagnoles gardent leur révision 2 (`spanish-a1.ts`). Le B2 espagnol reste en révision 1 :
- * la banque n'a que 3 exercices de ce niveau. Le micro-cours de la révision 1 est conservé.
+ * espagnoles gardent leur révision 2 (`spanish-a1.ts`). Le B2 espagnol s'appuie sur `content/es/advanced.ts`.
+ * Le micro-cours de la révision 1 est conservé.
  */
 type LessonRevision = Pick<GuidedLessonDefinition, "id" | "revision" | "estimatedMinutes" | "exerciseIds">
   & Partial<Pick<GuidedLessonDefinition, "relevance">>;
@@ -111,6 +111,22 @@ const SPANISH: LessonRevision[] = [
     id: "lesson-es-explain-health-availability", revision: 2, estimatedMinutes: 15,
     exerciseIds: ["es-b1-translation-work-schedule", "es-s-087-build", "es-s-087-listen", "es-b1-translation-doctor", "es-s-084-build", "es-s-084-listen"],
     relevance: { keywords: ["jueves", "fiebre", "garganta", "debería", "descansar", "semana"] }
+  },
+  // B2
+  {
+    id: "lesson-es-negotiate-conditions", revision: 2, estimatedMinutes: 16,
+    exerciseIds: ["es-hw-b2-nego-pairs", "es-hw-b2-nego-build", "es-hw-b2-nego-listen", "es-hw-b2-nego-mcq-siempre", "es-hw-b2-nego-gap-conditional", "es-hw-b2-nego-translation"],
+    relevance: { keywords: ["plazo", "con tal de que", "a menos que", "siempre que", "tuviéramos", "propuesta"] }
+  },
+  {
+    id: "lesson-es-find-a-collaborator", revision: 2, estimatedMinutes: 16,
+    exerciseIds: ["es-hw-b2-profile-pairs", "es-hw-b2-profile-build", "es-hw-b2-profile-listen", "es-b2-mcq-subjunctive", "es-hw-b2-profile-gap-saber", "es-hw-b2-profile-translation"],
+    relevance: { keywords: ["candidato", "alguien que", "busco", "buscamos", "nadie que", "persona que"] }
+  },
+  {
+    id: "lesson-es-explain-a-missed-deadline", revision: 2, estimatedMinutes: 16,
+    exerciseIds: ["es-hw-b2-late-build", "es-hw-b2-late-listen", "es-hw-b2-late-translation", "es-hw-b2-late-mcq-meeting", "es-b2-gap-pluperfect", "es-b2-mcq-flight-counterfactual"],
+    relevance: { keywords: ["hubiéramos", "habríamos", "había", "habían", "informe", "reunión", "vuelo"] }
   }
 ];
 

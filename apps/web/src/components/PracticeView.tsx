@@ -27,6 +27,8 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
   const [seen, setSeen] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const attemptRef = useRef<{ exerciseId: string; id: string } | undefined>(undefined);
 
   const loadSeries = useCallback((nextTopic: ExerciseTopic | undefined, exclude: string[], nextSkill?: string) => {
@@ -56,6 +58,15 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
   };
 
   const exercise = exercises[index];
+  // Résultat affiché : on ferme le clavier, on amène la correction à l'écran et on donne le focus à
+  // « Exercice suivant » pour pouvoir enchaîner avec la touche Entrée.
+  useEffect(() => {
+    if (!evaluation) return;
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    feedbackRef.current?.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+    nextRef.current?.focus({ preventScroll: true });
+  }, [evaluation]);
   const finished = exercises.length > 0 && index >= exercises.length;
 
   const validate = async () => {
@@ -135,7 +146,7 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
         <ExerciseAnswer exercise={exercise} language={language} value={answer} onChange={setAnswer} onSubmit={() => void validate()} disabled={Boolean(evaluation)} />
         {!evaluation ? <p className="hint">Indice : {exercise.hint}</p> : null}
         {evaluation ? (
-          <div className={`feedback ${evaluation.verdict}`} role="status">
+          <div className={`feedback ${evaluation.verdict}`} role="status" ref={feedbackRef}>
             <strong>{evaluation.verdict === "exact" ? "Exact — forme maîtrisée" : evaluation.verdict === "minor" ? "Bonne idée — peaufinons la forme" : "Une erreur utile à retenir"}</strong>
             <p>{evaluation.feedback}</p>
             <div className="teaching-lens">
@@ -151,7 +162,7 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
         {error ? <div className="alert" role="alert">{error}</div> : null}
         <div className="exercise-actions end">
           {evaluation
-            ? <button className="primary-button" onClick={next}>{index + 1 < exercises.length ? "Exercice suivant" : "Voir le bilan"}</button>
+            ? <button className="primary-button" ref={nextRef} onClick={next}>{index + 1 < exercises.length ? "Exercice suivant" : "Voir le bilan"}</button>
             : <button className="primary-button" disabled={!answer.trim() || loading} onClick={validate}>{loading ? "Vérification…" : "Vérifier"}</button>}
         </div>
       </article>

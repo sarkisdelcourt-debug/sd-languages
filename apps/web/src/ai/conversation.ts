@@ -60,3 +60,26 @@ export async function aiReplyFor(
     return undefined;
   }
 }
+
+/**
+ * Prépare le coach IA en tâche de fond quand il est activé : ouverture de la connexion vers l'API
+ * et téléchargement du SDK, pour que la première réplique ne paie ni l'un ni l'autre.
+ */
+export function warmUpAi(): void {
+  const start = async () => {
+    try {
+      if (!hasUsableKey(await loadAiSettings())) return;
+      if (!document.querySelector("link[data-sd-ai-preconnect]")) {
+        const link = Object.assign(document.createElement("link"), { rel: "preconnect", href: "https://api.anthropic.com" });
+        link.dataset.sdAiPreconnect = "1";
+        document.head.append(link);
+      }
+      await import("./coach-client");
+    } catch {
+      // Le préchargement est un confort : une erreur ici ne doit jamais se voir.
+    }
+  };
+  const idle = (window as Window & { requestIdleCallback?: (callback: () => void) => number }).requestIdleCallback;
+  if (idle) idle(() => void start());
+  else window.setTimeout(() => void start(), 1500);
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { warmUpAi } from "../ai/conversation";
 import { DEFAULT_AI_SETTINGS, loadAiSettings, loadAiUsage, saveAiSettings, type AiSettings } from "../ai/settings";
 import { COACH_MODEL, monthKey, type AiUsage } from "@engine/modules/ai-coach";
 
@@ -53,7 +54,7 @@ export function AiCoachSettings() {
         <button
           className="primary-button"
           disabled={!consent || !keyLooksValid}
-          onClick={() => void persist({ ...settings, enabled: !settings.enabled })}
+          onClick={async () => { await persist({ ...settings, enabled: !settings.enabled }); warmUpAi(); }}
         >
           {settings.enabled ? "Désactiver le coach IA" : "Activer le coach IA"}
         </button>

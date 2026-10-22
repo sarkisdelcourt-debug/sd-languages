@@ -394,3 +394,13 @@ main { min-width: 0; }
 .ai-consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 13px; line-height: 1.45; }
 .ai-consent input { width: 20px; height: 20px; margin-top: 2px; }
 .ai-settings .relay-actions .primary-button, .ai-settings .relay-actions .secondary-button { margin-top: 0; }
+
+/* Fluidité : message en attente et bulle « le coach écrit » */
+.message.pending, .lesson-message.pending { opacity: .72; }
+.typing { display: inline-flex; gap: 5px; align-items: center; min-height: 36px; padding: 12px 16px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .35; animation: typing-dot 1s ease-in-out infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing-dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: .9; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .typing i { animation: none; opacity: .6; } }
+.dialogue-composer textarea[readonly] { background: var(--surface-2, #f1f3f2); }

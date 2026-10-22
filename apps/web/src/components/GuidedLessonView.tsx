@@ -153,6 +153,14 @@ export function GuidedLessonView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const busyRef = useRef(false);
+  const [pending, setPending] = useState<string>();
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const messageCount = view?.session?.conversation.messages.length ?? 0;
+  useEffect(() => {
+    const list = messagesRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  }, [messageCount, pending]);
   const attemptRef = useRef<{ key: string; id: string } | undefined>(undefined);
 
   useEffect(() => {
@@ -234,11 +242,20 @@ export function GuidedLessonView({
   const sendMessage = async () => {
     if (!message.trim() || busyRef.current) return;
     const text = message;
+    // Le message s'affiche tout de suite (et le champ se vide) : l'attente de la réponse, surtout
+    // celle de l'IA, ne donne jamais l'impression que rien ne s'est passé.
+    setPending(text);
+    setMessage("");
+    let delivered = false;
     await run(async () => {
       const next = (await api.messageLesson(language, text)).view;
-      setMessage("");
+      delivered = true;
       return next;
     });
+    setPending(undefined);
+    if (!delivered) setMessage(text);
+    // Le champ garde le focus : le clavier de l'iPhone reste ouvert pour la réplique suivante.
+    window.setTimeout(() => composerRef.current?.focus({ preventScroll: true }), 0);
   };
 
   if (error && !view) return <div className="alert" role="alert">{error}<button onClick={() => location.reload()}>Réessayer</button></div>;
@@ -347,16 +364,18 @@ export function GuidedLessonView({
             <p>{lesson.objective}</p>
             <span>{session.conversationTurns} / {lesson.conversationTurnGoal} réponses</span>
           </div>
-          <div className="lesson-messages" aria-live="polite">
+          <div className="lesson-messages" aria-live="polite" ref={messagesRef}>
             {session.conversation.messages.map((item) => (
               <div className={`lesson-message ${item.role}`} key={item.id}>
                 <span>{item.role === "coach" ? "Coach" : "Vous"}{item.source === "ai" ? <b className="ai-badge" title="Réponse générée par Claude Haiku">IA</b> : null}</span><p>{item.text}</p>
                 {item.correction ? <small className="lesson-correction"><strong>Plutôt : {item.correction}</strong>{item.explanation ? <span>{item.explanation}</span> : null}</small> : null}
               </div>
             ))}
+            {pending ? <div className="lesson-message learner pending"><span>Vous</span><p>{pending}</p></div> : null}
+            {loading && pending ? <div className="lesson-message coach typing" role="status" aria-label="Le coach écrit"><i /><i /><i /></div> : null}
           </div>
           <label className="dialogue-composer">Votre réponse
-            <textarea value={message} onChange={(event) => setMessage(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} disabled={loading} rows={3} />
+            <textarea value={message} onChange={(event) => setMessage(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} readOnly={loading} ref={composerRef} rows={3} enterKeyHint="send" />
           </label>
           <footer><span>Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne</span><button className="primary-button" onClick={sendMessage} disabled={!message.trim() || loading}>{loading ? "Envoi…" : "Répondre"}</button></footer>
         </article>

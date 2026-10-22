@@ -13,6 +13,7 @@ import { SettingsView } from "./components/SettingsView";
 import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
 import { AI_NOTICE_EVENT } from "./ai/settings";
+import { warmUpAi } from "./ai/conversation";
 import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
 type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "conversation" | "settings" | "data";
@@ -72,6 +73,7 @@ export function App() {
   useEffect(() => {
     refreshDashboard();
     void requestPersistentStorage();
+    warmUpAi();
     return store.onExternalChange(() => {
       setExternalChange(true);
       refreshDashboard();

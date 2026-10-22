@@ -15,6 +15,8 @@ export function ConversationView({ language }: { language: LanguageCode }) {
   const [showScenarios, setShowScenarios] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [pendingText, setPendingText] = useState<string>();
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const [error, setError] = useState<string>();
   const [listening, setListening] = useState(false);
   const [voiceNote, setVoiceNote] = useState<string>();
@@ -32,7 +34,7 @@ export function ConversationView({ language }: { language: LanguageCode }) {
   }, [language]);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [thread.messages]);
+  }, [thread.messages, pendingText]);
   useEffect(() => () => {
     recognitionRef.current?.abort();
     recognitionRef.current = undefined;
@@ -56,8 +58,12 @@ export function ConversationView({ language }: { language: LanguageCode }) {
     if (!text.trim() || sending) return;
     setSending(true);
     setError(undefined);
+    // Message affiché et champ vidé tout de suite ; le texte revient si l'envoi échoue.
+    const sent = text;
+    setPendingText(sent);
+    setText("");
     try {
-      const reply = await api.sendMessage(language, text);
+      const reply = await api.sendMessage(language, sent);
       setThread((current) => ({
         ...current,
         scenarioStepIndex: reply.scenarioAdvanced && current.activeScenarioId ? (current.scenarioStepIndex ?? 0) + 1 : current.scenarioStepIndex,
@@ -66,11 +72,13 @@ export function ConversationView({ language }: { language: LanguageCode }) {
           : current.scenarioCompleted,
         messages: [...current.messages, reply.learnerMessage, reply.coachMessage]
       }));
-      setText("");
     } catch (reason) {
+      setText(sent);
       setError((reason as Error).message);
     } finally {
+      setPendingText(undefined);
       setSending(false);
+      window.setTimeout(() => composerRef.current?.focus({ preventScroll: true }), 0);
     }
   };
   const speak = (message: string) => {
@@ -153,12 +161,14 @@ export function ConversationView({ language }: { language: LanguageCode }) {
             </div>
           </div>
         ))}
+        {pendingText ? <div className="message-row learner"><div className="message pending"><p>{pendingText}</p></div></div> : null}
+        {sending && pendingText ? <div className="message-row coach"><div className="message typing" role="status" aria-label="Le coach écrit"><i /><i /><i /></div></div> : null}
         <div ref={endRef} />
       </div>
       {error ? <div className="alert" role="alert">{error}</div> : null}
       <form className="composer" onSubmit={send}>
         <label htmlFor="message">Votre message</label>
-        <textarea id="message" value={text} onChange={(event) => setText(event.target.value)} placeholder={`Écrivez en ${LANGUAGES[language].name.toLowerCase()}…`} maxLength={1000} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} />
+        <textarea id="message" ref={composerRef} enterKeyHint="send" value={text} onChange={(event) => setText(event.target.value)} placeholder={`Écrivez en ${LANGUAGES[language].name.toLowerCase()}…`} maxLength={1000} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} />
         <button
           type="button"
           className={listening ? "voice-button listening" : "voice-button"}

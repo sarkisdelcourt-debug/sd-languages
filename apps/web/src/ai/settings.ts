@@ -13,7 +13,7 @@ export interface AiSettings {
   monthlyCapUsd: number;
 }
 
-export const DEFAULT_AI_SETTINGS: AiSettings = { enabled: false, apiKey: "", monthlyCapUsd: 3 };
+export const DEFAULT_AI_SETTINGS: AiSettings = { enabled: false, apiKey: "", monthlyCapUsd: 10 };
 export const AI_NOTICE_EVENT = "sd-languages-ai-notice";
 export const SETTINGS_KEY = "aiSettings";
 export const USAGE_KEY = "aiUsage";

@@ -30,6 +30,41 @@ export const saveAiSettings = (settings: AiSettings) => store.setMeta(SETTINGS_K
 export const loadAiUsage = () => store.getMeta<AiUsage>(USAGE_KEY);
 export const hasUsableKey = (settings: AiSettings) => settings.enabled && /^sk-ant-/.test(settings.apiKey.trim());
 
+/** Lecture qui distingue « rien d'enregistré » de « stockage illisible » (ne jamais écraser dans ce cas). */
+export async function readAiSettings(): Promise<{ settings: AiSettings; readable: boolean }> {
+  try {
+    const stored = await store.getMeta<Partial<AiSettings>>(SETTINGS_KEY);
+    return { settings: { ...DEFAULT_AI_SETTINGS, ...(stored ?? {}) }, readable: true };
+  } catch {
+    return { settings: DEFAULT_AI_SETTINGS, readable: false };
+  }
+}
+
+/**
+ * Modifie seulement les champs demandés, à partir de ce qui est réellement enregistré : un réglage
+ * (plafond, activation) ne peut donc jamais effacer la clé, et rien n'est écrit si la lecture échoue.
+ */
+export async function patchAiSettings(patch: Partial<AiSettings>): Promise<AiSettings> {
+  const { settings, readable } = await readAiSettings();
+  if (!readable) throw new Error("Stockage de l'appareil illisible : rien n'a été modifié. Rechargez la page.");
+  const next: AiSettings = { ...settings, ...patch };
+  next.apiKey = next.apiKey.trim();
+  await saveAiSettings(next);
+  return next;
+}
+
+/** Clé affichée sans la révéler : « sk-ant-…ab12 ». */
+export const maskKey = (key: string) => (key.length > 14 ? `${key.slice(0, 7)}…${key.slice(-4)}` : key ? "clé trop courte" : "");
+
+export interface AiCheck {
+  ok: boolean;
+  at: string;
+  message: string;
+}
+const CHECK_KEY = "aiCheck";
+export const loadAiCheck = () => store.getMeta<AiCheck>(CHECK_KEY);
+export const saveAiCheck = (check: AiCheck) => store.setMeta(CHECK_KEY, check);
+
 export function announceFallback(reason: string) {
   window.dispatchEvent(new CustomEvent(AI_NOTICE_EVENT, { detail: reason }));
 }

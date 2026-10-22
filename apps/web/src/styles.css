@@ -417,3 +417,6 @@ main { min-width: 0; }
     box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
   }
 }
+.ai-key-state { padding: 12px 14px; border-left: 4px solid var(--accent); border-radius: 8px; background: var(--accent-soft, #e3f3ef); color: var(--ink); display: grid; gap: 4px; font-size: 14px; }
+.ai-key-state code { font-size: 13px; }
+.ai-key-state small { color: var(--muted); font-size: 12px; }

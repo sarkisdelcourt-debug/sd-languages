@@ -6,9 +6,9 @@ import { api, type PublicExercise, type VocabularySet } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ExerciseAnswer } from "./ExerciseAnswer";
 
-const DIRECTIONS: Array<{ id: VocabDirection; label: string }> = [
-  { id: "to-french", label: "Langue → français" },
-  { id: "to-target", label: "Français → langue" },
+const directionLabels = (languageName: string): Array<{ id: VocabDirection; label: string }> => [
+  { id: "to-french", label: `${languageName} → français` },
+  { id: "to-target", label: `Français → ${languageName.toLowerCase()}` },
   { id: "mixed", label: "Les deux" }
 ];
 const MODES: Array<{ id: VocabMode; label: string; help: string }> = [
@@ -32,7 +32,7 @@ function readSettings(): Settings {
   try {
     const saved = JSON.parse(localStorage.getItem("sd-vocab-settings") ?? "{}") as Partial<Settings>;
     return {
-      direction: DIRECTIONS.some((item) => item.id === saved.direction) ? saved.direction! : "to-french",
+      direction: ["to-french", "to-target", "mixed"].includes(saved.direction as string) ? saved.direction! : "to-french",
       mode: MODES.some((item) => item.id === saved.mode) ? saved.mode! : "choice",
       setId: saved.random ? undefined : saved.setId,
       random: Boolean(saved.random)
@@ -166,7 +166,7 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
         <article className="settings-card vocab-setup">
           <div className="settings-section"><strong>Sens</strong></div>
           <div className="segmented-options" role="group" aria-label="Sens du test">
-            {DIRECTIONS.map((item) => (
+            {directionLabels(LANGUAGES[language].name).map((item) => (
               <button key={item.id} className={settings.direction === item.id ? "selected" : ""} aria-pressed={settings.direction === item.id} onClick={() => update({ direction: item.id })}>{item.label}</button>
             ))}
           </div>

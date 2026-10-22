@@ -111,6 +111,7 @@ export function App() {
               className={`nav-item${view === item ? " active" : ""}${(secondaryViews as readonly View[]).includes(item) ? " nav-secondary" : ""}`}
               onClick={() => setView(item)}
               key={item}
+              data-label={viewLabels[item]}
               aria-current={view === item ? "page" : undefined}
             >
               <NavIcon name={item} />
@@ -126,6 +127,7 @@ export function App() {
             onClick={() => setMoreOpen((open) => !open)}
             aria-expanded={moreOpen}
             aria-controls="more-sheet"
+            data-label="Plus d'écrans"
           >
             <NavIcon name="more" />
             Plus
@@ -134,7 +136,7 @@ export function App() {
         {moreOpen ? (
           <div className="more-sheet" id="more-sheet" role="group" aria-label="Autres écrans">
             {secondaryViews.map((item) => (
-              <button className={view === item ? "nav-item active" : "nav-item"} onClick={() => setView(item)} key={item} aria-current={view === item ? "page" : undefined}>
+              <button className={view === item ? "nav-item active" : "nav-item"} data-label={viewLabels[item]} onClick={() => setView(item)} key={item} aria-current={view === item ? "page" : undefined}>
                 <NavIcon name={item} />
                 {viewLabels[item]}
               </button>

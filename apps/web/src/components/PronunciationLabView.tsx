@@ -13,8 +13,7 @@ import {
   createRecognition,
   getSpeechCapabilities,
   speakText,
-  type BrowserSpeechRecognition
-} from "../lib/browser-speech";
+  type BrowserSpeechRecognition, stopSpeaking } from "../lib/browser-speech";
 
 const verdictLabels = {
   clear: "Phrase très bien reconnue",
@@ -89,7 +88,7 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
     }
     if (!prompt) return;
     recorder.stop();
-    window.speechSynthesis?.cancel();
+    stopSpeaking();
     const recognition = createRecognition(language);
     if (!recognition) {
       setError("La reconnaissance n’est pas disponible ici. Enregistrez-vous localement ou saisissez une transcription.");

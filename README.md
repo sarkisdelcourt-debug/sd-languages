@@ -120,7 +120,7 @@ Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` i
 ## Structure
 
 ```text
-apps/web/                 interface React, PWA, IndexedDB, relais par fichier, voix navigateur
+apps/web/                 interface React, PWA, IndexedDB, relais par fichier, voix intégrées (enregistrements Piper dans public/audio, régénérés par scripts/generate-audio.mts) avec repli sur la voix du navigateur
 apps/api/                 serveur Express du PC : build, parité HTTP, reprise de l'ancien JSON
 packages/engine/          moteur pédagogique (routes « méthode + chemin », leçons, séries, coach, relais)
 packages/shared/          types, banque de contenu, générateurs, correction, répétition espacée

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { chooseRecordingMimeType } from "../lib/browser-speech";
+import { chooseRecordingMimeType, stopSpeaking } from "../lib/browser-speech";
 
 export function useLocalRecorder(resetKey: string) {
   const [recording, setRecording] = useState(false);
@@ -34,7 +34,7 @@ export function useLocalRecorder(resetKey: string) {
     if (recording || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") return;
     setError(undefined);
     clearAudio();
-    window.speechSynthesis?.cancel();
+    stopSpeaking();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = chooseRecordingMimeType();

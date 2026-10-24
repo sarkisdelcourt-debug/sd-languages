@@ -6,8 +6,7 @@ import {
   createRecognition,
   getSpeechCapabilities,
   speakText,
-  type BrowserSpeechRecognition
-} from "../lib/browser-speech";
+  type BrowserSpeechRecognition, stopSpeaking } from "../lib/browser-speech";
 
 export function ConversationView({ language }: { language: LanguageCode }) {
   const [thread, setThread] = useState<ConversationThread>({ language, messages: [] });
@@ -90,7 +89,7 @@ export function ConversationView({ language }: { language: LanguageCode }) {
       setVoiceNote("Dictée arrêtée. Relisez le texte avant de l’envoyer.");
       return;
     }
-    window.speechSynthesis?.cancel();
+    stopSpeaking();
     const recognition = createRecognition(language);
     if (!recognition) {
       setVoiceNote("La dictée n’est pas disponible dans ce navigateur. Vous pouvez continuer au clavier.");

@@ -467,3 +467,4 @@ main { min-width: 0; }
 .voice-notice { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--line-accent); border-radius: 8px; background: var(--tint-accent); color: var(--ink); font-size: 13px; line-height: 1.5; }
 .voice-notice.warn { border-left-color: var(--signal); background: var(--tint-warn); }
 .voice-notice.ok { color: var(--muted-strong); }
+.voice-download { margin-top: 6px; }

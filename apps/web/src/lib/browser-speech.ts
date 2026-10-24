@@ -1,4 +1,5 @@
 import type { LanguageCode } from "@shared/types";
+import { playClip, stopClip } from "./voice-clips";
 
 export const SPEECH_LOCALES: Record<LanguageCode, string> = {
   en: "en-GB",
@@ -109,8 +110,20 @@ export function onVoicesChanged(listener: () => void): () => void {
   return () => window.speechSynthesis.removeEventListener("voiceschanged", listener);
 }
 
+/** Arrête toute lecture en cours (enregistrement intégré ou voix de l'appareil). */
+export function stopSpeaking(): void {
+  stopClip();
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
 export function speakText(text: string, language: LanguageCode, rate = 0.86): boolean {
+  // 1) l'enregistrement intégré (voix Piper) quand il existe ; 2) sinon la voix de l'appareil.
+  if (playClip(text, language, rate < 0.75)) {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    return true;
+  }
   if (!("speechSynthesis" in window)) return false;
+  stopClip();
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   const voice = pickVoice(language);

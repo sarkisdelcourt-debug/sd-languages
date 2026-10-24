@@ -3,7 +3,9 @@
 // Toutes les adresses sont relatives à sa portée : « / » sur le PC, « /sd-languages/ » sur GitHub Pages.
 // Les appels /api restants (reprise de l'ancien fichier du PC) passent toujours par le réseau.
 const CACHE_PREFIX = "sd-languages-";
-const SHELL_CACHE = `${CACHE_PREFIX}shell-v8`;
+const SHELL_CACHE = `${CACHE_PREFIX}shell-v9`;
+// Les voix (enregistrements) vivent dans leur propre cache : elles ne sont pas effacées à chaque mise à jour de l'application.
+const AUDIO_CACHE = `${CACHE_PREFIX}audio-v1`;
 const SCOPE = new URL(self.registration.scope);
 const at = (relative) => new URL(relative, SCOPE).href;
 const PAGE = at("./");
@@ -27,7 +29,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE).map((key) => caches.delete(key))
+      keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE && key !== AUDIO_CACHE).map((key) => caches.delete(key))
     ))
   );
   self.clients.claim();
@@ -52,10 +54,51 @@ async function assetResponse(request) {
   return response;
 }
 
+// Voix : cache d'abord. Safari demande les fichiers audio par plages (Range) : on répond en 206 depuis le fichier complet en cache.
+async function audioResponse(request) {
+  const cache = await caches.open(AUDIO_CACHE);
+  let full = await cache.match(request.url);
+  if (!full) {
+    full = await fetch(request.url);
+    if (!full.ok) return full;
+    await cache.put(request.url, full.clone());
+  }
+  const range = request.headers.get("range");
+  if (!range) return full;
+  const buffer = await full.arrayBuffer();
+  const match = /bytes=(d*)-(d*)/.exec(range);
+  const start = match && match[1] ? Number(match[1]) : 0;
+  const end = match && match[2] ? Math.min(Number(match[2]), buffer.byteLength - 1) : buffer.byteLength - 1;
+  if (start > end || start >= buffer.byteLength) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${buffer.byteLength}` } });
+  return new Response(buffer.slice(start, end + 1), {
+    status: 206,
+    headers: { "Content-Type": "audio/mpeg", "Content-Range": `bytes ${start}-${end}/${buffer.byteLength}`, "Content-Length": String(end - start + 1), "Accept-Ranges": "bytes" }
+  });
+}
+
+async function manifestResponse(request) {
+  const cache = await caches.open(AUDIO_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request.url, response.clone());
+    return response;
+  } catch {
+    return (await cache.match(request.url)) ?? Response.error();
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
   if (event.request.method !== "GET" || requestUrl.origin !== self.location.origin) return;
   if (!requestUrl.href.startsWith(SCOPE.href) || requestUrl.pathname.includes("/api/")) return;
+  if (requestUrl.href === at("audio/manifest.json")) {
+    event.respondWith(manifestResponse(event.request));
+    return;
+  }
+  if (requestUrl.href.startsWith(at("audio/")) && requestUrl.pathname.endsWith(".mp3")) {
+    event.respondWith(audioResponse(event.request));
+    return;
+  }
   if (event.request.mode === "navigate") {
     event.respondWith(navigationResponse(event.request));
     return;

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useDeferredValue } from "react";
+import { loadClipManifest } from "./lib/voice-clips";
 import { isLanguageCode, LANGUAGES } from "@shared/catalog";
 import type { DashboardSnapshot, LanguageCode } from "@shared/types";
 import { api } from "./api";
@@ -78,6 +79,7 @@ export function App() {
     refreshDashboard();
     void requestPersistentStorage();
     warmUpAi();
+    void loadClipManifest();
     return store.onExternalChange(() => {
       setExternalChange(true);
       refreshDashboard();

@@ -2,21 +2,49 @@ import { useEffect, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import type { LanguageCode } from "@shared/types";
 import { getSpeechCapabilities, onVoicesChanged, voiceReport, type VoiceReport } from "../lib/browser-speech";
+import { clipCount, clipVoiceName, downloadLanguageClips, onClipManifestLoaded } from "../lib/voice-clips";
 
 /**
- * Dit quelle voix lit la langue étudiée, et quoi faire quand l'appareil n'en a pas : sans voix de la langue,
- * l'iPhone lit l'anglais ou l'allemand avec sa voix française, ce qui n'a aucun accent.
+ * Dit quelle voix lit la langue étudiée. Les voix intégrées (enregistrements Piper) passent en premier ; à défaut, la voix de
+ * l'appareil : sans voix de la langue, l'iPhone lit l'anglais ou l'allemand avec sa voix française, sans aucun accent.
  */
 export function VoiceNotice({ language, onlyMissing = false }: { language: LanguageCode; onlyMissing?: boolean }) {
   const [report, setReport] = useState<VoiceReport>(() => (getSpeechCapabilities().synthesis ? voiceReport(language) : { found: false, enhanced: false }));
+  const [clipVoice, setClipVoice] = useState<string | undefined>(() => clipVoiceName(language));
+  const [progress, setProgress] = useState<{ done: number; total: number } | undefined>();
+  const [downloaded, setDownloaded] = useState(false);
   useEffect(() => {
-    if (!getSpeechCapabilities().synthesis) return undefined;
+    setClipVoice(clipVoiceName(language));
+    setDownloaded(false);
+    setProgress(undefined);
+    const stopClips = onClipManifestLoaded(() => setClipVoice(clipVoiceName(language)));
+    if (!getSpeechCapabilities().synthesis) return stopClips;
     const refresh = () => setReport(voiceReport(language));
     refresh();
-    return onVoicesChanged(refresh);
+    const stopVoices = onVoicesChanged(refresh);
+    return () => { stopClips(); stopVoices(); };
   }, [language]);
-  if (!getSpeechCapabilities().synthesis) return null;
   const name = LANGUAGES[language].name.toLowerCase();
+
+  if (clipVoice) {
+    if (onlyMissing) return null;
+    const busy = progress !== undefined && !downloaded;
+    return (
+      <div className="voice-notice ok" role="status">
+        Voix intégrée à l'application : {clipVoice}. Un mot sans enregistrement est lu par la voix de l'appareil.
+        <div className="voice-download">
+          <button className="text-button" disabled={busy} onClick={() => {
+            setProgress({ done: 0, total: 1 });
+            void downloadLanguageClips(language, (done, total) => setProgress({ done, total })).then(() => setDownloaded(true)).catch(() => setProgress(undefined));
+          }}>
+            {busy ? `Téléchargement… ${progress!.done}/${progress!.total}` : downloaded ? "✓ Voix téléchargées pour l'écoute hors ligne" : `Télécharger les voix ${name} (${clipCount(language)} enregistrements) pour l'écoute hors ligne`}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!getSpeechCapabilities().synthesis) return null;
   if (!report.found) {
     return (
       <div className="voice-notice warn" role="status">

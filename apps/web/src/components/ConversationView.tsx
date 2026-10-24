@@ -6,7 +6,7 @@ import {
   createRecognition,
   getSpeechCapabilities,
   speakText,
-  type BrowserSpeechRecognition, stopSpeaking } from "../lib/browser-speech";
+  type BrowserSpeechRecognition, stopSpeaking, RECOGNITION_SILENT_HELP } from "../lib/browser-speech";
 
 export function ConversationView({ language }: { language: LanguageCode }) {
   const [thread, setThread] = useState<ConversationThread>({ language, messages: [] });
@@ -98,13 +98,16 @@ export function ConversationView({ language }: { language: LanguageCode }) {
     recognitionRef.current = recognition;
     setVoiceNote("Parlez maintenant — le texte restera modifiable avant envoi.");
     setListening(true);
+    let heard = false;
     recognition.onresult = (event) => {
       if (recognitionRef.current !== recognition) return;
+      heard = true;
       const transcript = Array.from(event.results).map((result) => result[0]?.transcript ?? "").join(" ").trim();
       if (transcript) setText((current) => `${current}${current ? " " : ""}${transcript}`.slice(0, 1000));
     };
     recognition.onerror = (event) => {
       if (recognitionRef.current !== recognition) return;
+      heard = true;
       setVoiceNote(event.error === "not-allowed" ? "Microphone non autorisé. Vous pouvez continuer au clavier." : "Dictée interrompue. Réessayez ou continuez au clavier.");
       setListening(false);
     };
@@ -113,6 +116,9 @@ export function ConversationView({ language }: { language: LanguageCode }) {
       setListening(false);
       recognitionRef.current = undefined;
     };
+    window.setTimeout(() => {
+      if (!heard && recognitionRef.current === recognition) setVoiceNote(RECOGNITION_SILENT_HELP);
+    }, 8000);
     try {
       recognition.start();
     } catch {

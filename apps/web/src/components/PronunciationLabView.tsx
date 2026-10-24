@@ -13,7 +13,7 @@ import {
   createRecognition,
   getSpeechCapabilities,
   speakText,
-  type BrowserSpeechRecognition, stopSpeaking } from "../lib/browser-speech";
+  type BrowserSpeechRecognition, stopSpeaking, RECOGNITION_SILENT_HELP } from "../lib/browser-speech";
 
 const verdictLabels = {
   clear: "Phrase très bien reconnue",
@@ -99,8 +99,10 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
     setResult(undefined);
     setListening(true);
     setStatus("Parlez maintenant. Rien ne sera envoyé automatiquement à SD Languages.");
+    let heard = false;
     recognition.onresult = (event) => {
       if (recognitionRef.current !== recognition) return;
+      heard = true;
       const value = Array.from(event.results).map((item) => item[0]?.transcript ?? "").join(" ").trim();
       if (value) {
         setTranscript(value.slice(0, 500));
@@ -110,6 +112,7 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
     };
     recognition.onerror = (event) => {
       if (recognitionRef.current !== recognition) return;
+      heard = true;
       const message = event.error === "not-allowed"
         ? "Microphone non autorisé. Autorisez-le dans le navigateur ou utilisez l’enregistrement local et le mode texte."
         : event.error === "no-speech"
@@ -123,6 +126,9 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
       recognitionRef.current = undefined;
       setListening(false);
     };
+    window.setTimeout(() => {
+      if (!heard && recognitionRef.current === recognition) { setError(RECOGNITION_SILENT_HELP); setStatus(undefined); }
+    }, 8000);
     try {
       recognition.start();
     } catch {

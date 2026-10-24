@@ -35,8 +35,12 @@ export function useLocalRecorder(resetKey: string) {
     setError(undefined);
     clearAudio();
     stopSpeaking();
+    // Sur iPhone, une demande d'accès au micro peut rester sans réponse : on le dit au lieu de laisser un bouton muet.
+    const waiting = window.setTimeout(() => setError("Le micro ne répond pas. Vérifiez Réglages › Safari › Microphone (ou celui de l'application ajoutée à l'écran d'accueil), puis fermez et rouvrez l'application. Vous pouvez continuer avec le mode texte."), 8000);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      window.clearTimeout(waiting);
+      setError(undefined);
       const mimeType = chooseRecordingMimeType();
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       recorderRef.current = recorder;
@@ -63,6 +67,7 @@ export function useLocalRecorder(resetKey: string) {
       setRecording(true);
       timerRef.current = window.setTimeout(() => stop(), 15_000);
     } catch (reason) {
+      window.clearTimeout(waiting);
       const name = (reason as DOMException).name;
       setError(name === "NotAllowedError"
         ? "Microphone non autorisé. Autorisez-le dans le navigateur ou utilisez le mode texte."

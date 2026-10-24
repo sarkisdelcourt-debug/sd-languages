@@ -51,6 +51,18 @@ export function getSpeechCapabilities(): SpeechCapabilities {
   };
 }
 
+/** iPhone : application ouverte depuis l'écran d'accueil (mode « standalone »). */
+export function isIosStandalone(): boolean {
+  const nav = navigator as Navigator & { standalone?: boolean };
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && nav.standalone === true;
+}
+
+/** Message affiché quand la dictée ne répond pas (aucun résultat ni erreur) : cause la plus fréquente sur iPhone. */
+export const RECOGNITION_SILENT_HELP =
+  "Aucune réponse du micro. Sur iPhone, la dictée intégrée à une application ajoutée à l'écran d'accueil est souvent bloquée par iOS. "
+  + "Solutions : touchez le champ de texte et utilisez la touche micro 🎤 du clavier (ajoutez le clavier de la langue : Réglages › Général › Clavier), "
+  + "ou ouvrez le site dans Safari. Vérifiez aussi Réglages › Général › Clavier › Activer la dictée.";
+
 export function createRecognition(language: LanguageCode): BrowserSpeechRecognition | undefined {
   const speechWindow = window as SpeechWindow;
   const Constructor = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;

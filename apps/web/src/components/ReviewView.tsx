@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LanguageCode, ReviewCard, ReviewRating } from "@shared/types";
 import { api } from "../api";
 
@@ -18,15 +18,24 @@ export function ReviewView({ language, onProgress }: { language: LanguageCode; o
     api.reviews(language).then(setCards).catch((reason: Error) => setError(reason.message)).finally(() => setLoading(false));
   }, [language]);
   const card = cards[0];
+  // Une tentative par carte affichée : un second clic renvoie le même identifiant, le moteur ne compte alors la
+  // révision qu'une fois (LANG-04). Après une erreur, l'écran affiche l'alerte : il faut le quitter pour réessayer.
+  const attempt = useRef<{ key: string; id: string } | undefined>(undefined);
+  const busy = useRef(false);
   const rate = async (rating: ReviewRating) => {
-    if (!card) return;
+    if (!card || busy.current) return;
+    const key = `${card.id}:${card.repetitions}:${card.lapses}:${card.lastReviewedAt ?? ""}`;
+    if (attempt.current?.key !== key) attempt.current = { key, id: `review-${crypto.randomUUID()}` };
+    busy.current = true;
     try {
-      await api.review(card.id, rating);
+      await api.review(card.id, rating, attempt.current.id);
       setCards((current) => current.slice(1));
       setRevealed(false);
       onProgress();
     } catch (reason) {
       setError((reason as Error).message);
+    } finally {
+      busy.current = false;
     }
   };
   if (loading) return <div className="loading-card">Préparation des cartes…</div>;

@@ -1,3 +1,4 @@
+import { VoiceNotice } from "./VoiceNotice";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import type {
@@ -209,7 +210,7 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
               Plus lentement
             </button>
           </div>
-          {!capabilities.synthesis ? <p className="capability-note">La lecture vocale n’est pas disponible dans ce navigateur.</p> : null}
+          {!capabilities.synthesis ? <p className="capability-note">La lecture vocale n’est pas disponible dans ce navigateur.</p> : <VoiceNotice language={language} />}
         </article>
 
         <div className="pronunciation-workbench">

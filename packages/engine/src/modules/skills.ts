@@ -1,6 +1,7 @@
 import { EXERCISES } from "../../../shared/src/curriculum.js";
 import { SKILLS, SKILL_GROUP_LABELS, type SkillDefinition } from "../../../shared/src/skills.js";
 import type { Exercise, LanguageCode, LearnerState, SkillAction, SkillSummary, SkillsView } from "../../../shared/src/types.js";
+import { unresolvedCount } from "./mistakes.js";
 
 /**
  * Carte de compétences (22/10/2026), calcul pur et déterministe à partir de l'état local :
@@ -78,7 +79,7 @@ export function summarizeSkill(
   const recentSuccess = recentResults.length ? recentResults.filter(Boolean).length / recentResults.length : undefined;
   const openMistakes = state.mistakes
     .filter((mistake) => mistake.language === language && ids.has(mistake.exerciseId))
-    .reduce((total, mistake) => total + Math.max(0, mistake.occurrenceCount - mistake.resolvedCount), 0);
+    .reduce((total, mistake) => total + unresolvedCount(mistake, state.exerciseHistory), 0);
   const nextReviewAt = state.reviewCards
     .filter((card) => card.language === language && ids.has(card.sourceExerciseId))
     .map((card) => card.nextReviewAt)

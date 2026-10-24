@@ -18,9 +18,9 @@ import {
   startLessonSession,
   toLessonView
 } from "./modules/guided-lessons.js";
-import { applyPracticeAttempt } from "./modules/practice-attempt.js";
+import { applyPracticeAttempt, rememberAttempt } from "./modules/practice-attempt.js";
 import { applyPronunciationAttempt, createPronunciationLab, findPronunciationPrompt } from "./modules/pronunciation.js";
-import { createDashboard } from "./modules/progress.js";
+import { createDashboard, learningDay } from "./modules/progress.js";
 import { createSkillsView } from "./modules/skills.js";
 import { findSkill } from "../../shared/src/skills.js";
 import type { StateStore } from "./state.js";
@@ -188,7 +188,7 @@ export function createEngine(store: StateStore): Engine {
     const count = Math.min(20, Math.max(5, Number(query.get("count")) || 10));
     const excluded = new Set((query.get("exclude") ?? "").split(",").filter(Boolean));
     const state = await store.read();
-    const day = new Date().toISOString().slice(0, 10);
+    const day = learningDay(new Date());
     const daily = (id: string) => Array.from(`${day}${id}`).reduce((sum, character) => (sum * 31 + (character.codePointAt(0) ?? 0)) >>> 0, 7);
     // Priorité : ce qui vient d'être raté, puis ce qui n'a jamais été vu, puis le reste ; ce qui est réussi attend.
     const rank = (id: string) => {
@@ -228,9 +228,14 @@ export function createEngine(store: StateStore): Engine {
   route("POST", "/api/reviews/:cardId", async ({ params, body }) => {
     const rating = body?.rating as ReviewRating | undefined;
     if (!rating || !reviewRatings.has(rating)) return fail(400, "Note de révision invalide.");
+    const attemptId = body?.attemptId;
+    if (typeof attemptId !== "string" || attemptId.length < 6) return fail(400, "Un identifiant de tentative est requis.");
     const updated = await store.update((state) => {
       const index = state.reviewCards.findIndex((card) => card.id === params.cardId);
       if (index < 0) return undefined;
+      // Rejeu (double clic, requête renvoyée après un délai) : on rend la carte telle qu'elle est, sans la replanifier
+      // ni recompter les points. L'identifiant n'est retenu qu'une fois la carte retrouvée.
+      if (!rememberAttempt(state, attemptId)) return state.reviewCards[index]!;
       const card = scheduleReview(state.reviewCards[index]!, rating);
       state.reviewCards[index] = card;
       state.progress[card.language].xp += rating === "again" ? 1 : 5;

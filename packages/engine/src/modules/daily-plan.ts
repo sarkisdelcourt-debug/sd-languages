@@ -2,6 +2,7 @@ import { currentLevel } from "./level.js";
 import type { DailyPlan, DailyPlanItem, LanguageCode, LearnerState } from "../../../shared/src/types.js";
 import { isDue } from "../../../shared/src/learning.js";
 import { createLessonCatalog } from "./guided-lessons.js";
+import { unresolvedCount } from "./mistakes.js";
 
 export function createDailyPlan(
   state: LearnerState,
@@ -12,7 +13,7 @@ export function createDailyPlan(
   const dueReviews = state.reviewCards.filter((card) => card.language === language && isDue(card, now));
   const frequentMistake = state.mistakes
     .filter((mistake) => mistake.language === language)
-    .map((mistake) => ({ mistake, unresolved: Math.max(0, mistake.occurrenceCount - mistake.resolvedCount) }))
+    .map((mistake) => ({ mistake, unresolved: unresolvedCount(mistake, state.exerciseHistory) }))
     .filter((entry) => entry.unresolved > 0)
     .sort((a, b) => b.unresolved - a.unresolved)[0]?.mistake;
   const items: DailyPlanItem[] = [];

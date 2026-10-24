@@ -97,8 +97,8 @@ export const api = {
       { method: "POST", body: JSON.stringify({ answer, attemptId }) }
     ),
   reviews: (language: string) => request<ReviewCard[]>(`/api/reviews/${language}`),
-  review: (cardId: string, rating: ReviewRating) =>
-    request<ReviewCard>(`/api/reviews/${cardId}`, { method: "POST", body: JSON.stringify({ rating }) }),
+  review: (cardId: string, rating: ReviewRating, attemptId: string) =>
+    request<ReviewCard>(`/api/reviews/${cardId}`, { method: "POST", body: JSON.stringify({ rating, attemptId }) }),
   mistakes: (language: string) => request<MistakeRecord[]>(`/api/mistakes?language=${language}`),
   conversation: (language: string) => request<ConversationThread>(`/api/conversations/${language}`),
   scenarios: (language: string) => request<PublicConversationScenario[]>(`/api/scenarios/${language}`),

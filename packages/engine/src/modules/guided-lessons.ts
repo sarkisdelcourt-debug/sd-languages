@@ -1,4 +1,5 @@
 import { currentLevel } from "./level.js";
+import { unresolvedCount } from "./mistakes.js";
 import { EXERCISES } from "../../../shared/src/curriculum.js";
 import { GUIDED_LESSONS, RETIRED_LESSON_REVISIONS } from "../../../shared/src/lessons.js";
 import { CONVERSATION_SCENARIOS } from "../../../shared/src/scenarios.js";
@@ -41,7 +42,7 @@ export function findActiveLessonSession(state: LearnerState, language: LanguageC
 function unresolvedMistakeCount(state: LearnerState, lesson: GuidedLessonDefinition) {
   return state.mistakes
     .filter((mistake) => lesson.exerciseIds.includes(mistake.exerciseId))
-    .reduce((total, mistake) => total + Math.max(0, mistake.occurrenceCount - mistake.resolvedCount), 0);
+    .reduce((total, mistake) => total + unresolvedCount(mistake, state.exerciseHistory), 0);
 }
 
 function lessonIsUnlocked(

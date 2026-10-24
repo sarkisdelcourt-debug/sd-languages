@@ -2,7 +2,7 @@
 
 Coach linguistique local-first pour progresser en anglais, réactiver l'allemand et commencer l'espagnol. L'application associe un diagnostic court, des leçons guidées, des exercices corrigés (QCM, textes à trous, traduction, phrases à construire, paires à associer, dictées), une mémoire des erreurs, une répétition espacée, un suivi de progression, un coach de conversation par règles et un laboratoire de prononciation.
 
-Elle ne demande ni compte, ni abonnement, ni clé d'API. Le moteur pédagogique tourne dans le navigateur ; la progression vit dans IndexedDB sur chaque appareil et se transfère de l'un à l'autre par fichier. Version en ligne : <https://sarkisdelcourt-debug.github.io/sd-languages/> (installable sur iPhone, fonctionne hors ligne).
+Elle ne demande ni compte, ni abonnement ; la clé d'API n'est nécessaire que si vous activez le coach IA facultatif (voir « Coach IA facultatif »). Le moteur pédagogique tourne dans le navigateur ; la progression vit dans IndexedDB sur chaque appareil et se transfère de l'un à l'autre par fichier. Version en ligne : <https://sarkisdelcourt-debug.github.io/sd-languages/> (installable sur iPhone, fonctionne hors ligne).
 
 ## Démarrage rapide
 
@@ -67,24 +67,32 @@ Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils
 | Parcours personnalisé | Opérationnel | Objectif, durée quotidienne et niveau cible configurables pour chaque langue |
 | Parcours guidé A1–B2 | Opérationnel | 36 séances persistantes (12 par langue, 3 par niveau), carte en 4 chapitres, placement par diagnostic ou niveau déclaré, déblocage par maîtrise, abandon possible |
 | Parcours quotidien | Opérationnel | Plan adaptatif priorisé selon objectif, niveau, erreurs, cartes dues et temps disponible ; la leçon est l'action principale |
-| Conversation | Opérationnel, par règles | 12 scénarios en 4 étapes ; coach local (relances, indices, suivi du thème) et correcteur d'erreurs typiques de francophones — jamais présenté comme une IA |
+| Conversation | Opérationnel, par règles | 12 scénarios en 4 étapes ; coach local (relances, indices, suivi du thème) et correcteur d'erreurs typiques de francophones ; avec le coach IA facultatif activé, les réponses du coach peuvent venir d'un modèle d'IA (voir « Coach IA facultatif ») |
 | Laboratoire de prononciation | Opérationnel, progressif | 12 phrases A1–B2, écoute normale ou lente, enregistrement éphémère, transcription assistée ou manuelle et comparaison explicable des mots |
 | Lecture vocale | Opportuniste | Synthèse native du navigateur lorsqu'elle existe |
 | Dictée vocale | Opportuniste | Reconnaissance du navigateur dans la conversation et le laboratoire, transcription modifiable et envoi toujours manuel |
-| PWA hors ligne | Opérationnel | Tout le moteur s'exécute dans l'appareil : aucune requête réseau pour apprendre, mode avion possible une fois installée |
+| PWA hors ligne | Opérationnel | Tout le moteur s'exécute dans l'appareil : aucune requête réseau pour apprendre (hors coach IA facultatif, désactivé par défaut), mode avion possible une fois installée |
 | Relais entre appareils | Opérationnel | « Envoyer ma progression » produit un fichier ; l'autre appareil le reprend avec aperçu et avertissements ; sauvegardes automatiques restaurables (10 max) |
 | Thème sombre | Opérationnel | Suit le réglage de l'appareil ; contrastes ≥ 4.5:1, états distingués par symbole et luminance |
 
 ## Ce qui est préparé mais pas encore intégré
 
-- conversation libre avec un modèle d'IA ;
+- conversation libre avec un modèle d'IA, au-delà du coach IA facultatif décrit plus bas (réponses courtes dans un scénario) ;
 - correction sémantique de réponses ouvertes ;
 - analyse acoustique détaillée des phonèmes, du rythme et de l'accent ;
 - voix neuronales avancées ;
 - synchronisation entre appareils ;
 - comptes, authentification et tableau enseignant.
 
-Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` isolent ces futures intégrations. Leur ajout ne doit pas rendre le fournisseur local inutilisable. Aucune fonctionnalité actuelle n'est présentée comme une correction IA.
+Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` isolent ces futures intégrations. Leur ajout ne doit pas rendre le fournisseur local inutilisable : sans clé, hors ligne ou plafond atteint, le coach local répond.
+
+## Coach IA facultatif
+
+- **Désactivé par défaut.** Il ne fonctionne qu'avec votre propre clé API Anthropic (`sk-ant-…`), saisie dans les réglages.
+- **Où vit la clé** : dans la zone « meta » d'IndexedDB de l'appareil, jamais dans la progression ; elle n'est ni exportée dans le fichier de relais ni publiée, et « Effacer mes données » la supprime. Elle reste lisible par le code de la page dans votre navigateur (appel direct depuis le navigateur, sans serveur intermédiaire).
+- **Ce qui est envoyé à Anthropic** à chaque message du coach : les dernières répliques de la conversation en cours, votre nouveau message, la langue, votre niveau estimé et votre objectif, la mise en situation du scénario et la consigne du coach (qui présente l'apprenant comme un francophone médecin). Pas la progression complète, pas l'audio.
+- **Plafond mensuel estimé** (10 $ par défaut) ; au-delà, hors ligne ou en cas d'erreur, retour automatique au coach local.
+- Non vérifié par test automatisé : la façon dont l'interface signale à l'apprenant qu'une réponse vient de l'IA.
 
 ## Limites assumées du MVP
 

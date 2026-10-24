@@ -3,14 +3,17 @@ import type { LearnerState } from "../../shared/src/types.js";
 import {
   BackupFormatError,
   adoptBackup,
+  applyExportCheckpoint,
   assessImport,
   createBackup,
   isPristine,
   noteChange,
   parseBackupFile,
-  summarizeState
+  summarizeState,
+  syncRevision
 } from "../src/backup.js";
 import { createInitialState } from "../src/initial-state.js";
+import { createDashboard } from "../src/modules/progress.js";
 
 /** Simule une activité réelle sur un appareil : des XP et un changement compté. */
 function practise(state: LearnerState, xp = 10) {
@@ -136,5 +139,110 @@ describe("lecture des fichiers de sauvegarde", () => {
     expect(summary.languages.es).toMatchObject({ xp: 25, completedExercises: 1, completedLessons: 0, activeLesson: false });
     expect(summary.totalXp).toBe(25);
     expect(summary.lastActivityAt).toBe("2026-10-20T21:30:00.000Z");
+  });
+});
+
+describe("import strict : chaque élément est vérifié avant tout remplacement (LANG-01)", () => {
+  const card = (over: Record<string, unknown> = {}) => ({
+    id: "c1", sourceExerciseId: "e1", language: "en", prompt: "p", answer: "a", focus: "f",
+    nextReviewAt: "2026-10-21T10:00:00.000Z", intervalDays: 1, easeFactor: 2.5, repetitions: 0, lapses: 0, ...over
+  });
+  const parse = (patch: Record<string, unknown>) => parseBackupFile(JSON.stringify({ ...createInitialState(), ...patch }));
+
+  it("refuse un tableau qui contient autre chose que des objets (cas reproduit : reviewCards:[null])", () => {
+    expect(() => parse({ reviewCards: [null] })).toThrow(BackupFormatError);
+    expect(() => parse({ reviewCards: [null] })).toThrow(/carte de révision n°1/);
+    expect(() => parse({ mistakes: [42] })).toThrow(/erreur enregistrée n°1/);
+    expect(() => parse({ lessonSessions: ["x"] })).toThrow(/séance de leçon n°1/);
+    expect(() => parse({ processedAttemptIds: [1] })).toThrow(/identifiant de tentative n°1/);
+  });
+
+  it("dit quel élément est abîmé et pourquoi", () => {
+    expect(() => parse({ reviewCards: [card(), card({ id: "c2", language: "fr" })] })).toThrow(/carte de révision n°2.*langue/);
+    expect(() => parse({ reviewCards: [card({ nextReviewAt: 5 })] })).toThrow(/carte de révision n°1.*nextReviewAt/);
+    expect(() => parse({ reviewCards: [card({ intervalDays: "deux" })] })).toThrow(/intervalDays/);
+    expect(() => parse({ reviewCards: [{ language: "en" }] })).toThrow(/identifiant/);
+    expect(() => parse({ lessonSessions: [{ id: "s", lessonId: "l", language: "en", status: "perdue", attempts: [] }] })).toThrow(/séance de leçon n°1.*statut/);
+  });
+
+  it("refuse les identifiants en double et les relations cassées", () => {
+    expect(() => parse({ reviewCards: [card(), card()] })).toThrow(/carte de révision.*en double/);
+    expect(() => parse({ conversations: { en: {} } })).toThrow(/conversation « en »/);
+    expect(() => parse({ settings: { en: "x" } })).toThrow(/réglages « en »/);
+    expect(() => parse({ lessonProgress: [] })).toThrow(/progression des leçons/);
+    expect(() => parse({ sync: { checkpointHistory: [1], changesSinceCheckpoint: 0 } })).toThrow(/relais/);
+    expect(() => parse({ sync: { checkpointHistory: [], changesSinceCheckpoint: "3" } })).toThrow(/relais/);
+  });
+
+  it("accepte un fichier réel et les anciens profils sans les champs récents", () => {
+    const parsed = parse({ reviewCards: [card()], mistakes: [] });
+    expect(parsed.state.reviewCards).toHaveLength(1);
+    expect(createDashboard(parsed.state).totalCards).toBe(1);
+    const old = { progress: { en: { language: "en", xp: 5, completedExercises: 1, correctAnswers: 1, currentStreak: 1 } }, reviewCards: [{ id: "x", language: "es" }] };
+    expect(parseBackupFile(JSON.stringify(old)).state.reviewCards).toHaveLength(1);
+  });
+
+  it("tout fichier accepté peut ensuite être affiché sans erreur", () => {
+    const odd: Record<string, unknown>[] = [{}, { reviewCards: [] }, { reviewCards: [{ id: "x", language: "de" }] }, { mistakes: [{ id: "m", language: "es" }] }, { conversations: {} }, { settings: {} }];
+    for (const patch of odd) {
+      let state;
+      try { state = parse(patch).state; } catch (error) { expect(error).toBeInstanceOf(BackupFormatError); continue; }
+      expect(() => { createDashboard(state); summarizeState(state); isPristine(state); }).not.toThrow();
+    }
+  });
+});
+
+describe("point de relais posé à l'envoi (LANG-02)", () => {
+  const now = new Date("2026-10-21T10:00:00.000Z");
+
+  it("pose le point après une activité préalable quand rien n'a changé pendant l'envoi (cas reproduit)", () => {
+    const state = createInitialState();
+    practise(state); // changesSinceCheckpoint = 1 avant l'envoi
+    const revision = syncRevision(state);
+    const backup = createBackup(state, "PC", "relais-1", now);
+    const next = applyExportCheckpoint(state, backup, revision);
+    expect(next.sync?.checkpointId).toBe("relais-1");
+    expect(next.sync?.changesSinceCheckpoint).toBe(0);
+    expect(next.progress.es.xp).toBe(state.progress.es.xp);
+  });
+
+  it("pose le point aussi sans activité préalable", () => {
+    const state = createInitialState();
+    const next = applyExportCheckpoint(state, createBackup(state, "PC", "relais-1", now), syncRevision(state));
+    expect(next.sync?.checkpointId).toBe("relais-1");
+  });
+
+  it("ne pose pas le point si l'apprenant a travaillé pendant l'envoi, et garde son travail", () => {
+    const state = createInitialState();
+    practise(state);
+    const revision = syncRevision(state);
+    const backup = createBackup(state, "PC", "relais-1", now);
+    const duringShare = structuredClone(state);
+    practise(duringShare, 7); // une leçon terminée pendant la feuille de partage
+    const next = applyExportCheckpoint(duringShare, backup, revision);
+    expect(next).toEqual(duringShare);
+    expect(next.sync?.checkpointId).toBeUndefined();
+    expect(next.sync?.changesSinceCheckpoint).toBe(2);
+    expect(next.progress.es.xp).toBe(17);
+  });
+
+  it("l'état courant n'est jamais modifié en place", () => {
+    const state = createInitialState();
+    practise(state);
+    const before = JSON.stringify(state);
+    applyExportCheckpoint(state, createBackup(state, "PC", "relais-1", now), syncRevision(state));
+    expect(JSON.stringify(state)).toBe(before);
+  });
+});
+
+describe("import strict : séances et conversations (audit du 24/10/2026)", () => {
+  const file = (patch: Record<string, unknown>) => JSON.stringify({ format: "sd-languages-backup", formatVersion: 1, exportedAt: "2026-10-24T10:00:00.000Z", device: "test", state: { ...createInitialState(), ...patch } });
+  it("refuse une séance sans liste de tentatives ou sans leçon", () => {
+    expect(() => parseBackupFile(file({ lessonSessions: [{ id: "s", language: "en", status: "active" }] }))).toThrow(BackupFormatError);
+    expect(() => parseBackupFile(file({ lessonSessions: [{ id: "s", language: "en", status: "active", attempts: [] }] }))).toThrow(BackupFormatError);
+  });
+  it("refuse des messages de conversation qui ne sont pas des objets", () => {
+    const state = createInitialState();
+    expect(() => parseBackupFile(file({ conversations: { ...state.conversations, en: { ...state.conversations.en, messages: [null] } } }))).toThrow(BackupFormatError);
   });
 });

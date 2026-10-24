@@ -2,6 +2,16 @@ import { createReviewCard, evaluateAnswer } from "../../../shared/src/learning.j
 import type { Exercise, LearnerState, MistakeRecord } from "../../../shared/src/types.js";
 import { recordPractice } from "./progress.js";
 
+/** Retient une tentative déjà comptée (les 1 000 dernières) ; faux si elle l'était déjà : un rejeu ne compte pas deux fois. */
+export function rememberAttempt(state: LearnerState, attemptId: string): boolean {
+  if (state.processedAttemptIds.includes(attemptId)) return false;
+  state.processedAttemptIds.push(attemptId);
+  if (state.processedAttemptIds.length > 1_000) {
+    state.processedAttemptIds.splice(0, state.processedAttemptIds.length - 1_000);
+  }
+  return true;
+}
+
 export function applyPracticeAttempt(
   state: LearnerState,
   exercise: Exercise,
@@ -9,12 +19,7 @@ export function applyPracticeAttempt(
   attemptId: string
 ) {
   const evaluation = evaluateAnswer(exercise, answer);
-  if (state.processedAttemptIds.includes(attemptId)) return { evaluation, duplicate: true };
-
-  state.processedAttemptIds.push(attemptId);
-  if (state.processedAttemptIds.length > 1_000) {
-    state.processedAttemptIds.splice(0, state.processedAttemptIds.length - 1_000);
-  }
+  if (!rememberAttempt(state, attemptId)) return { evaluation, duplicate: true };
   recordPractice(state, exercise.language, evaluation.correct);
   // Registre compact par exercice : permet de proposer du neuf au lieu de tourner en rond.
   const history = (state.exerciseHistory ??= {});
@@ -54,7 +59,8 @@ export function applyPracticeAttempt(
       state.reviewCards.push(createReviewCard(exercise));
     }
   } else if (existingMistake) {
-    existingMistake.resolvedCount += 1;
+    // Une réussite solde un échec déjà survenu, jamais un échec à venir (LANG-03) : le compteur ne dépasse pas les échecs.
+    existingMistake.resolvedCount = Math.min(existingMistake.resolvedCount + 1, existingMistake.occurrenceCount);
   }
   return { evaluation, duplicate: false };
 }

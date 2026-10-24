@@ -1,3 +1,4 @@
+import { VoiceNotice } from "./VoiceNotice";
 import { useMemo, useRef, useState } from "react";
 import { LANGUAGES } from "@shared/catalog";
 import { matchPairsAnswer } from "@shared/learning";
@@ -127,6 +128,7 @@ function Listening({ exercise, language, value, onChange, onSubmit, disabled }: 
   const play = (rate: number) => exercise.audioText && speakText(exercise.audioText, language, rate);
   return (
     <div className="listening">
+      {canSpeak ? <VoiceNotice language={language} onlyMissing /> : null}
       {canSpeak ? (
         <div className="listen-buttons">
           <button className="secondary-button" disabled={disabled} onClick={() => play(0.9)}>▶ Écouter</button>

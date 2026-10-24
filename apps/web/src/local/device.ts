@@ -1,10 +1,12 @@
 import type { LearnerState } from "@shared/types";
 import {
   adoptBackup,
+  applyExportCheckpoint,
   isPristine,
   assessImport,
   createBackup,
   parseBackupFile,
+  syncRevision,
   type ImportAssessment
 } from "@engine/backup";
 import { createEngine } from "@engine/router";
@@ -69,7 +71,11 @@ export async function exportProgress(): Promise<ExportOutcome> {
   const now = new Date();
   const device = deviceLabel();
   const checkpointId = crypto.randomUUID();
-  const backup = createBackup(await store.read(), device, checkpointId, now);
+  const before = await store.read();
+  // Révision relevée avant de fabriquer le fichier : le fichier remet le compteur à zéro, c'est donc la seule
+  // référence fiable pour savoir si l'apprenant a travaillé pendant la feuille de partage (LANG-02).
+  const sentRevision = syncRevision(before);
+  const backup = createBackup(before, device, checkpointId, now);
   const name = `sd-languages-${device.toLowerCase()}-${fileDate(now)}.json`;
   const text = `${JSON.stringify(backup, null, 1)}\n`;
   const file = new File([text], name, { type: "application/json" });
@@ -93,11 +99,7 @@ export async function exportProgress(): Promise<ExportOutcome> {
     outcome = "downloaded";
   }
   // L'état a pu changer pendant la feuille de partage : on ne pose le point que sur l'état envoyé.
-  await store.transform((state) => {
-    const unchanged = (state.sync?.changesSinceCheckpoint ?? 0) === (backup.state.sync?.changesSinceCheckpoint ?? 0)
-      && state.sync?.lastChangeAt === backup.state.sync?.lastChangeAt;
-    return { state: unchanged ? { ...state, sync: backup.state.sync } : state, result: undefined };
-  });
+  await store.transform((state) => ({ state: applyExportCheckpoint(state, backup, sentRevision), result: undefined }));
   return outcome;
 }
 

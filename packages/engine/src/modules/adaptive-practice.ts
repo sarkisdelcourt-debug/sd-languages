@@ -1,5 +1,7 @@
 import type { CefrLevel, Exercise, ExerciseTopic, LanguageCode, LearnerState, LearningGoal } from "../../../shared/src/types.js";
 import { currentLevel } from "./level.js";
+import { unresolvedCount } from "./mistakes.js";
+import { learningDay } from "./progress.js";
 
 const LEVEL_RANK: Record<CefrLevel, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5 };
 
@@ -14,8 +16,12 @@ export interface RankedExercise {
  * l'échelle des autres bonus. Mille valeurs distinctes évitent les ex æquo que l'ancien « mod 7 »
  * laissait trancher par l'ordre alphabétique des ids (d'où un biais vers « en-day-… »).
  */
-export function dailyTieBreaker(id: string, now: Date): number {
-  const day = now.toISOString().slice(0, 10);
+export function dailyTieBreaker(id: string, now: Date, timeZone?: string): number {
+  return tieBreakerForDay(id, learningDay(now, timeZone)); // le « jour » est celui de l'apprenant, comme pour la série (LANG-05)
+}
+
+/** Même départage avec le jour déjà calculé : rankExercises le calcule une seule fois (Intl coûte ~0,15 ms par appel). */
+function tieBreakerForDay(id: string, day: string): number {
   let value = 2_166_136_261;
   for (const character of `${day}-${id}`) value = Math.imul(value ^ (character.codePointAt(0) ?? 0), 16_777_619) >>> 0;
   return value % 1001;
@@ -37,17 +43,18 @@ export function rankExercises(
 ): RankedExercise[] {
   const estimatedLevel = currentLevel(state, language);
   const targetRank = estimatedLevel ? LEVEL_RANK[estimatedLevel] : 1;
+  const day = learningDay(now);
 
   return exercises
     .map((exercise) => {
       const mistake = state.mistakes.find(
         (candidate) => candidate.language === language && candidate.exerciseId === exercise.id
       );
-      let score = dailyTieBreaker(exercise.id, now) * 7 / 1000;
+      let score = tieBreakerForDay(exercise.id, day) * 7 / 1000;
       let recommendationReason = "Découverte progressive";
       score += goalBoost(exercise, state.settings[language].goal);
 
-      const unresolved = mistake ? Math.max(0, mistake.occurrenceCount - mistake.resolvedCount) : 0;
+      const unresolved = mistake ? unresolvedCount(mistake, state.exerciseHistory) : 0;
       if (mistake && unresolved > 0) {
         score += 100 + unresolved * 15;
         recommendationReason = `À renforcer · ${mistake.focus}`;
@@ -171,7 +178,7 @@ export function selectAdaptiveExercises(
   const lowerRank = Math.max(1, Math.min(currentRank, targetRank) - 1);
   const candidates = exercises.filter((exercise) => {
     const mistake = state.mistakes.find((item) => item.exerciseId === exercise.id && item.language === language);
-    const unresolved = mistake ? mistake.occurrenceCount - mistake.resolvedCount : 0;
+    const unresolved = mistake ? unresolvedCount(mistake, state.exerciseHistory) : 0;
     const rank = LEVEL_RANK[exercise.level];
     return unresolved > 0 || (rank >= lowerRank && rank <= upperRank);
   });

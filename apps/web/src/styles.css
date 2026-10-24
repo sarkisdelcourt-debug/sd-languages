@@ -443,14 +443,12 @@ main { min-width: 0; }
 .app-shell > main {
   background: linear-gradient(165deg, var(--lang-a) 0%, var(--lang-b) 55%, var(--bg) 100%);
   border-top: 4px solid var(--lang-bar);
-  transition: background .35s ease, border-color .35s ease;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .app-shell { --lang-a: #14233b; --lang-b: var(--bg); --lang-bar: #6f9cf0; }
   :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-a: #2b2412; --lang-b: var(--bg); --lang-bar: #e3a834; }
   :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-a: #2d1c1f; --lang-b: var(--bg); --lang-bar: #f08470; }
 }
-@media (prefers-reduced-motion: reduce) { .app-shell > main { transition: none; } }
 
 /* Tests de mots sur téléphone : choix empilés, grands et lisibles (22/10/2026). */
 .vocab-setup .segmented-options { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }

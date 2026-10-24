@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useDeferredValue } from "react";
 import { isLanguageCode, LANGUAGES } from "@shared/catalog";
 import type { DashboardSnapshot, LanguageCode } from "@shared/types";
 import { api } from "./api";
@@ -50,6 +50,8 @@ function readSavedLanguage(): LanguageCode {
 
 export function App() {
   const [language, setLanguage] = useState<LanguageCode>(readSavedLanguage);
+  // Les pastilles de langue réagissent tout de suite ; le contenu des écrans suit en priorité basse (pas de blocage au toucher).
+  const viewLanguage = useDeferredValue(language);
   const [view, setView] = useState<View>("home");
   const [speakingMode, setSpeakingMode] = useState<SpeakingMode>("pronunciation");
   const [dashboard, setDashboard] = useState<DashboardSnapshot>();
@@ -202,21 +204,21 @@ export function App() {
           </div>
         ) : null}
 
-        <section className="content" key={`${view}-${language}`}>
+        <section className="content" key={`${view}-${viewLanguage}`}>
           {view === "home" && dashboard ? (
-            <DashboardView dashboard={dashboard} language={language} onNavigate={(nextView, nextSpeakingMode) => {
+            <DashboardView dashboard={dashboard} language={viewLanguage} onNavigate={(nextView, nextSpeakingMode) => {
               if (nextSpeakingMode) setSpeakingMode(nextSpeakingMode);
               setView(nextView);
             }} />
           ) : null}
-          {view === "diagnostic" ? <DiagnosticView language={language} onComplete={refreshDashboard} /> : null}
-          {view === "lesson" ? <GuidedLessonView language={language} onProgress={refreshDashboard} onHome={() => setView("home")} /> : null}
-          {view === "practice" ? <PracticeView language={language} onProgress={refreshDashboard} target={practiceTarget} /> : null}
-          {view === "vocabulary" ? <VocabularyView language={language} onProgress={refreshDashboard} /> : null}
-          {view === "skills" ? <SkillsView language={language} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}
-          {view === "review" ? <ReviewView language={language} onProgress={refreshDashboard} /> : null}
-          {view === "conversation" ? <SpeakingView language={language} mode={speakingMode} onModeChange={setSpeakingMode} /> : null}
-          {view === "settings" ? <SettingsView language={language} onSaved={refreshDashboard} /> : null}
+          {view === "diagnostic" ? <DiagnosticView language={viewLanguage} onComplete={refreshDashboard} /> : null}
+          {view === "lesson" ? <GuidedLessonView language={viewLanguage} onProgress={refreshDashboard} onHome={() => setView("home")} /> : null}
+          {view === "practice" ? <PracticeView language={viewLanguage} onProgress={refreshDashboard} target={practiceTarget} /> : null}
+          {view === "vocabulary" ? <VocabularyView language={viewLanguage} onProgress={refreshDashboard} /> : null}
+          {view === "skills" ? <SkillsView language={viewLanguage} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}
+          {view === "review" ? <ReviewView language={viewLanguage} onProgress={refreshDashboard} /> : null}
+          {view === "conversation" ? <SpeakingView language={viewLanguage} mode={speakingMode} onModeChange={setSpeakingMode} /> : null}
+          {view === "settings" ? <SettingsView language={viewLanguage} onSaved={refreshDashboard} /> : null}
           {view === "data" ? <DataView onChanged={refreshDashboard} /> : null}
           {view === "home" && !dashboard ? <div className="loading-card">Chargement de votre progression…</div> : null}
         </section>

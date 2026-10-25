@@ -7,6 +7,7 @@ import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/cata
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
 import type { CefrLevel, ConversationScenario, ExerciseTopic, LanguageCode, LearningGoal, ReviewRating } from "../../shared/src/types.js";
 import { parseAiReply } from "./modules/ai-coach.js";
+import { currentLevel } from "./modules/level.js";
 import { rankExercises, selectAdaptiveExercises, selectTopicExercises } from "./modules/adaptive-practice.js";
 import { LocalCoachProvider, buildAiReply } from "./modules/coach.js";
 import { createDailyPlan } from "./modules/daily-plan.js";
@@ -201,7 +202,13 @@ export function createEngine(store: StateStore): Engine {
       const seen = state.exerciseHistory?.[id];
       return !seen ? 1 : seen.lastCorrect ? 2 : 0;
     };
-    const all = drillCandidates(language, direction, mode, setId);
+    let all = drillCandidates(language, direction, mode, setId);
+    // « Pour maintenant » : uniquement des mots du niveau actuel et du niveau juste au-dessus (repli : tous les mots).
+    if (query.get("forLevel") === "1") {
+      const reference = cefrRank[currentLevel(state, language) ?? "A1"];
+      const near = all.filter((exercise) => Math.abs(cefrRank[exercise.level] - reference) <= 1 && cefrRank[exercise.level] >= reference - 1);
+      if (near.length >= count) all = near;
+    }
     const fresh = all.filter((exercise) => !excluded.has(exercise.id));
     const pool = fresh.length >= Math.min(count, all.length) ? fresh : all;
     // « Mot au hasard » : tirage aléatoire dans le périmètre, sans priorité de révision.
@@ -491,18 +498,24 @@ export function createEngine(store: StateStore): Engine {
   route("GET", "/api/scenarios/:language", async ({ params }) => {
     const language = params.language;
     if (!isLanguageCode(language)) return unknownLanguage();
-    const settings = (await store.read()).settings[language];
+    const state = await store.read();
+    const settings = state.settings[language];
+    // Repère = le niveau actuel (déclaré ou diagnostiqué), pas l'objectif : une cible B2 ne doit pas mettre un scénario B2 en tête
+    // d'un profil qui commence (audit du 24/10/2026). Sans niveau connu, on part de A1.
+    const reference: CefrLevel = currentLevel(state, language) ?? "A1";
     const scored = CONVERSATION_SCENARIOS.filter((scenario) => scenario.language === language).map((scenario) => {
       const goalToken = settings.goal === "basics" ? "daily" : settings.goal;
       const goalMatch = settings.goal !== "fluency" && scenario.id.includes(goalToken);
-      const levelDistance = Math.abs(cefrRank[scenario.level] - cefrRank[settings.targetLevel]);
-      const levelScore = Math.max(0, 12 - levelDistance * 4);
-      const recommendationReason = goalMatch
-        ? `Prioritaire · ${goalLabels[settings.goal]}`
-        : settings.goal === "fluency" && levelScore > 0
-          ? `Progression vers ${settings.targetLevel}`
-          : undefined;
-      return { ...scenario, recommendationScore: (goalMatch ? 30 : 0) + levelScore, recommendationReason };
+      const gap = cefrRank[scenario.level] - cefrRank[reference]; // > 0 : plus difficile que le niveau actuel
+      const levelScore = gap > 1 ? Math.max(0, 6 - (gap - 1) * 3) : Math.max(0, 14 - Math.abs(gap) * 4);
+      const recommendationReason = gap > 1
+        ? "Pour aller plus loin"
+        : gap < -1
+          ? "Pour s'échauffer"
+          : goalMatch
+            ? `Pour maintenant · ${goalLabels[settings.goal]}`
+            : `Pour maintenant · niveau ${scenario.level}`;
+      return { ...scenario, recommendationScore: (goalMatch ? 8 : 0) + levelScore, recommendationReason };
     }).sort((a, b) => b.recommendationScore - a.recommendationScore || a.title.localeCompare(b.title));
     return ok(scored);
   });

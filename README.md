@@ -113,7 +113,7 @@ Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` i
 - Aucun appel analytique ou publicitaire.
 - Aucun compte utilisateur.
 - La progression vit dans IndexedDB (`sd-languages`), dans le navigateur de chaque appareil ; `localStorage` ne garde que la langue choisie. Aucune donnée n'est hébergée : GitHub Pages ne sert que l'application.
-- L'audio n'est jamais enregistré ni envoyé ; seuls le score et le verdict d'un essai de prononciation sont conservés.
+- « M'enregistrer » garde l'audio en mémoire vive pour la réécoute (jamais envoyé par l'application, effacé en quittant la page) ; « Reconnaître » utilise la reconnaissance vocale du navigateur, dont le service peut être distant selon le navigateur. Seuls le score et le verdict d'un essai sont conservés.
 - Le serveur Express est lié à `127.0.0.1` ; son fichier `data/*.json` (ancienne progression du PC) est ignoré par Git et n'est plus écrit par l'application.
 - « Mes données » permet d'envoyer, reprendre, restaurer une sauvegarde ou tout effacer (double confirmation).
 

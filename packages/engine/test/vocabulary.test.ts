@@ -102,3 +102,13 @@ describe("route des tests de vocabulaire", () => {
     }
   });
 });
+
+describe("« 10 mots utiles maintenant »", () => {
+  it("ne propose que des mots du niveau actuel ou du niveau juste au-dessus pour un débutant", async () => {
+    const engine = createEngine(new MemoryStore());
+    const series = await drillOf(engine, "direction=to-french&mode=choice&forLevel=1");
+    expect(series).toHaveLength(10);
+    // Profil neuf = niveau A1 : seulement A1 et A2, jamais de liste B1 ou B2.
+    expect(series.every((item) => ["A1", "A2"].includes((item as unknown as { level: string }).level))).toBe(true);
+  });
+});

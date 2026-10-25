@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useDeferredValue } from "react";
 import { loadClipManifest } from "./lib/voice-clips";
 import { isLanguageCode, LANGUAGES } from "@shared/catalog";
 import type { DashboardSnapshot, LanguageCode } from "@shared/types";
-import { api } from "./api";
+import { api, STATE_CHANGED_EVENT } from "./api";
 import { DashboardView } from "./components/DashboardView";
 import { DataView } from "./components/DataView";
 import { DiagnosticView } from "./components/DiagnosticView";
@@ -69,6 +69,16 @@ export function App() {
   const refreshDashboard = useCallback(() => {
     api.dashboard().then(setDashboard).catch((reason: Error) => setError(reason.message));
     getRelayStatus().then(setRelay).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    const refreshRelay = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => { getRelayStatus().then(setRelay).catch(() => undefined); }, 200);
+    };
+    window.addEventListener(STATE_CHANGED_EVENT, refreshRelay);
+    return () => { window.clearTimeout(timer); window.removeEventListener(STATE_CHANGED_EVENT, refreshRelay); };
   }, []);
 
   useEffect(() => {

@@ -504,3 +504,10 @@ main { min-width: 0; }
 .rule-pitfalls { padding: 10px 12px; border-left: 4px solid var(--signal); border-radius: 8px; background: var(--tint-warn); }
 .scratch-start { margin-top: 10px; }
 .scratch-start small { display: block; margin-top: 4px; opacity: .85; }
+
+.match-mistakes { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.match-mistakes li { padding: 8px 10px; border-left: 4px solid var(--signal); border-radius: 6px; background: var(--tint-warn); display: grid; gap: 2px; }
+.match-mistakes b { color: var(--accent-ink); }
+
+.skills-untouched { margin-top: 10px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 12px; }
+.skills-untouched > summary { cursor: pointer; color: var(--muted-strong); font-weight: 700; min-height: 40px; display: flex; align-items: center; }

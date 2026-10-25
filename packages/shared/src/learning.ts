@@ -10,6 +10,25 @@ import type {
 } from "./types.js";
 
 /** Forme canonique (et lisible en révision) d'un exercice d'association : « la casa = la maison · … ». */
+export interface MatchPairsMistake {
+  target: string;
+  /** Ce que l'apprenant a associé (absent s'il n'a rien associé à ce mot). */
+  given?: string;
+  expected: string;
+}
+
+/** Les paires fausses d'une réponse « a = b · c = d », pour un retour ciblé (audit du 24/10/2026). */
+export function matchPairsMistakes(submitted: string, expected: string): MatchPairsMistake[] {
+  const parse = (text: string) => text.split(" · ").map((part) => {
+    const [target, ...rest] = part.split(" = ");
+    return { target: (target ?? "").trim(), native: rest.join(" = ").trim() };
+  }).filter((pair) => pair.target);
+  const given = new Map(parse(submitted).map((pair) => [pair.target, pair.native]));
+  return parse(expected)
+    .filter((pair) => given.get(pair.target) !== pair.native)
+    .map((pair) => ({ target: pair.target, ...(given.get(pair.target) ? { given: given.get(pair.target) } : {}), expected: pair.native }));
+}
+
 export function matchPairsAnswer(pairs: Array<{ target: string; native: string }>): string {
   return pairs.map((pair) => `${pair.target} = ${pair.native}`).join(" · ");
 }

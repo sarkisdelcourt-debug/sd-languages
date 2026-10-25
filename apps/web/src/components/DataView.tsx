@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { STATE_CHANGED_EVENT } from "../api";
 import { LANGUAGE_CODES, LANGUAGES } from "@shared/catalog";
 import type { StateSummary } from "@engine/backup";
 import type { BackupEntry } from "../local/browser-store";
@@ -68,6 +69,9 @@ export function DataView({ onChanged }: { onChanged: () => void }) {
   useEffect(() => {
     void refresh();
     void fetchLegacyServerExport().then(setLegacyText);
+    const onChange = () => { void refresh(); };
+    window.addEventListener(STATE_CHANGED_EVENT, onChange);
+    return () => window.removeEventListener(STATE_CHANGED_EVENT, onChange);
   }, [refresh]);
 
   useEffect(() => {

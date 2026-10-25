@@ -54,6 +54,8 @@ export type PublicConversationScenario = ConversationScenario & {
  * Les vues gardent leurs appels « /api/… », mais le moteur s'exécute dans l'appareil : aucune
  * requête réseau, donc la même expérience en ligne, hors ligne ou en mode avion.
  */
+export const STATE_CHANGED_EVENT = "sd:state-changed";
+
 async function request<T>(path: string, options?: { method?: string; body?: string }): Promise<T> {
   const response = await engine.handle(options?.method ?? "GET", path, options?.body ? JSON.parse(options.body) : undefined);
   const body = response.body as T | { error?: string };
@@ -61,6 +63,9 @@ async function request<T>(path: string, options?: { method?: string; body?: stri
     const message = body && typeof body === "object" && "error" in body ? body.error : undefined;
     throw new Error(message ?? "Erreur locale inattendue.");
   }
+  // Toute écriture réussie prévient l'interface : le compteur de relais (barre latérale, « Mes données ») se rafraîchit
+  // partout, y compris après une conversation ou un essai de prononciation qui ne rappellent pas le tableau de bord.
+  if ((options?.method ?? "GET") !== "GET" && typeof window !== "undefined") window.dispatchEvent(new Event(STATE_CHANGED_EVENT));
   return body as T;
 }
 
@@ -84,10 +89,11 @@ export const api = {
   },
   rules: (language: string) => request<GrammarRule[]>(`/api/rules/${language}`),
   vocabulary: (language: string) => request<{ language: string; sets: VocabularySet[] }>(`/api/vocabulary/${language}`),
-  vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[]; random?: boolean }) => {
+  vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[]; random?: boolean; forLevel?: boolean }) => {
     const query = new URLSearchParams({ direction: options.direction, mode: options.mode });
     if (options.setId) query.set("set", options.setId);
     if (options.random) query.set("order", "random");
+    if (options.forLevel) query.set("forLevel", "1");
     if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
     return request<PublicExercise[]>(`/api/vocabulary/${language}/drill?${query.toString()}`);
   },

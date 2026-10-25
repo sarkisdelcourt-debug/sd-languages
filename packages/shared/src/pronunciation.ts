@@ -5,12 +5,23 @@ export const PRONUNCIATION_PROMPTS: PronunciationPrompt[] = [
     id: "pron-en-gate",
     language: "en",
     level: "A1",
-    sourceLessonId: "lesson-en-daily-basics",
+    sourceLessonId: "lesson-en-ask-and-clarify",
     text: "Where is gate twelve?",
     translation: "Où se trouve la porte douze ?",
     focus: "Le w initial, la diphtongue de gate et le groupe final de twelve.",
     keyTokens: ["gate", "twelve"],
     coachingTip: "Posez la question en un seul groupe et appuyez gate puis twelve."
+  },
+  {
+    id: "pron-en-cafe",
+    language: "en",
+    level: "A1",
+    sourceLessonId: "lesson-en-daily-basics",
+    text: "I would like a coffee, please.",
+    translation: "Je voudrais un café, s'il vous plaît.",
+    focus: "La forme contractée I'd, le w de would muet à l'oral rapide et la voyelle de coffee.",
+    keyTokens: ["would", "coffee"],
+    coachingTip: "Enchaînez I would like en un seul groupe, puis marquez la première syllabe de coffee."
   },
   {
     id: "pron-en-routine",
@@ -49,12 +60,23 @@ export const PRONUNCIATION_PROMPTS: PronunciationPrompt[] = [
     id: "pron-de-greeting",
     language: "de",
     level: "A1",
-    sourceLessonId: "lesson-de-daily-basics",
+    sourceLessonId: "lesson-de-check-in-politely",
     text: "Guten Tag, ich heiße Alex.",
     translation: "Bonjour, je m’appelle Alex.",
     focus: "Le h expiré de heiße, le ich-Laut et le ß prononcé comme un s net.",
     keyTokens: ["heiße", "Alex"],
     coachingTip: "Détachez Guten Tag, puis gardez ich heiße dans un seul souffle."
+  },
+  {
+    id: "pron-de-shop",
+    language: "de",
+    level: "A1",
+    sourceLessonId: "lesson-de-daily-basics",
+    text: "Ich möchte ein Brot, bitte.",
+    translation: "Je voudrais un pain, s'il vous plaît.",
+    focus: "Le ch doux de ich, le ö de möchte et le r final de bitte.",
+    keyTokens: ["möchte", "Brot"],
+    coachingTip: "Arrondissez les lèvres pour möchte, puis articulez le r de Brot en arrière de la gorge."
   },
   {
     id: "pron-de-ticket",
@@ -115,7 +137,7 @@ export const PRONUNCIATION_PROMPTS: PronunciationPrompt[] = [
     id: "pron-es-deadline",
     language: "es",
     level: "B1",
-    sourceLessonId: "lesson-es-experience-work",
+    sourceLessonId: "lesson-es-explain-health-availability",
     text: "Tenemos que terminar esta tarea antes del jueves.",
     translation: "Nous devons terminer cette tâche avant jeudi.",
     focus: "Le j de jueves, les accents de terminar et tarea, et le débit régulier.",

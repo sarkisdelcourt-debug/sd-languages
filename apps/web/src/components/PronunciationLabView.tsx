@@ -177,8 +177,8 @@ export function PronunciationLabView({ language }: { language: LanguageCode }) {
           <p>Une séance courte pour rendre votre parole plus intelligible, phrase après phrase.</p>
         </div>
         <aside className="privacy-note">
-          <strong>Votre voix reste éphémère</strong>
-          <span>L'audio n'est jamais enregistré ni envoyé : il disparaît en quittant la page. Seuls le score et le verdict de chaque essai restent dans votre progression, sur cet appareil.</span>
+          <strong>Ce que devient votre voix</strong>
+          <span><b>« M'enregistrer »</b> : l'enregistrement reste en mémoire sur cet appareil pour vous réécouter, et disparaît en quittant la page ; il n'est jamais envoyé par l'application. <b>« Reconnaître »</b> : c'est le navigateur qui transcrit, et selon le navigateur son service vocal peut passer par Internet. Seuls le score et le verdict de chaque essai sont conservés, sur cet appareil.</span>
         </aside>
       </header>
 

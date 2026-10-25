@@ -99,7 +99,7 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
       <section className="metric-grid" aria-label="Progression">
         <article className="metric-card">
           <span className="metric-icon violet" aria-hidden="true">PR</span>
-          <div><strong>{accuracy}%</strong><span>Précision</span></div>
+          <div><strong>{progress.completedExercises ? `${accuracy}%` : "—"}</strong><span>{progress.completedExercises ? "Précision" : "Précision · pas encore mesurée"}</span></div>
         </article>
         <article className="metric-card">
           <span className="metric-icon coral" aria-hidden="true">JR</span>

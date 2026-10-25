@@ -94,12 +94,12 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
   };
 
   // `keepScore` : en mode « mot au hasard », la série suivante se charge sans remettre le score à zéro.
-  const start = async (exclude: string[] = [], keepScore = false, override: Partial<Settings> = {}) => {
+  const start = async (exclude: string[] = [], keepScore = false, override: Partial<Settings> = {}, forLevel = false) => {
     const chosen = { ...settings, ...override };
     setLoading(true);
     setError(undefined);
     try {
-      const drill = await api.vocabularyDrill(language, { direction: chosen.direction, mode: chosen.mode, setId: chosen.random ? undefined : chosen.setId, random: chosen.random, exclude });
+      const drill = await api.vocabularyDrill(language, { direction: chosen.direction, mode: chosen.mode, setId: chosen.random ? undefined : chosen.setId, random: chosen.random, forLevel, exclude });
       setSeries(drill);
       setSeen([...exclude, ...drill.map((item) => item.id)]);
       setIndex(0);
@@ -183,7 +183,10 @@ export function VocabularyView({ language, onProgress }: { language: LanguageCod
               <button key={item.id} className={settings.mode === item.id ? "selected" : ""} aria-pressed={settings.mode === item.id} onClick={() => update({ mode: item.id })}>{item.label}<small> · {item.help}</small></button>
             ))}
           </div>
-          <div className="settings-section"><strong>Liste</strong></div>
+          <div className="relay-actions">
+            <button className="primary-button" disabled={loading || !sets.length} onClick={() => void start([], false, { setId: undefined, random: false }, true)}>10 mots utiles maintenant (adaptés à mon niveau)</button>
+          </div>
+          <div className="settings-section"><strong>Ou choisir une liste</strong></div>
           <div className="vocab-sets" role="group" aria-label="Liste de vocabulaire">
             <button className={settings.random ? "vocab-set selected" : "vocab-set"} aria-pressed={Boolean(settings.random)} onClick={() => pick({ random: true, setId: undefined })}>
               <strong>Mot au hasard</strong><small>Un mot après l'autre, tiré dans toutes les listes, sans fin</small>

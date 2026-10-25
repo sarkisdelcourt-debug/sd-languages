@@ -113,8 +113,8 @@ describe("SD Languages API", () => {
 
   it("assesses pronunciation transcripts locally and persists only compact attempt metadata", async () => {
     const lab = await request(app).get("/api/pronunciation/en").expect(200);
-    expect(lab.body.prompts).toHaveLength(4);
-    expect(lab.body.prompts.map((prompt: { level: string }) => prompt.level)).toEqual(["A1", "A2", "B1", "B2"]);
+    expect(lab.body.prompts).toHaveLength(5);
+    expect(lab.body.prompts.map((prompt: { level: string }) => prompt.level)).toEqual(["A1", "A1", "A2", "B1", "B2"]);
     expect(lab.body.recommendedPromptId).toBe("pron-en-setback");
 
     await request(app)
@@ -293,9 +293,10 @@ describe("SD Languages API", () => {
     const scenarios = await request(app).get("/api/scenarios/en").expect(200);
     expect(scenarios.body).toHaveLength(4);
     expect(scenarios.body[0]).toMatchObject({
-      id: "en-work-service-recovery",
-      recommendationReason: "Progression vers B2"
+      id: "en-daily-cafe",
+      recommendationReason: "Pour maintenant · niveau A1"
     });
+    expect(scenarios.body.at(-1)).toMatchObject({ id: "en-work-service-recovery", recommendationReason: "Pour aller plus loin" });
 
     await request(app)
       .post("/api/conversations/en/scenario")

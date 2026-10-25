@@ -4,6 +4,7 @@ import { api } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ContentNotice } from "./ContentNotice";
 import { ExerciseAnswer } from "./ExerciseAnswer";
+import { MatchPairsFeedback } from "./MatchPairsFeedback";
 
 const phaseIndex = { intro: 0, practice: 1, correction: 2, conversation: 3, summary: 4 } as const;
 const phaseLabels = ["Comprendre", "Pratiquer", "Corriger", "Dialoguer", "Retenir"];
@@ -206,7 +207,11 @@ export function GuidedLessonView({
     if (!lessonId) return Promise.resolve();
     return run(() => api.startLesson(language, lessonId));
   };
-  const selectLesson = (lessonId: string) => run(() => api.lesson(language, lessonId));
+  const selectLesson = async (lessonId: string) => {
+    await run(() => api.lesson(language, lessonId));
+    // La leçon choisie s'affiche en haut de l'écran : on y revient pour que le changement se voie.
+    window.setTimeout(() => document.getElementById("lesson-preview-title")?.scrollIntoView({ block: "center", behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 50);
+  };
   const continueLesson = () => run(async () => {
     const next = await api.continueLesson(language);
     setAnswer("");
@@ -266,7 +271,7 @@ export function GuidedLessonView({
     return (
       <div className="guided-lesson catalog-mode">
         <ContentNotice language={language} />
-        <LearningPath view={view} disabled={loading} onSelect={selectLesson} />
+        {/* L'action utile d'abord (audit du 24/10) : la leçon proposée et son bouton, puis la carte du parcours. */}
         <section className="lesson-welcome" aria-labelledby="lesson-preview-title">
           <div className="lesson-welcome-copy">
             <p className="lesson-kicker">Séance sélectionnée · {lesson.estimatedMinutes} minutes</p>
@@ -286,6 +291,7 @@ export function GuidedLessonView({
             {phaseLabels.map((label, index) => <span key={label}><b>{index + 1}</b>{label}</span>)}
           </aside>
         </section>
+        <LearningPath view={view} disabled={loading} onSelect={selectLesson} />
       </div>
     );
   }
@@ -345,7 +351,8 @@ export function GuidedLessonView({
           <div className="correction-copy">
             <p className="lesson-kicker">{evaluation.verdict === "exact" ? "Réponse exacte" : evaluation.verdict === "minor" ? "Bonne réponse, forme à préciser" : "On ajuste puis on réessaie"}</p>
             <h2 id="lesson-step-title" tabIndex={-1}>{evaluation.feedback}</h2>
-            {evaluation.verdict !== "exact" ? <div className="model-answer"><span>Forme attendue</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
+            {evaluation.verdict !== "exact" && currentExercise?.type !== "match-pairs" ? <div className="model-answer"><span>Forme attendue</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
+            {evaluation.verdict !== "exact" && currentExercise?.type === "match-pairs" ? <div className="model-answer"><span>Paires à corriger</span><MatchPairsFeedback submitted={answer} expected={evaluation.expectedAnswer} /></div> : null}
             {currentExercise && currentExercise.type !== "match-pairs" && getSpeechCapabilities().synthesis ? (
               <button className="text-button listen-model" onClick={() => speakText(evaluation.expectedAnswer, language, 0.85)}>▶ Écouter la phrase</button>
             ) : null}

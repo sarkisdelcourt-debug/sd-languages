@@ -3,6 +3,7 @@ import type { AnswerEvaluation, ExerciseTopic, LanguageCode } from "@shared/type
 import { api, type PracticeTopic, type PublicExercise } from "../api";
 import { getSpeechCapabilities, speakText } from "../lib/browser-speech";
 import { ExerciseAnswer, exerciseTypeLabels } from "./ExerciseAnswer";
+import { MatchPairsFeedback } from "./MatchPairsFeedback";
 import type { PracticeTarget } from "./SkillsView";
 
 interface SeriesResult {
@@ -150,7 +151,8 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
             <strong>{evaluation.verdict === "exact" ? "Exact — forme maîtrisée" : evaluation.verdict === "minor" ? "Bonne idée — peaufinons la forme" : "Une erreur utile à retenir"}</strong>
             <p>{evaluation.feedback}</p>
             <div className="teaching-lens">
-              {evaluation.verdict !== "exact" ? <div><span>Réponse modèle</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
+              {evaluation.verdict !== "exact" && exercise.type !== "match-pairs" ? <div><span>Réponse modèle</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
+              {evaluation.verdict !== "exact" && exercise.type === "match-pairs" ? <div><span>À corriger</span><MatchPairsFeedback submitted={answer} expected={evaluation.expectedAnswer} /></div> : null}
               <div><span>Pourquoi ?</span><strong>{evaluation.explanation}</strong></div>
               {evaluation.issues.map((issue) => <div key={`${issue.kind}-${issue.message}`}><span>{issue.kind === "accent" ? "Point d'attention" : "Piste de correction"}</span><strong>{issue.message}</strong></div>)}
             </div>

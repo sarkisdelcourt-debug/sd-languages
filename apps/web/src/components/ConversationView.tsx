@@ -142,7 +142,7 @@ export function ConversationView({ language }: { language: LanguageCode }) {
           <div className="scenario-grid">
             {scenarios.map((scenario) => (
               <button key={scenario.id} onClick={() => void startScenario(scenario.id)} disabled={sending}>
-                <span>{scenario.level}</span><strong>{scenario.title}</strong><small>{scenario.description}</small>{scenario.recommendationReason ? <em>Recommandé : {scenario.recommendationReason}</em> : null}
+                <span>{scenario.level}</span><strong>{scenario.title}</strong><small>{scenario.description}</small>{scenario.recommendationReason ? <em>{scenario.recommendationReason}</em> : null}
               </button>
             ))}
           </div>

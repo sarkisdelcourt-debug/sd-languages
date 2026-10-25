@@ -174,12 +174,12 @@ describe("curriculum integrity", () => {
     }
   });
 
-  it("provides four pronunciation prompts per language linked to guided lessons", () => {
-    expect(PRONUNCIATION_PROMPTS).toHaveLength(12);
+  it("provides at least four pronunciation prompts per language (A1 to B2) linked to guided lessons", () => {
+    expect(PRONUNCIATION_PROMPTS).toHaveLength(14);
     expect(new Set(PRONUNCIATION_PROMPTS.map((prompt) => prompt.id)).size).toBe(PRONUNCIATION_PROMPTS.length);
     for (const language of ["en", "de", "es"] as const) {
       const prompts = PRONUNCIATION_PROMPTS.filter((prompt) => prompt.language === language);
-      expect(prompts.map((prompt) => prompt.level)).toEqual(["A1", "A2", "B1", "B2"]);
+      expect([...new Set(prompts.map((prompt) => prompt.level))]).toEqual(["A1", "A2", "B1", "B2"]);
       expect(prompts.every((prompt) => prompt.keyTokens.length === 2)).toBe(true);
       expect(prompts.every((prompt) => GUIDED_LESSONS.some(
         (lesson) => lesson.id === prompt.sourceLessonId && lesson.language === language
@@ -217,5 +217,32 @@ describe("couverture du contenu par langue (21/10/2026)", () => {
       expect(contentCoverage(language), language).toMatchObject({ language, exercises, inConstruction: exercises < 50 });
     }
     expect(contentCoverage("en").inConstruction).toBe(false);
+  });
+});
+
+describe("phrases de prononciation reliées aux leçons (audit UX du 24/10/2026)", () => {
+  it("référence une leçon existante du même niveau et de la même langue, jamais deux phrases pour la même leçon", () => {
+    const seen = new Map<string, string>();
+    for (const prompt of PRONUNCIATION_PROMPTS) {
+      const lesson = GUIDED_LESSONS.find((candidate) => candidate.id === prompt.sourceLessonId);
+      expect(lesson, prompt.id).toBeDefined();
+      expect(lesson!.language, prompt.id).toBe(prompt.language);
+      expect(lesson!.level, prompt.id).toBe(prompt.level);
+      expect(seen.get(prompt.sourceLessonId!), `${prompt.id} et ${seen.get(prompt.sourceLessonId!)} visent la même leçon`).toBeUndefined();
+      seen.set(prompt.sourceLessonId!, prompt.id);
+    }
+  });
+});
+
+describe("retour ciblé des exercices « associer »", () => {
+  it("ne liste que les paires fausses, avec ce que l'apprenant a associé", async () => {
+    const { matchPairsMistakes } = await import("../src/learning");
+    const expected = "a coffee = un café · a tea = un thé · a sandwich = un sandwich";
+    expect(matchPairsMistakes("a coffee = un thé · a tea = un café · a sandwich = un sandwich", expected)).toEqual([
+      { target: "a coffee", given: "un thé", expected: "un café" },
+      { target: "a tea", given: "un café", expected: "un thé" }
+    ]);
+    expect(matchPairsMistakes(expected, expected)).toEqual([]);
+    expect(matchPairsMistakes("", expected)).toHaveLength(3);
   });
 });

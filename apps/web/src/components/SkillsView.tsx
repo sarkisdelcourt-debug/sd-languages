@@ -82,6 +82,10 @@ export function SkillsView({ language, onPractice }: { language: LanguageCode; o
 
   const met = view.skills.filter((skill) => skill.exposure > 0).length;
   const solid = view.skills.filter((skill) => skill.exposure > 0 && skill.action === "practice").length;
+  // Audit du 24/10 : on dit d'abord quoi travailler maintenant ; les compétences jamais rencontrées restent repliées.
+  const priority = view.skills.filter((skill) => skill.exposure > 0 && skill.action !== "practice")
+    .sort((left, right) => (left.action === "review" ? 0 : 1) - (right.action === "review" ? 0 : 1)).slice(0, 3);
+  const untouched = (group: string) => view.skills.filter((skill) => skill.group === group && skill.exposure === 0);
   return (
     <div className="stack-large skills-view">
       <ContentNotice language={language} />
@@ -90,14 +94,36 @@ export function SkillsView({ language, onPractice }: { language: LanguageCode; o
         <h2>{met} compétence{met > 1 ? "s" : ""} rencontrée{met > 1 ? "s" : ""} sur {view.skills.length}, {solid} acquise{solid > 1 ? "s" : ""} de façon stable</h2>
         <p className="skills-note">Chaque état s'appuie sur vos réponses enregistrées sur cet appareil : nombre de tentatives, dix dernières réponses, erreurs encore ouvertes et cartes de révision. Rien n'est estimé par une IA.</p>
       </section>
+      {priority.length ? (
+        <section className="skills-group" aria-labelledby="skills-priority">
+          <h2 id="skills-priority">À travailler maintenant <small>{priority.length}</small></h2>
+          <ul className="skills-list">
+            {priority.map((skill) => <SkillItem key={skill.id} skill={skill} onPractice={onPractice} />)}
+          </ul>
+        </section>
+      ) : met === 0 ? (
+        <section className="skills-group"><p className="skills-note">Aucune compétence rencontrée pour l'instant : faites une leçon ou une série, et cette page dira quoi travailler en priorité.</p></section>
+      ) : null}
       {view.groups.map((group) => {
-        const skills = view.skills.filter((skill) => skill.group === group.group);
+        const skills = view.skills.filter((skill) => skill.group === group.group && skill.exposure > 0);
+        const never = untouched(group.group);
+        if (!skills.length && !never.length) return null;
         return (
           <section className="skills-group" key={group.group} aria-labelledby={`skills-group-${group.group}`}>
-            <h2 id={`skills-group-${group.group}`}>{group.label} <small>{skills.length}</small></h2>
-            <ul className="skills-list">
-              {skills.map((skill) => <SkillItem key={skill.id} skill={skill} onPractice={onPractice} />)}
-            </ul>
+            <h2 id={`skills-group-${group.group}`}>{group.label} <small>{skills.length + never.length}</small></h2>
+            {skills.length ? (
+              <ul className="skills-list">
+                {skills.map((skill) => <SkillItem key={skill.id} skill={skill} onPractice={onPractice} />)}
+              </ul>
+            ) : null}
+            {never.length ? (
+              <details className="skills-untouched">
+                <summary>{never.length} compétence{never.length > 1 ? "s" : ""} pas encore rencontrée{never.length > 1 ? "s" : ""}</summary>
+                <ul className="skills-list">
+                  {never.map((skill) => <SkillItem key={skill.id} skill={skill} onPractice={onPractice} />)}
+                </ul>
+              </details>
+            ) : null}
           </section>
         );
       })}

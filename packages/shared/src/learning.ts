@@ -144,7 +144,11 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
   const answers = [exercise.answer, ...(exercise.acceptedAnswers ?? [])];
   const accepted = answers.map(normalizeAnswer);
   const acceptedSurface = answers.map(normalizeSurface);
-  const matchedIndex = accepted.indexOf(normalizedAnswer);
+  // QCM : le choix cliqué doit être EXACTEMENT l'un des choix (casse mise à part). Les accents comptent : « se » n'est pas « sé »,
+  // et ils ne sont jamais « une faute d'écriture » puisque rien n'a été saisi.
+  const matchedIndex = exercise.type === "multiple-choice"
+    ? answers.findIndex((candidate) => candidate.trim().toLocaleLowerCase() === submittedAnswer.trim().toLocaleLowerCase())
+    : accepted.indexOf(normalizedAnswer);
   const correct = matchedIndex >= 0;
   const exactSurface = correct && acceptedSurface[matchedIndex] === normalizeSurface(submittedAnswer);
   const nearMiss = !correct && normalizedAnswer.length >= 6 && accepted.some((candidate) => editDistance(candidate, normalizedAnswer) === 1);

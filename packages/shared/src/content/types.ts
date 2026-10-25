@@ -42,6 +42,7 @@ export interface SentenceItem {
   fr: string;
   skills?: string[];     // compétences de skills.ts (obligatoire hors anglais)
   note: string;          // une phrase d'explication en français (tournure, faux ami, grammaire)
+  accepted?: string[];   // autres ordres des mots aussi naturels, acceptés en « construire la phrase » (« bitte », adverbes de temps…)
 }
 
 /** Verbe à particule : génère un texte à trous en contexte et des paires à associer. */

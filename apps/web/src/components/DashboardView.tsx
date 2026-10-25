@@ -8,7 +8,7 @@ interface Props {
   dashboard: DashboardSnapshot;
   language: LanguageCode;
   onNavigate: (
-    view: "lesson" | "diagnostic" | "practice" | "vocabulary" | "review" | "conversation" | "settings",
+    view: "lesson" | "diagnostic" | "practice" | "vocabulary" | "review" | "conversation" | "settings" | "rules",
     speakingMode?: "pronunciation" | "conversation"
   ) => void;
 }
@@ -26,6 +26,15 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
     api.plan(language).then(setPlan).catch(() => { setPlan(undefined); unavailableNow(); });
     api.settings(language).then(setSettings).catch(() => { setSettings(undefined); unavailableNow(); });
   }, [language, progress.completedExercises]);
+  // « Je pars de 0 » : niveau A1 déclaré, objectif de base, puis les premières fiches de règles.
+  const startFromScratch = async () => {
+    try {
+      await api.updateSettings(language, { goal: "basics", dailyMinutes: settings?.dailyMinutes ?? 10, targetLevel: "A2", declaredLevel: "A1" });
+    } catch {
+      // Le parcours reste consultable même si les réglages ne peuvent pas être enregistrés.
+    }
+    onNavigate("rules");
+  };
   const accuracy = progress.completedExercises ? Math.round((progress.correctAnswers / progress.completedExercises) * 100) : 0;
   const focusAreas = useMemo(
     () => [...mistakes].sort((a, b) => b.occurrenceCount - a.occurrenceCount).slice(0, 3),
@@ -55,6 +64,12 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
           <button className="primary-button light" onClick={() => onNavigate(dashboard.levels?.[language] ? "lesson" : "diagnostic")}>
             {dashboard.levels?.[language] ? "Commencer ma leçon" : "Faire le diagnostic"} <span aria-hidden="true">→</span>
           </button>
+          {!dashboard.levels?.[language] && !progress.completedExercises ? (
+            <div className="scratch-start">
+              <button className="secondary-button light" onClick={() => void startFromScratch()}>Je pars de 0</button>
+              <small>Débutant complet : niveau A1, parcours « premiers pas » (prononciation, genre, verbes de base) puis la première leçon.</small>
+            </div>
+          ) : null}
         </div>
         <div className="hero-score" aria-label={`${progress.xp} points d'expérience`}>
           <strong>{progress.xp}</strong>

@@ -468,3 +468,39 @@ main { min-width: 0; }
 .voice-notice.warn { border-left-color: var(--signal); background: var(--tint-warn); }
 .voice-notice.ok { color: var(--muted-strong); }
 .voice-download { margin-top: 6px; }
+
+/* Règles (24/10/2026) */
+.rules-layout { max-width: 900px; margin: 0 auto; display: grid; gap: 16px; }
+.rules-filters { display: grid; gap: 10px; }
+.rules-filters input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font-size: 16px; }
+.rules-groups { display: flex; flex-wrap: wrap; gap: 8px; }
+.rules-groups button { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--muted-strong); font-weight: 700; }
+.rules-groups button.selected { border-color: var(--accent); background: var(--tint-accent); color: var(--accent-ink); }
+.rules-list { display: grid; gap: 10px; }
+.rule-card { border: 1px solid var(--line); border-radius: 14px; background: var(--paper); overflow: hidden; }
+.rule-card > summary { padding: 14px 16px; display: grid; gap: 4px; cursor: pointer; list-style: none; }
+.rule-card > summary::-webkit-details-marker { display: none; }
+.rule-card[open] > summary { border-bottom: 1px solid var(--line); background: var(--tint-accent); }
+.rule-group { color: var(--accent-ink); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.rule-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rule-title strong { font-size: 17px; }
+.rule-level { padding: 2px 8px; border: 1px solid var(--line-accent); border-radius: 999px; color: var(--accent-ink); font-size: 12px; font-weight: 800; }
+.rule-summary { color: var(--muted-strong); font-size: 14px; line-height: 1.45; }
+.rule-body { padding: 14px 16px 18px; display: grid; gap: 14px; }
+.rule-body h4 { margin: 0 0 6px; font-size: 14px; }
+.rule-section p { margin: 0 0 8px; line-height: 1.6; }
+.rule-section ul, .rule-pitfalls ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.5; }
+.rule-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.rule-table { border-collapse: collapse; min-width: 100%; font-size: 14px; }
+.rule-table caption { padding: 0 0 6px; color: var(--muted-strong); font-size: 13px; text-align: left; }
+.rule-table th, .rule-table td { padding: 8px 10px; border: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.rule-table thead th { background: var(--surface-2); }
+.rule-table tbody th { background: var(--tint-accent); color: var(--accent-ink); }
+.rule-examples { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.rule-examples li { padding: 10px 12px; border-left: 4px solid var(--accent); border-radius: 8px; background: var(--tint-accent); display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.rule-examples li > div { display: grid; gap: 2px; }
+.rule-examples span { color: var(--muted-strong); }
+.rule-examples small { color: var(--muted); }
+.rule-pitfalls { padding: 10px 12px; border-left: 4px solid var(--signal); border-radius: 8px; background: var(--tint-warn); }
+.scratch-start { margin-top: 10px; }
+.scratch-start small { display: block; margin-top: 4px; opacity: .85; }

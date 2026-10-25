@@ -1,6 +1,7 @@
 import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../../shared/src/curriculum.js";
 import { drillCandidates, drillSets, findDrillExercise, type VocabDirection, type VocabMode } from "../../shared/src/content/vocab-drills.js";
 import { slug } from "../../shared/src/content/generators.js";
+import { rulesFor } from "../../shared/src/grammar-rules.js";
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
 import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/catalog.js";
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
@@ -163,6 +164,11 @@ export function createEngine(store: StateStore): Engine {
   });
 
   // Tests de vocabulaire (22/10/2026) : listes, séries dans les deux sens, réponses via la route des exercices.
+  route("GET", "/api/rules/:language", async ({ params }) => {
+    if (!isLanguageCode(params.language)) return unknownLanguage();
+    return ok(rulesFor(params.language));
+  });
+
   route("GET", "/api/vocabulary/:language", async ({ params }) => {
     const language = params.language;
     if (!isLanguageCode(language)) return unknownLanguage();

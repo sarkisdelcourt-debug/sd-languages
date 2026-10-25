@@ -53,6 +53,10 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
         </div>
         <div className="settings-section"><strong>Temps quotidien</strong><span>Un objectif réaliste vaut mieux qu'une longue session occasionnelle.</span></div>
         <div className="segmented-options">{MINUTES.map((minutes) => <button key={minutes} className={settings.dailyMinutes === minutes ? "selected" : ""} onClick={() => setSettings({ ...settings, dailyMinutes: minutes })}>{minutes} min</button>)}</div>
+        <div className="settings-section"><strong>Je pars de 0</strong><span>Débutant complet en {LANGUAGES[language].name.toLowerCase()} : niveau A1, objectif « bases », et le parcours « Premiers pas » ouvert en premier dans Règles.</span></div>
+        <div className="relay-actions">
+          <button className="secondary-button" onClick={() => setSettings({ ...settings, declaredLevel: "A1", goal: "basics", targetLevel: settings.targetLevel === "A1" ? "A2" : settings.targetLevel })}>Je pars de 0 (puis Enregistrer)</button>
+        </div>
         <div className="settings-section"><strong>Mon niveau actuel</strong><span>Si le diagnostic vous sous-estime, indiquez votre vrai niveau : les leçons en dessous seront considérées comme acquises (toujours accessibles).</span></div>
         <div className="level-options">
           <button className={!settings.declaredLevel ? "selected" : ""} aria-pressed={!settings.declaredLevel} onClick={() => setSettings({ ...settings, declaredLevel: undefined })}>

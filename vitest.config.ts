@@ -14,6 +14,8 @@ export default defineConfig({
   test: {
     include: ["packages/**/*.test.ts", "apps/api/**/*.test.ts", "apps/web/**/*.test.ts"],
     environment: "node",
+    // Les tests qui parcourent tout le catalogue (plus de 8 000 exercices) dépassent 5 s quand la machine est chargée.
+    testTimeout: 30_000,
     coverage: {
       reporter: ["text", "html"]
     }

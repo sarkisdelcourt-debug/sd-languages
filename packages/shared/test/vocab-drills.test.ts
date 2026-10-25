@@ -129,7 +129,7 @@ describe("tests de vocabulaire dans les deux sens", () => {
       for (const set of VOCAB_SETS[language]) for (const item of set.items) {
         const key = item.en.toLowerCase();
         const previous = owners.get(key);
-        if (previous && (set.id.includes("-v-x-") || previous.includes("-v-x-"))) repeated.push(`${language} « ${item.en} » : ${owners.get(key)} et ${set.id}`);
+        if (previous && (/-v-(x|verbs)-/.test(set.id) || /-v-(x|verbs)-/.test(previous))) repeated.push(`${language} « ${item.en} » : ${owners.get(key)} et ${set.id}`);
         owners.set(key, set.id);
       }
     }

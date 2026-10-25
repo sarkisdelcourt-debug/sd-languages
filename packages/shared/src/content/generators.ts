@@ -234,6 +234,27 @@ export function vocabExercises(set: VocabSet, language: LanguageCode = LANGUAGE)
   return [...pairs, ...meanings];
 }
 
+const CLAUSE_STARTERS: Partial<Record<LanguageCode, RegExp>> = {
+  en: /^(if|when|although|though|while|as soon as|unless|once|before|after|because)\s/i,
+  es: /^(si|cuando|aunque|mientras|como|antes de|después de|a pesar de|en cuanto|apenas)\s/i
+};
+/**
+ * « Si A, B. » s'écrit aussi « B si A. » (anglais, espagnol) : une seule virgule, proposition subordonnée en tête.
+ * L'ordre inverse est aussi naturel et ne doit pas être refusé en « construire la phrase ». Hors allemand : l'ordre
+ * des verbes y change quand la principale suit la subordonnée.
+ */
+function swappedClauseVariant(sentence: string, language: LanguageCode): string | undefined {
+  const starter = CLAUSE_STARTERS[language];
+  if (!starter || !starter.test(sentence)) return undefined;
+  const commas = sentence.match(/,/g) ?? [];
+  if (commas.length !== 1) return undefined;
+  const end = /[.?!]$/.test(sentence) ? sentence.slice(-1) : "";
+  const body = end ? sentence.slice(0, -1) : sentence;
+  const [first, second] = body.split(/,\s*/) as [string, string];
+  if (!first || !second) return undefined;
+  return `${second} ${first.charAt(0).toLowerCase()}${first.slice(1)}${end}`;
+}
+
 export function sentenceExercises(items: SentenceItem[], language: LanguageCode = LANGUAGE): TopicExercise[] {
   // Les règles de distracteurs, contractions et compétences déduites sont propres à l'anglais.
   const english = language === "en";
@@ -254,7 +275,10 @@ export function sentenceExercises(items: SentenceItem[], language: LanguageCode 
       {
         ...base, id: `${item.id}-build`, type: "word-bank", skillTags: [...skills, "sentence-building"],
         prompt: `Construisez : « ${item.fr} »`, tiles: [...words, ...distractors], answer: item.en,
-        hint: english ? buildHint(item.en) : "Commencez par le sujet, puis le verbe conjugué."
+        ...(((): { acceptedAnswers?: string[] } => { const swapped = swappedClauseVariant(item.en, language); const all = [...(item.accepted ?? []), ...(swapped ? [swapped] : [])]; return all.length ? { acceptedAnswers: all } : {}; })()),
+        hint: english ? buildHint(item.en) : language === "de"
+          ? "Le verbe conjugué est en 2e position (en tête pour une question ou un impératif, à la fin dans une subordonnée)."
+          : "Ordre : sujet, verbe, compléments ; les pronoms (me, lo, se…) se placent avant le verbe conjugué."
       },
       {
         // La traduction n'est révélée qu'après validation (explication), pas dans l'indice.
@@ -314,4 +338,31 @@ export function irregularVerbExercises(items: IrregularVerbItem[]): TopicExercis
       }
     ];
   });
+}
+
+const ARTICLE_CHOICES: Partial<Record<LanguageCode, { pattern: RegExp; choices: string[] }>> = {
+  de: { pattern: /^(der|die|das) (\S.*)$/i, choices: ["der", "die", "das"] },
+  es: { pattern: /^(el|la) (\S.*)$/i, choices: ["el", "la"] }
+};
+
+/**
+ * Genre des noms (24/10/2026) : « der, die ou das ? » / « el ou la ? » pour chaque nom des listes de vocabulaire. Même source que
+ * les listes : aucun mot à saisir deux fois, et un nom ajouté à une liste gagne tout de suite son exercice de genre.
+ */
+export function articleExercises(sets: VocabSet[], language: LanguageCode): TopicExercise[] {
+  const rule = ARTICLE_CHOICES[language];
+  if (!rule) return [];
+  return sets.flatMap((set) => set.items.flatMap((item): TopicExercise[] => {
+    const match = rule.pattern.exec(item.en.replace(/\s*\([^)]*\)/g, "").trim());
+    if (!match || /^(les|des)\s/i.test(item.fr)) return []; // pluriels : pas de genre à retenir
+    const article = match[1]!.toLowerCase();
+    const noun = match[2]!;
+    return [{
+      id: `${set.id}-art-${slug(noun)}`, language, level: set.level, topic: set.topic, type: "multiple-choice", skillTags: ["articles-gender"],
+      prompt: `Quel article pour « ${noun} » (${item.fr}) ?`, choices: rule.choices, answer: article,
+      explanation: `${article} ${noun} — ${item.fr}. Apprenez toujours le nom avec son article.`,
+      hint: language === "de" ? "Pensez au suffixe : -ung, -heit, -keit sont féminins ; -chen est neutre." : "Les noms en -o sont souvent masculins, ceux en -a, -ción, -dad féminins.",
+      focus: "Genre des noms"
+    }];
+  }));
 }

@@ -150,3 +150,18 @@ describe("générateurs plus didactiques (21/10/2026)", () => {
     expect(drills.find((drill) => drill.id === "en-irr-go-past")!.prompt).toContain("She went home after the scan.");
   });
 });
+
+describe("construire la phrase : proposition subordonnée inversée (24/10/2026)", () => {
+  const item = (en: string, language: "en" | "es" | "de") => sentenceExercises([{ id: `${language}-t-001`, topic: "everyday", level: "B1", en, fr: "…", note: "…", skills: ["everyday-vocabulary"] }], language).find((exercise) => exercise.type === "word-bank")!;
+  it("accepte « B si A. » pour « Si A, B. » en anglais et en espagnol", () => {
+    const en = item("If you feel dizzy, tell the radiographer straight away.", "en");
+    expect(evaluateAnswer(en, "Tell the radiographer straight away if you feel dizzy.").correct).toBe(true);
+    const es = item("Cuando llegamos, la reunión ya había empezado.", "es");
+    expect(evaluateAnswer(es, "La reunión ya había empezado cuando llegamos.").correct).toBe(true);
+    expect(evaluateAnswer(es, "Cuando llegamos la reunión.").correct).toBe(false);
+  });
+  it("n'inverse jamais en allemand (l'ordre des verbes change)", () => {
+    const de = item("Wenn ich Zeit habe, komme ich vorbei.", "de");
+    expect(evaluateAnswer(de, "Komme ich vorbei wenn ich Zeit habe.").correct).toBe(false);
+  });
+});

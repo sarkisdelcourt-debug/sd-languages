@@ -22,6 +22,7 @@ import type {
   ReviewRating,
   SkillsView
 } from "@shared/types";
+import type { GrammarRule } from "@shared/grammar-rules";
 import { engine } from "./local/device";
 import { aiReplyFor } from "./ai/conversation";
 
@@ -81,6 +82,7 @@ export const api = {
     const suffix = query.toString();
     return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
   },
+  rules: (language: string) => request<GrammarRule[]>(`/api/rules/${language}`),
   vocabulary: (language: string) => request<{ language: string; sets: VocabularySet[] }>(`/api/vocabulary/${language}`),
   vocabularyDrill: (language: string, options: { direction: string; mode: string; setId?: string; exclude?: string[]; random?: boolean }) => {
     const query = new URLSearchParams({ direction: options.direction, mode: options.mode });

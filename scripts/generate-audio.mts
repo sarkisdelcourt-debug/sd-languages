@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { runInThisContext } from "node:vm";
 import { EXERCISES } from "../packages/shared/src/curriculum.js";
 import { PRONUNCIATION_PROMPTS } from "../packages/shared/src/pronunciation.js";
+import { GRAMMAR_RULES } from "../packages/shared/src/grammar-rules.js";
 import { VOCAB_SETS } from "../packages/shared/src/content/vocab-drills.js";
 
 const require = createRequire(import.meta.url);
@@ -39,6 +40,8 @@ function collect(language: Lang): { texts: Set<string>; sentences: Set<string> }
     }
   }
   for (const prompt of PRONUNCIATION_PROMPTS) if (prompt.language === language) { texts.add(prompt.text); sentences.add(prompt.text); }
+  // Exemples des fiches de règles : le bouton ▶ de chaque exemple joue ces enregistrements.
+  for (const rule of GRAMMAR_RULES) if (rule.language === language) for (const example of rule.examples) { texts.add(example.target); if (example.target.split(/\s+/).length >= 3) sentences.add(example.target); }
   for (const set of VOCAB_SETS[language]) for (const item of set.items) texts.add(item.en);
   return { texts, sentences };
 }
@@ -95,27 +98,28 @@ for (const language of LANGUAGES) {
   mkdirSync(join(OUT, language), { recursive: true });
   mkdirSync(WORK, { recursive: true });
   const all = [...texts].filter((text) => spoken(text).length > 0).slice(0, limit || undefined);
-  const jobs = all.map((text) => ({ text, file: join(WORK, `${language}-${clipId(text)}.wav`) }));
-  await runPiper(language, jobs, 1.0);
+  // Incrémental : un enregistrement déjà présent n'est pas régénéré (rm -r apps/web/public/audio pour tout refaire).
+  const mp3Path = (text: string, slow: boolean) => join(OUT, language, `${clipId(text)}${slow ? "-s" : ""}.mp3`);
+  const jobs = all.filter((text) => !existsSync(mp3Path(text, false))).map((text) => ({ text, file: join(WORK, `${language}-${clipId(text)}.wav`) }));
+  if (jobs.length) await runPiper(language, jobs, 1.0);
   for (const job of jobs) {
-    const id = clipId(job.text);
     const mp3 = wavToMp3(job.file);
-    writeFileSync(join(OUT, language, `${id}.mp3`), mp3);
+    writeFileSync(mp3Path(job.text, false), mp3);
     rmSync(job.file);
-    manifest.clips[language]![job.text] = id;
     totalBytes += mp3.length; totalClips += 1;
   }
-  const slowJobs = all.filter((text) => sentences.has(text)).map((text) => ({ text, file: join(WORK, `${language}-${clipId(text)}-s.wav`) }));
-  await runPiper(language, slowJobs, 1.55);
+  for (const text of all) manifest.clips[language]![text] = clipId(text);
+  const slowTexts = all.filter((text) => sentences.has(text));
+  const slowJobs = slowTexts.filter((text) => !existsSync(mp3Path(text, true))).map((text) => ({ text, file: join(WORK, `${language}-${clipId(text)}-s.wav`) }));
+  if (slowJobs.length) await runPiper(language, slowJobs, 1.55);
   for (const job of slowJobs) {
-    const id = clipId(job.text);
     const mp3 = wavToMp3(job.file);
-    writeFileSync(join(OUT, language, `${id}-s.mp3`), mp3);
+    writeFileSync(mp3Path(job.text, true), mp3);
     rmSync(job.file);
-    manifest.slow[language]!.push(id);
     totalBytes += mp3.length; totalClips += 1;
   }
-  console.log(`${language}: ${jobs.length} clips, ${slowJobs.length} lents`);
+  for (const text of slowTexts) manifest.slow[language]!.push(clipId(text));
+  console.log(`${language}: ${jobs.length} nouveaux clips, ${slowJobs.length} nouveaux lents (${all.length} au total)`);
 }
 writeFileSync(join(OUT, "manifest.json"), JSON.stringify(manifest));
 console.log(`Total : ${totalClips} fichiers, ${(totalBytes / 1_048_576).toFixed(1)} Mo`);

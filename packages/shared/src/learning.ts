@@ -52,7 +52,11 @@ function tolerateSpelling(value: string): string {
 }
 
 export function normalizeAnswer(value: string): string {
-  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr").replace(/œ/g, "oe").replace(/æ/g, "ae").replace(/ß/g, "ss"));
+  // Tréma allemand : ä ö ü s'écrivent ae oe ue sans la touche (convention standard) ; « wurde » n'est PAS « würde » (prétérit ≠ Konjunktiv II).
+  // Les autres accents (é, è, ñ, ç…) restent ignorés : c'est un détail d'écriture, signalé en « minor ».
+  const folded = value.normalize("NFC").toLocaleLowerCase("fr")
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/œ/g, "oe").replace(/æ/g, "ae");
+  return tolerateSpelling(folded.normalize("NFD").replace(/[̀-ͯ]/g, ""));
 }
 
 function normalizeSurface(value: string): string {
@@ -172,18 +176,50 @@ export function conceptsCovered(normalizedAnswer: string, concepts: string[][]):
     const alt = flatten(normalizeAnswer(prefix ? raw.slice(0, -1) : raw));
     if (!alt) return false;
     if (prefix ? padded.includes(` ${alt}`) : padded.includes(` ${alt} `)) return true;
-    // Faute de frappe tolérée seulement sur un mot de 7 lettres ou plus qui garde la même première et la même dernière lettre :
-    // derecho/derecha, hermano/hermana, cuesta/cuenta ne se confondent plus.
-    // Une faute de frappe n'est tolérée que sur un mot de 6 lettres ou plus qui garde sa première lettre, et jamais quand seule la
-    // voyelle finale change (derecho/derecha, hermano/hermana : ce sont deux mots, pas une faute). where/here, train/rain restent distincts.
+    // Une faute de frappe n'est tolérée que sur un mot de 8 lettres ou plus qui garde sa première lettre, et jamais quand seule la
+    // voyelle finale change. En dessous, deux mots différents se confondent (cuenta/cuesta, cansado/casado, manzana/mañana,
+    // where/here, train/rain) : la liste des formes acceptées utilise alors « * » pour les terminaisons (repet* pour repetez).
     const genderSwap = (token: string) => token.slice(0, -1) === alt.slice(0, -1) && /[aoe]$/.test(token) && /[aoe]$/.test(alt);
-    return !alt.includes(" ") && alt.length >= 6 && tokens.some((token) => token.length >= 5 && token[0] === alt[0] && !genderSwap(token) && editDistance(token, alt) <= 1);
+    return !alt.includes(" ") && alt.length >= 8 && tokens.some((token) => token.length >= 7 && token[0] === alt[0] && !genderSwap(token) && editDistance(token, alt) <= 1);
   }));
 }
 
 /** Négation (français, anglais, allemand, espagnol) : un contresens ne doit pas passer pour « compris ». */
-const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne)(?: |$)|n't(?: |$)/;
-const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/'/g, " ").replace(/\s+/g, " ").trim());
+const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne|sin|ohne|sans|without)(?: |$)|n't(?: |$)|(?:^| )(?:isn|aren|wasn|weren|don|doesn|didn|can|couldn|won|wouldn|shouldn|hasn|haven|hadn|mustn|needn)t(?: |$)/;
+// L'apostrophe est conservée pour reconnaître « isn't » : la retirer d'abord rendait « n't » invisible.
+const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/\s+/g, " ").trim());
+
+/**
+ * Mots qui s'excluent : gauche/droite, jours, mois… Une réponse qui contient un de ces mots absent de toutes les formulations
+ * prévues, alors qu'une formulation en contient un autre du même groupe, dit autre chose (lundi ≠ mardi, links ≠ geradeaus).
+ */
+const EXCLUSIVE_GROUPS: string[][] = [
+  ["left", "right", "straight", "links", "rechts", "geradeaus", "izquierda", "derecha", "recto", "derecho", "gauche", "droite", "droit"],
+  ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+  ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "januar", "februar", "marz", "juni", "juli", "oktober", "dezember", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre", "janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"],
+  ["to", "from", "nach", "von", "aus", "hacia", "desde"],
+  ["con", "sin", "with", "without", "mit", "ohne", "avec", "sans"],
+  ["before", "after", "vor", "nach", "antes", "despues", "avant", "apres"],
+  ["open", "closed", "offen", "geschlossen", "abierto", "cerrado", "ouvert", "ferme"]
+];
+const exclusiveMismatch = (normalizedAnswer: string, acceptedList: string[]): boolean => {
+  const words = (text: string) => new Set(text.replace(/'/g, " ").split(" ").filter(Boolean));
+  const ordered = (text: string, group: string[]) => text.replace(/'/g, " ").split(" ").filter((word) => group.includes(word));
+  const answerWords = words(normalizedAnswer);
+  const acceptedWords = acceptedList.map(words);
+  return EXCLUSIVE_GROUPS.some((group, index) => {
+    // Jours, mois, directions : plusieurs dans la réponse → même ordre que dans une formulation prévue (lundi puis mardi ≠ mardi puis lundi).
+    if (index < 3) {
+      const inOrder = ordered(normalizedAnswer, group);
+      if (inOrder.length >= 2 && !acceptedList.some((candidate) => ordered(candidate, group).join(" ") === inOrder.join(" "))) return true;
+    }
+    const inAnswer = group.filter((word) => answerWords.has(word));
+    if (!inAnswer.length) return false;
+    // Un mot du groupe que NI l'une NI l'autre des formulations prévues ne contient, alors qu'elles en contiennent un autre du groupe.
+    const known = new Set(acceptedWords.flatMap((set) => group.filter((word) => set.has(word))));
+    return known.size > 0 && inAnswer.some((word) => !known.has(word));
+  });
+};
 
 export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): AnswerEvaluation {
   const normalizedAnswer = normalizeAnswer(submittedAnswer);
@@ -200,7 +236,7 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
   const nearMiss = !correct && normalizedAnswer.length >= 6 && accepted.some((candidate) => editDistance(candidate, normalizedAnswer) === 1);
   // Une négation qu'aucune formulation prévue ne contient (ou l'inverse) annonce un contresens : pas de « on vous comprendrait ».
   const sameNegation = accepted.some((candidate) => hasNegation(candidate) === hasNegation(normalizedAnswer));
-  if (!correct && exercise.understandable?.length && sameNegation && conceptsCovered(normalizedAnswer, exercise.understandable)) {
+  if (!correct && exercise.understandable?.length && sameNegation && !exclusiveMismatch(normalizedAnswer, accepted) && conceptsCovered(normalizedAnswer, exercise.understandable)) {
     return {
       correct: true,
       verdict: "minor",
@@ -249,7 +285,18 @@ export function estimateLevel(
     0
   );
   const percentage = total === 0 ? 0 : Math.round((score / total) * 100);
-  const index = percentage < 25 ? 0 : percentage < 45 ? 1 : percentage < 65 ? 2 : percentage < 85 ? 3 : 4;
+  const byPercentage = percentage < 25 ? 0 : percentage < 45 ? 1 : percentage < 65 ? 2 : percentage < 85 ? 3 : 4;
+  // Le pourcentage global sous-estimait : A1 à B1 tous justes = 33 % donnait A2 (audit du 26/10/2026). On retient aussi le plus haut
+  // niveau dont, parmi les questions de CE niveau et des niveaux inférieurs, au moins les deux tiers sont justes.
+  let byLevel = 0;
+  LEVEL_ORDER.forEach((level, levelIndex) => {
+    const upTo = questions.filter((question) => LEVEL_ORDER.indexOf(question.level) <= levelIndex);
+    if (!upTo.length) return;
+    const right = upTo.filter((question) => evaluateAnswer(question, answers[question.id] ?? "").correct).length;
+    const own = upTo.filter((question) => LEVEL_ORDER.indexOf(question.level) === levelIndex);
+    if (right / upTo.length >= 2 / 3 && own.some((question) => evaluateAnswer(question, answers[question.id] ?? "").correct)) byLevel = levelIndex;
+  });
+  const index = Math.max(byPercentage, byLevel);
 
   return { score, total, percentage, estimatedLevel: LEVEL_ORDER[index] ?? "A1" };
 }

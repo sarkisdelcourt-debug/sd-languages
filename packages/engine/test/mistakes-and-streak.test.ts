@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { EXERCISES } from "../../shared/src/curriculum.js";
 import type { Exercise, LearnerState, MistakeRecord } from "../../shared/src/types.js";
+import { evaluateAnswer } from "../../shared/src/learning.js";
 import { createInitialState } from "../src/initial-state.js";
 import { createDailyPlan } from "../src/modules/daily-plan.js";
 import { unresolvedCount } from "../src/modules/mistakes.js";
@@ -64,10 +65,10 @@ describe("erreurs ouvertes : une réussite ne solde que les échecs déjà surve
 
   it("le plan quotidien reprend l'erreur rouverte (avant : « 0 erreur ouverte », elle disparaissait)", () => {
     const state = sequence([false, true, true, true, false]);
-    const lesson = createDailyPlan(state, "en", new Date("2026-10-23T10:00:00Z")).items.find((item) => item.kind === "lesson")!;
-    expect(lesson.title).toContain(state.mistakes[0]!.focus);
+    const titles = createDailyPlan(state, "en", new Date("2026-10-23T10:00:00Z")).items.map((item) => item.title).join(" | ");
+    expect(titles).toContain(state.mistakes[0]!.focus);
     const solved = sequence([false, true]);
-    expect(createDailyPlan(solved, "en", new Date("2026-10-23T10:00:00Z")).items.find((item) => item.kind === "lesson")!.title).not.toContain(solved.mistakes[0]!.focus);
+    expect(createDailyPlan(solved, "en", new Date("2026-10-23T10:00:00Z")).items.map((item) => item.title).join(" | ")).not.toContain(solved.mistakes[0]!.focus);
   });
 });
 
@@ -149,5 +150,42 @@ describe("série quotidienne : date enregistrée dans le futur (ancien calcul en
     state.progress.en.currentStreak = 30;
     recordPractice(state, "en", true, new Date("2026-10-24T04:00:00Z"), "America/Los_Angeles"); // 23 octobre au soir à Los Angeles
     expect(state.progress.en).toMatchObject({ lastPracticeDate: "2026-10-24", currentStreak: 30 });
+  });
+});
+
+import { createEngine } from "../src/router.js";
+import { buildLessonSummary } from "../src/modules/guided-lessons.js";
+import { GUIDED_LESSONS } from "../../shared/src/lessons.js";
+import { EXERCISES } from "../../shared/src/curriculum.js";
+
+describe("preuve de maîtrise : recopier la correction ne vaut pas maîtrise (audit du 26/10/2026, C1)", () => {
+  it("une leçon dont chaque exercice est raté puis recopié n'est PAS maîtrisée", () => {
+    const lesson = GUIDED_LESSONS.find((candidate) => candidate.id === "lesson-en-project-update")!;
+    const attempts = lesson.exerciseIds.flatMap((exerciseId, index) => {
+      const exercise = EXERCISES.find((candidate) => candidate.id === exerciseId)!;
+      const wrong = evaluateAnswer(exercise, "banana banana banana");
+      const copied = evaluateAnswer(exercise, exercise.answer);
+      return [
+        { attemptId: `w${index}`, exerciseId, submittedAnswer: "banana banana banana", evaluation: wrong, createdAt: "2026-10-26T10:00:00Z" },
+        { attemptId: `c${index}`, exerciseId, submittedAnswer: exercise.answer, evaluation: copied, createdAt: "2026-10-26T10:01:00Z" }
+      ];
+    });
+    const summary = buildLessonSummary({ attempts, conversation: { language: "en", messages: [], scenarioStepIndex: 4 } } as never, lesson);
+    expect(summary.exact + summary.minor).toBe(0);
+    expect(summary.corrected).toBe(lesson.exerciseIds.length);
+    expect(summary.outcome).toBe("needs-review");
+  });
+  it("les erreurs recopiées restent ouvertes et ne rapportent pas d'XP de réussite", async () => {
+    const state = createInitialState();
+    const exercise = EXERCISES.find((candidate) => candidate.language === "en" && candidate.type === "fill-gap")!;
+    const { applyPracticeAttempt } = await import("../src/modules/practice-attempt.js");
+    applyPracticeAttempt(state, exercise, "zzz", "attempt-1");
+    const xpAfterMiss = state.progress.en.xp;
+    applyPracticeAttempt(state, exercise, exercise.answer, "attempt-2", { assisted: true });
+    expect(state.progress.en.xp - xpAfterMiss).toBe(2);
+    expect(state.mistakes[0]!.resolvedCount).toBe(0);
+    applyPracticeAttempt(state, exercise, exercise.answer, "attempt-3");
+    expect(state.mistakes[0]!.resolvedCount).toBe(1);
+    expect(createEngine).toBeDefined();
   });
 });

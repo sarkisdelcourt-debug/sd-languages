@@ -56,8 +56,8 @@ Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils
 
 | Domaine | État MVP | Détail |
 |---|---|---|
-| Anglais | Opérationnel | 875 exercices (médical, conversation, voyage, grammaire B1–B2, phrasal verbs, verbes irréguliers, faux amis) et 6 questions diagnostiques |
-| Allemand, espagnol | En construction, annoncé dans l'interface | 15 et 30 exercices, 6 questions diagnostiques ; les leçons réemploient cette petite banque |
+| Anglais | Opérationnel | 2 132 exercices (médical, conversation, voyage, grammaire A2–B2, phrasal verbs, verbes irréguliers, faux amis), 839 mots et verbes, 160 phrases du quotidien, 22 fiches de règles |
+| Allemand, espagnol | Opérationnels | 2 176 et 2 240 exercices de l'A1 au B2 (60 % de QCM), 815 et 836 mots et verbes, 160 et 180 phrases du quotidien, 28 et 31 fiches de règles (dont un parcours « Premiers pas » pour partir de zéro en espagnol) |
 | Niveau | Opérationnel | Diagnostic pondéré A1–C1 indicatif, ou niveau déclaré par l'apprenant (les leçons inférieures passent « Acquis ») |
 | Exercices | Opérationnel | QCM, texte à trous, traduction, phrase à construire, paires à associer, dictée ; séries de 6 variées par format et par thème |
 | Correction didactique | Opérationnel, déterministe | Verdict exact, détail mineur (accent, apostrophe) ou erreur ; contractions, chiffres en lettres, variantes US/UK, « 3 pm » acceptés |
@@ -98,7 +98,7 @@ Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` i
 
 - Le niveau CECRL est un repère pédagogique, pas une certification.
 - La correction ignore la casse et la ponctuation. Un accent manquant est accepté comme détail mineur et expliqué séparément ; la correction sémantique libre reste hors périmètre.
-- Le catalogue compte 18 questions diagnostiques et 920 exercices, très inégalement répartis : 875 en anglais, 30 en espagnol, 15 en allemand. L'interface le dit lorsqu'une langue compte moins de 50 exercices.
+- Le catalogue compte 18 questions diagnostiques et 6 548 exercices (2 132 anglais, 2 176 allemand, 2 240 espagnol), plus, générés à la demande : les tests de vocabulaire (≈ 2 500 mots, deux sens, QCM ou saisie), 500 phrases du quotidien à formulations multiples et les exercices de genre des noms. 81 fiches de règles. Un mot ou une phrase = plusieurs exercices : le nombre d'éléments distincts est inférieur (≈ 1 300 par langue).
 - Le parcours couvre A1 à B2 avec trois séances par niveau et par langue. Les leçons anglaises tirent 6 exercices chacune de la banque ; celles d'allemand et d'espagnol réemploient leurs petites banques et 4 scénarios par langue.
 - Une séance terminée ne débloque le niveau suivant que si elle atteint le seuil de maîtrise : au moins deux tiers de réponses finales justes (exactes ou à un détail près, un accent oublié n'est pas une erreur), aucune erreur finale et trois étapes de dialogue validées. Sinon, l'application propose une consolidation. « Abandonner cette leçon » la rend à nouveau disponible sans rien effacer d'autre.
 - La correction accepte des variantes générées par règles (contractions, chiffres, lexique US/UK) ; une formulation juste mais non prévue peut encore être refusée : les réponses acceptées s'enrichissent au fil des retours.

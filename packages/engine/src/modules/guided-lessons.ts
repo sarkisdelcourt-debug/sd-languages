@@ -187,10 +187,14 @@ export function buildLessonSummary(session: GuidedLessonSession, lesson: GuidedL
   const finalAttempts = lesson.exerciseIds.map((exerciseId) =>
     [...session.attempts].reverse().find((attempt) => attempt.exerciseId === exerciseId)
   ).filter((attempt): attempt is NonNullable<typeof attempt> => Boolean(attempt));
+  // Le bilan juge le PREMIER essai : une réponse juste après avoir vu la « forme attendue » est « corrigée », pas « maîtrisée ».
+  const firstAttempts = lesson.exerciseIds.map((exerciseId) => session.attempts.find((attempt) => attempt.exerciseId === exerciseId))
+    .filter((attempt): attempt is NonNullable<typeof attempt> => Boolean(attempt));
   const scenarioSteps = CONVERSATION_SCENARIOS.find((scenario) => scenario.id === lesson.scenarioId)?.steps.length ?? 0;
   const summary: GuidedLessonSummary = {
-    exact: finalAttempts.filter((attempt) => attempt.evaluation.verdict === "exact").length,
-    minor: finalAttempts.filter((attempt) => attempt.evaluation.verdict === "minor").length,
+    exact: firstAttempts.filter((attempt) => attempt.evaluation.verdict === "exact").length,
+    minor: firstAttempts.filter((attempt) => attempt.evaluation.verdict === "minor").length,
+    corrected: firstAttempts.filter((attempt, index) => !attempt.evaluation.correct && finalAttempts.find((final) => final.exerciseId === attempt.exerciseId)?.evaluation.correct).length,
     incorrect: finalAttempts.filter((attempt) => attempt.evaluation.verdict === "incorrect").length,
     completedExercises: finalAttempts.length,
     conversationSteps: session.conversation.scenarioStepIndex ?? 0,

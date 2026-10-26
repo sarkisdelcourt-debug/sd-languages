@@ -47,7 +47,7 @@ const MAX_TEXT = 700;
 export function buildSystemPrompt(context: AiCoachContext): string {
   const language = LANGUAGE_NAMES[context.language];
   const lines = [
-    `Tu es un coach de conversation en ${language} pour un apprenant francophone (médecin). Niveau estimé : ${context.level ?? "inconnu"}. Objectif : ${GOAL_NAMES[context.goal]}.`,
+    `Tu es un coach de conversation en ${language} pour un apprenant francophone. Niveau estimé : ${context.level ?? "inconnu"}. Objectif : ${GOAL_NAMES[context.goal]}.`,
     "",
     "Règles :",
     `- Ta réponse (champ « reply ») est en ${language}, naturelle, 1 à 3 phrases courtes, adaptée au niveau (vocabulaire et grammaire un cran au-dessus au plus), et se termine le plus souvent par UNE question qui fait avancer la conversation.`,

@@ -107,6 +107,12 @@ const ENGLISH_RULES: Rule[] = [
     explanation: "« Je suis ici depuis… » se dit au present perfect en anglais : « I have been here since 2019 », jamais au présent."
   },
   {
+    id: "has-since-duration",
+    pattern: new RegExp(`\\b(has|have)\\s+(?=(?:a|an|the|my|his|her|their|our|some|no|\\d+)\\b)([^.?!]*?)\\bsince\\s+${DURATION}\\b`, "gi"),
+    replace: (match, verb, middle) => `${verb} had ${middle}${match.replace(/^[\s\S]*?\bsince\s+/i, "for ")}`,
+    explanation: "Une situation qui dure s'exprime au present perfect avec for + durée : « has had a fever for two days » (since sert à donner le point de départ : since Monday)."
+  },
+  {
     id: "since-duration",
     pattern: new RegExp(`\\bsince\\s+${DURATION}\\b`, "gi"),
     replace: (match) => keepCase(match, match.replace(/^since/i, "for")),
@@ -156,6 +162,12 @@ const ENGLISH_RULES: Rule[] = [
     pattern: /\b(make|makes|made|making)\s+(a|some)\s+(photo|photos|picture|pictures)\b/gi,
     replace: (_match, verb, determiner, noun) => `${({ make: "take", makes: "takes", made: "took", making: "taking" } as Record<string, string>)[verb!.toLowerCase()]} ${determiner} ${noun}`,
     explanation: "On « prend » une photo en anglais : take a photo."
+  },
+  {
+    id: "uncountable-agreement",
+    pattern: /\b(informations|advices|equipments|feedbacks|homeworks|furnitures|luggages|knowledges|evidences|softwares)\s+(are|were|have)\b/gi,
+    replace: (_match, noun, verb) => `${noun!.replace(/s$/i, "")} ${({ are: "is", were: "was", have: "has" } as Record<string, string>)[verb!.toLowerCase()]}`,
+    explanation: "Information, advice, equipment… sont indénombrables : pas de -s, et le verbe reste au singulier (« the information is »)."
   },
   {
     id: "uncountable-plural",

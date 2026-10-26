@@ -54,7 +54,9 @@ describe("SD Languages API", () => {
       "review",
       "lesson"
     ]);
-    expect(adaptedPlan.body.items[2].title).toContain("Présent des verbes réguliers");
+    // La leçon recommandée ne promet la notion fautive que si elle la contient ; sinon c'est une série ciblée qui la reprend.
+    const planTitles = adaptedPlan.body.items.map((item: { title: string }) => item.title).join(" | ");
+    expect(planTitles).not.toContain("Leçon guidée · Présent des verbes réguliers");
   });
 
   it("persists independent learning settings and applies the daily budget", async () => {

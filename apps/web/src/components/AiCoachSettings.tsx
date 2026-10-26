@@ -100,7 +100,7 @@ export function AiCoachSettings() {
 
       <label className="ai-consent">
         <input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); if (!event.target.checked) void change({ enabled: false }); }} />
-        <span>Je comprends que, quand le coach IA est actif, mes messages de conversation (les 8 derniers échanges, ma langue, mon niveau et mon objectif) sont envoyés à Anthropic pour générer la réponse. Ma progression, mes scores et mes autres données ne sont jamais envoyés.</span>
+        <span>Je comprends que, quand le coach IA est actif, mon message et les 8 derniers messages de la conversation, ma langue, mon niveau estimé, mon objectif et la mise en situation sont envoyés à Anthropic pour générer la réponse. Ma progression, mes scores et mes autres données ne sont jamais envoyés. Je n'écris aucune information sur des patients.</span>
       </label>
       <div className="relay-actions">
         <button className="primary-button" disabled={!consent || !hasStoredKey || !readable} onClick={async () => { await change({ enabled: !settings.enabled }); warmUpAi(); }}>

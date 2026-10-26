@@ -114,7 +114,7 @@ export class LocalCoachProvider implements CoachProvider {
     const scenarioStep = scenario?.steps[stepIndex];
     // On cherche les mots attendus dans la réponse ET dans sa version corrigée (« have finish » → « finished »).
     const searchable = `${normalizeAnswer(trimmed)} ${normalizeAnswer(check.corrected)}`;
-    const scenarioMatch = Boolean(scenarioStep?.keywords.some((keyword) => searchable.includes(normalizeAnswer(keyword))));
+    const scenarioMatch = Boolean(scenarioStep?.keywords.some((keyword) => keywordPresent(searchable, keyword)));
 
     let coachText: string;
     if (scenario && !scenarioStep) {
@@ -162,6 +162,18 @@ export interface TextToSpeechProvider {
  * reste déterministe : une étape n'avance que si l'IA le dit ET que le message contient au moins
  * trois mots — jamais sur un « ok » ou un message vide, même si le modèle s'est trompé.
  */
+/**
+ * Mot attendu présent comme MOT ENTIER (« by » n'est pas dans « baby » ni « goodbye », « dia » n'est pas dans « diabetes »).
+ * Un mot de 5 lettres ou plus peut porter une terminaison (« fridays »).
+ */
+export function keywordPresent(searchable: string, keyword: string): boolean {
+  const wanted = normalizeAnswer(keyword);
+  if (!wanted) return false;
+  const padded = ` ${searchable.replace(/'/g, " ")} `;
+  if (padded.includes(` ${wanted} `)) return true;
+  return wanted.length >= 5 && !wanted.includes(" ") && padded.includes(` ${wanted}`);
+}
+
 export function buildAiReply(
   language: LanguageCode,
   text: string,
@@ -181,6 +193,8 @@ export function buildAiReply(
       ...(ai.correction && !sameAsInput ? { correction: ai.correction, explanation: ai.explanation } : {})
     },
     coachMessage: { id: crypto.randomUUID(), role: "coach", text: ai.reply, createdAt, source: "ai" },
-    scenarioAdvanced: Boolean(step && ai.stepAchieved && wordCount(trimmed) >= 3)
+    // Le modèle dit « étape atteinte » : on exige en plus un mot attendu ou une phrase corrigée d'au moins 3 mots (audit du 26/10/2026).
+    scenarioAdvanced: Boolean(step && ai.stepAchieved && wordCount(trimmed) >= 3
+      && (step.keywords.some((keyword) => keywordPresent(`${normalizeAnswer(trimmed)} ${normalizeAnswer(ai.correction ?? "")}`, keyword)) || wordCount(ai.correction ?? "") >= 3))
   };
 }

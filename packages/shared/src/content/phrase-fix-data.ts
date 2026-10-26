@@ -73,7 +73,10 @@ export const DE_FIXES: Record<string, PhraseFix> = {
   "de-ph-intro-005": { addTargets: ["Freut mich."] },
   "de-ph-polite-005": { setKeys: [["gern*", "bitte", "ursache", "nichts", "problem"], ["tag"]] },
   "de-ph-polite-008": { setKeys: [["duzen", "per du"], ["wir", "uns"]] },
-  "de-ph-compr-001": { setKeys: [["wiederholen", "noch einmal", "nochmal"], ["bitte"]], addTargets: ["Wie bitte?"] },
+  "de-ph-compr-001": { setKeys: [["wiederholen", "noch einmal", "nochmal"], ["bitte"]], addTargets: ["Wie bitte?"], frKeys: [{ swap: ["repeter", ["repet*", "redi*"]] }] },
+  "de-ph-intro-010": { frKeys: [{ swap: ["medical", ["medical*", "medecin*"]] }] },
+  "de-ph-money-009": { frKeys: [{ swap: ["refuse", ["refus*"]] }] },
+  "de-ph-weather-004": { frKeys: [{ swap: ["neige", ["neig*"]] }] },
   "de-ph-compr-005": { setKeys: [["sagt", "heißt"], ["deutsch", "deutschen"], ["wie", "was"]] },
   "de-ph-cafe-006": {
     setKeys: [["bin", "esse", "ernähre"], ["vegetarier*", "vegetarisch", "kein fleisch", "keine fleisch", "ohne fleisch"]],

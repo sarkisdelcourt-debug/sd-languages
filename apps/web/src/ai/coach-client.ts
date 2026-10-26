@@ -5,7 +5,7 @@ import {
 } from "@engine/modules/ai-coach";
 import { store } from "../local/device";
 
-import { USAGE_KEY, hasUsableKey, loadAiSettings, loadAiUsage, type AiSettings } from "./settings";
+import { AI_NOTICE_EVENT, USAGE_KEY, hasUsableKey, loadAiSettings, loadAiUsage, type AiSettings } from "./settings";
 
 /** Appels à Claude Haiku (chargé à la demande : le SDK est volumineux). Réglages et clé : settings.ts. */
 
@@ -25,10 +25,14 @@ export function describeAiError(error: unknown): string {
   return "Réponse IA inutilisable.";
 }
 
-const clientFor = (apiKey: string) => new Anthropic({ apiKey: apiKey.trim(), dangerouslyAllowBrowser: true, maxRetries: 1, timeout: 20_000 });
+const clientFor = (apiKey: string) => new Anthropic({ apiKey: apiKey.trim(), dangerouslyAllowBrowser: true, maxRetries: 0, timeout: 10_000 });
 
+/** Lecture + écriture du cumul sous verrou : cinq appels simultanés comptent tous, pas un seul (audit du 26/10/2026). */
 async function recordUsage(costUsd: number) {
-  await store.setMeta(USAGE_KEY, addUsage(await loadAiUsage(), costUsd, new Date()));
+  const write = async () => store.setMeta(USAGE_KEY, addUsage(await loadAiUsage(), costUsd, new Date()));
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+  if (locks) await locks.request("sd-languages-ai-usage", write);
+  else await write();
 }
 
 export interface AiCall {
@@ -64,6 +68,8 @@ export async function askCoach(context: AiCoachContext, settings?: AiSettings): 
     if (response.stop_reason === "refusal") return { fallbackReason: "L'IA a décliné cette demande : coach local." };
     const text = response.content.find((block) => block.type === "text");
     const reply = parseAiReply(text && text.type === "text" ? text.text : undefined);
+    // Une réponse IA réussie efface le bandeau « coach IA non utilisé » laissé par un échec précédent.
+    if (reply && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(AI_NOTICE_EVENT, { detail: "" }));
     return reply ? { reply } : { fallbackReason: "Réponse IA inutilisable : coach local." };
   } catch (error) {
     return { fallbackReason: `${describeAiError(error)} Coach local en attendant.` };

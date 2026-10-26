@@ -13,9 +13,11 @@ export function VoiceNotice({ language, onlyMissing = false }: { language: Langu
   const [clipVoice, setClipVoice] = useState<string | undefined>(() => clipVoiceName(language));
   const [progress, setProgress] = useState<{ done: number; total: number } | undefined>();
   const [downloaded, setDownloaded] = useState(false);
+  const [downloadNote, setDownloadNote] = useState<string>();
   useEffect(() => {
     setClipVoice(clipVoiceName(language));
     setDownloaded(false);
+    setDownloadNote(undefined);
     setProgress(undefined);
     const stopClips = onClipManifestLoaded(() => setClipVoice(clipVoiceName(language)));
     if (!getSpeechCapabilities().synthesis) return stopClips;
@@ -35,10 +37,20 @@ export function VoiceNotice({ language, onlyMissing = false }: { language: Langu
         <div className="voice-download">
           <button className="text-button" disabled={busy} onClick={() => {
             setProgress({ done: 0, total: 1 });
-            void downloadLanguageClips(language, (done, total) => setProgress({ done, total })).then(() => setDownloaded(true)).catch(() => setProgress(undefined));
+            setDownloadNote(undefined);
+            void downloadLanguageClips(language, (done, total) => setProgress({ done, total })).then((result) => {
+              if (result.cached >= result.total) setDownloaded(true);
+              else {
+                setProgress(undefined);
+                setDownloadNote(!result.controlled
+                  ? "Rien n'a pu être gardé hors ligne : fermez puis rouvrez l'application avec du réseau, et recommencez."
+                  : `${result.cached} sur ${result.total} enregistrements gardés (${result.failed} échec${result.failed > 1 ? "s" : ""}). Recommencez avec du réseau.`);
+              }
+            }).catch(() => { setProgress(undefined); setDownloadNote("Téléchargement impossible : vérifiez le réseau et recommencez."); });
           }}>
             {busy ? `Téléchargement… ${progress!.done}/${progress!.total}` : downloaded ? "✓ Voix téléchargées pour l'écoute hors ligne" : `Télécharger les voix ${name} (${clipCount(language)} enregistrements) pour l'écoute hors ligne`}
           </button>
+          {downloadNote ? <p className="inline-error" role="status">{downloadNote}</p> : null}
         </div>
       </div>
     );

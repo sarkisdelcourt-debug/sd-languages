@@ -198,8 +198,11 @@ export interface GuidedLessonAttempt {
 }
 
 export interface GuidedLessonSummary {
+  /** Réussis du PREMIER coup (audit du 26/10/2026) : recopier la correction ne prouve pas qu'on savait. */
   exact: number;
   minor: number;
+  /** Ratés au premier essai puis réussis après avoir vu la correction : comptés, mais pas comme maîtrise. */
+  corrected?: number;
   incorrect: number;
   completedExercises: number;
   conversationSteps: number;

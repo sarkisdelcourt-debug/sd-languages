@@ -340,7 +340,7 @@ export function GuidedLessonView({
           <h2 id="lesson-step-title" tabIndex={-1}>{currentExercise.prompt}</h2>
           {currentAttempts.length ? <p className="retry-note">Deuxième essai : relisez le point d’attention avant de répondre.</p> : null}
           <ExerciseAnswer exercise={currentExercise} language={language} value={answer} onChange={setAnswer} onSubmit={() => void submitAnswer()} disabled={loading} />
-          <p className="hint">Indice : {currentExercise.hint}</p>
+          <details className="hint hint-reveal"><summary>Besoin d'un indice ?</summary><p>{currentExercise.hint}</p></details>
           <footer><button className="primary-button" onClick={submitAnswer} disabled={!answer.trim() || loading}>{loading ? "Vérification…" : "Vérifier ma réponse"}</button></footer>
         </article>
       ) : null}
@@ -398,6 +398,7 @@ export function GuidedLessonView({
             <dl className="summary-grid">
               <div><dt>Exactes</dt><dd>{session.summary.exact}</dd></div>
               <div><dt>Détails à polir</dt><dd>{session.summary.minor}</dd></div>
+              {session.summary.corrected ? <div><dt>Corrigées (à revoir demain)</dt><dd>{session.summary.corrected}</dd></div> : null}
               <div><dt>À revoir</dt><dd>{session.summary.incorrect}</dd></div>
               <div><dt>Dialogue</dt><dd>{session.summary.conversationSteps}/{session.summary.conversationGoal}</dd></div>
             </dl>

@@ -18,7 +18,7 @@ import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
 import { AI_NOTICE_EVENT } from "./ai/settings";
 import { warmUpAi } from "./ai/conversation";
-import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
+import { getRelayStatus, isIos, isStandalone, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
 type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "vocabulary" | "phrases" | "rules" | "conversation" | "settings" | "data";
 
@@ -65,6 +65,7 @@ export function App() {
   const [aiNotice, setAiNotice] = useState<string>();
   const [error, setError] = useState<string>();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [iosBannerDismissed, setIosBannerDismissed] = useState(false);
   /** Série ciblée demandée depuis « Mes acquis » ; effacée dès que l'écran S'entraîner est quitté. */
   const [practiceTarget, setPracticeTarget] = useState<PracticeTarget>();
 
@@ -151,6 +152,7 @@ export function App() {
           >
             <NavIcon name="more" />
             Plus
+            {unsent > 0 ? <span className="nav-badge" aria-label={`${unsent} changement${unsent > 1 ? "s" : ""} à envoyer`}>↑{unsent}</span> : null}
           </button>
         </nav>
         {moreOpen ? (
@@ -191,6 +193,17 @@ export function App() {
             </div>
           ) : null}
         </header>
+
+        {isIos() && !isStandalone() && !localStorage.getItem("sd-ios-banner-dismissed") && !iosBannerDismissed ? (
+          <aside className="offline-banner" role="status">
+            <span className="offline-symbol" aria-hidden="true">!</span>
+            <div>
+              <strong>Ajoutez l'application à l'écran d'accueil</strong>
+              <span>Dans Safari, la progression est séparée de celle de l'application installée, et Safari peut effacer ses données après une semaine sans visite. Touchez Partager puis « Sur l'écran d'accueil », et ouvrez-la une première fois avec du réseau.</span>
+            </div>
+            <button type="button" onClick={() => { try { localStorage.setItem("sd-ios-banner-dismissed", "1"); } catch { /* confort */ } setIosBannerDismissed(true); }}>OK</button>
+          </aside>
+        ) : null}
 
         {aiNotice ? (
           <aside className="offline-banner is-offline" role="status">

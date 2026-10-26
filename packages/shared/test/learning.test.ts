@@ -269,7 +269,9 @@ describe("« se faire comprendre » : concepts clés (26/10/2026)", () => {
   });
   it("tolère une faute de frappe sur un mot de cinq lettres ou plus, et les débuts de mot (*)", async () => {
     const { conceptsCovered, normalizeAnswer } = await import("../src/learning");
-    expect(conceptsCovered(normalizeAnswer("I would like a cofee"), [["coffee"]])).toBe(true);
+    expect(conceptsCovered(normalizeAnswer("I booked a restarant"), [["restaurant"]])).toBe(true);
+    expect(conceptsCovered(normalizeAnswer("cuesta"), [["cuenta"]])).toBe(false);
+    expect(conceptsCovered(normalizeAnswer("casado"), [["cansado"]])).toBe(false);
     expect(conceptsCovered(normalizeAnswer("Quisiera dos cafés"), [["caf*"]])).toBe(true);
     expect(conceptsCovered(normalizeAnswer("tea"), [["coffee"]])).toBe(false);
   });
@@ -298,5 +300,57 @@ describe("« se faire comprendre » : garde-fous (négation, ß)", () => {
     const { evaluateAnswer } = await import("../src/learning");
     const heisse = { ...exercise, answer: "Ich heiße Marc.", acceptedAnswers: undefined, understandable: undefined } as const;
     expect(evaluateAnswer(heisse, "Ich heisse Marc").correct).toBe(true);
+  });
+});
+
+describe("audit du 26/10/2026 : tréma, négation, contresens", () => {
+  const de = (answer: string, accepted?: string[]) => ({ id: "d", language: "de", level: "B2", type: "fill-gap", prompt: "Complétez", answer, acceptedAnswers: accepted, explanation: "…", hint: "…", focus: "Konjunktiv" }) as const;
+  it("distingue le tréma en allemand (wurde ≠ würde) et accepte la translittération", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const exercise = de("würde");
+    expect(evaluateAnswer(exercise, "würde").verdict).toBe("exact");
+    expect(evaluateAnswer(exercise, "wuerde").correct).toBe(true);
+    expect(evaluateAnswer(exercise, "wurde").correct).toBe(false);
+    expect(evaluateAnswer(de("Bücher"), "Bucher").correct).toBe(false);
+  });
+  it("voit la négation en « n't » et ne valide pas le contraire", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const exercise = {
+      id: "n", language: "en", level: "A1", type: "translation", prompt: "Dites en anglais : « La climatisation ne marche pas. »",
+      answer: "The air conditioning isn't working.", understandable: [["air"], ["working", "works", "work"]], explanation: "…", hint: "…", focus: "Hôtel"
+    } as const;
+    expect(evaluateAnswer(exercise, "The air conditioning is working").correct).toBe(false);
+    expect(evaluateAnswer(exercise, "The air conditioning doesn't work").correct).toBe(true);
+    expect(evaluateAnswer(exercise, "air conditioning not working").correct).toBe(true);
+  });
+  it("refuse un jour ou une direction inversés, ou « con » pour « sin »", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const base = { language: "en", level: "A1", type: "translation", explanation: "…", hint: "…", focus: "x" } as const;
+    const day = { ...base, id: "j", prompt: "x", answer: "Today is Monday and tomorrow is Tuesday.", understandable: [["monday"], ["tuesday"]] } as const;
+    expect(evaluateAnswer(day, "Today is Monday, tomorrow Tuesday").correct).toBe(true);
+    expect(evaluateAnswer(day, "Today is Tuesday and tomorrow is Monday").correct).toBe(false);
+    const sin = { ...base, language: "es", id: "s", prompt: "x", answer: "Sin gluten, por favor.", understandable: [["gluten"], ["favor", "quiero", "quisiera"]] } as const;
+    expect(evaluateAnswer(sin, "Quisiera gluten por favor").correct).toBe(false);
+    expect(evaluateAnswer(sin, "Quisiera sin gluten").correct).toBe(true);
+  });
+});
+
+describe("diagnostic : le niveau n'est plus sous-estimé (audit du 26/10/2026, I8)", () => {
+  it("tout juste de A1 à B1 donne B1, tout juste de A1 à B2 donne B2", async () => {
+    const { DIAGNOSTIC_QUESTIONS } = await import("../src/curriculum");
+    const english = DIAGNOSTIC_QUESTIONS.filter((question) => question.language === "en");
+    const rightUpTo = (maxIndex: number) => Object.fromEntries(english.map((question) => [question.id, ["A1", "A2", "B1", "B2", "C1"].indexOf(question.level) <= maxIndex ? question.answer : "zzz"]));
+    expect(estimateLevel(english, rightUpTo(2)).estimatedLevel).toBe("B1");
+    expect(estimateLevel(english, rightUpTo(3)).estimatedLevel).toBe("B2");
+  });
+});
+
+describe("variantes des traductions rédigées (audit du 26/10/2026, I4)", () => {
+  it("accepte « at 3 » pour « at three » et « hubiésemos » pour « hubiéramos »", async () => {
+    const { EXERCISES } = await import("../src/curriculum");
+    const doctor = EXERCISES.find((item) => item.id === "en-b1-translation-doctor-appointment")!;
+    expect(evaluateAnswer(doctor, doctor.answer.replace(/\bthree\b/, "3")).correct).toBe(true);
+    const spanish = EXERCISES.find((item) => item.language === "es" && /hubiéramos/.test(item.answer) && item.type === "translation");
+    if (spanish) expect(evaluateAnswer(spanish, spanish.answer.replace(/hubiéramos/g, "hubiésemos")).correct).toBe(true);
   });
 });

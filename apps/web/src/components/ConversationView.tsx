@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { hasUsableKey, loadAiSettings } from "../ai/settings";
 import { LANGUAGES } from "@shared/catalog";
 import type { ConversationThread, LanguageCode } from "@shared/types";
 import { api, type PublicConversationScenario } from "../api";
@@ -9,6 +10,12 @@ import {
   type BrowserSpeechRecognition, stopSpeaking, RECOGNITION_SILENT_HELP } from "../lib/browser-speech";
 
 export function ConversationView({ language }: { language: LanguageCode }) {
+  const [aiActive, setAiActive] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void loadAiSettings().then((settings) => { if (alive) setAiActive(hasUsableKey(settings)); }).catch(() => undefined);
+    return () => { alive = false; };
+  }, [language]);
   const [thread, setThread] = useState<ConversationThread>({ language, messages: [] });
   const [scenarios, setScenarios] = useState<PublicConversationScenario[]>([]);
   const [showScenarios, setShowScenarios] = useState(false);
@@ -131,14 +138,14 @@ export function ConversationView({ language }: { language: LanguageCode }) {
     <section className="conversation-panel">
       <div className="conversation-header">
         <div className="coach-avatar">SD</div>
-        <div><h2>Coach {LANGUAGES[language].nativeName}</h2><p><span className="status-dot" /> Mode local guidé</p></div>
+        <div><h2>Coach {LANGUAGES[language].nativeName}</h2><p><span className="status-dot" /> {aiActive ? "Coach IA actif (Haiku)" : "Mode local guidé"}</p></div>
         <button className="scenario-toggle" onClick={() => setShowScenarios((value) => !value)}>
           {activeScenario ? "Changer de scénario" : "Choisir un scénario"}
         </button>
       </div>
       {showScenarios ? (
         <div className="scenario-picker">
-          <div className="scenario-picker-head"><strong>Choisissez une situation</strong><span>{scenarios.length} parcours · 100 % local</span></div>
+          <div className="scenario-picker-head"><strong>Choisissez une situation</strong><span>{scenarios.length} parcours · {aiActive ? "coach IA actif" : "coach local"}</span></div>
           <div className="scenario-grid">
             {scenarios.map((scenario) => (
               <button key={scenario.id} onClick={() => void startScenario(scenario.id)} disabled={sending}>

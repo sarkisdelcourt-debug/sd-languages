@@ -49,10 +49,10 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
       <article className="settings-card">
         <div className="settings-section"><strong>Pourquoi apprenez-vous ?</strong><span>Choisissez votre priorité actuelle.</span></div>
         <div className="goal-grid">
-          {GOALS.map((goal) => <button key={goal.id} className={settings.goal === goal.id ? "goal-option selected" : "goal-option"} onClick={() => setSettings({ ...settings, goal: goal.id })}><span>{goal.mark}</span><strong>{goal.title}</strong><small>{goal.description}</small></button>)}
+          {GOALS.map((goal) => <button key={goal.id} className={settings.goal === goal.id ? "goal-option selected" : "goal-option"} aria-pressed={settings.goal === goal.id} onClick={() => setSettings({ ...settings, goal: goal.id })}><span>{goal.mark}</span><strong>{goal.title}</strong><small>{goal.description}</small></button>)}
         </div>
         <div className="settings-section"><strong>Temps quotidien</strong><span>Un objectif réaliste vaut mieux qu'une longue session occasionnelle.</span></div>
-        <div className="segmented-options">{MINUTES.map((minutes) => <button key={minutes} className={settings.dailyMinutes === minutes ? "selected" : ""} onClick={() => setSettings({ ...settings, dailyMinutes: minutes })}>{minutes} min</button>)}</div>
+        <div className="segmented-options">{MINUTES.map((minutes) => <button key={minutes} className={settings.dailyMinutes === minutes ? "selected" : ""} aria-pressed={settings.dailyMinutes === minutes} onClick={() => setSettings({ ...settings, dailyMinutes: minutes })}>{minutes} min</button>)}</div>
         <div className="settings-section"><strong>Je pars de 0</strong><span>Débutant complet en {LANGUAGES[language].name.toLowerCase()} : niveau A1, objectif « bases », et le parcours « Premiers pas » ouvert en premier dans Règles.</span></div>
         <div className="relay-actions">
           <button className="secondary-button" onClick={() => setSettings({ ...settings, declaredLevel: "A1", goal: "basics", targetLevel: settings.targetLevel === "A1" ? "A2" : settings.targetLevel })}>Je pars de 0 (puis Enregistrer)</button>
@@ -65,7 +65,7 @@ export function SettingsView({ language, onSaved }: { language: LanguageCode; on
           {LEVELS.map((level) => <button key={level} className={settings.declaredLevel === level ? "selected" : ""} aria-pressed={settings.declaredLevel === level} onClick={() => setSettings({ ...settings, declaredLevel: level })}>{level}</button>)}
         </div>
         <div className="settings-section"><strong>Niveau visé</strong><span>Le cap que vous vous fixez pour cette langue.</span></div>
-        <div className="level-options">{LEVELS.map((level) => <button key={level} className={settings.targetLevel === level ? "selected" : ""} onClick={() => setSettings({ ...settings, targetLevel: level })}>{level}</button>)}</div>
+        <div className="level-options">{LEVELS.map((level) => <button key={level} className={settings.targetLevel === level ? "selected" : ""} aria-pressed={settings.targetLevel === level} onClick={() => setSettings({ ...settings, targetLevel: level })}>{level}</button>)}</div>
         <div className="settings-footer"><span>{saved ? "✓ Préférences enregistrées sur cet appareil" : "Rien ne quitte cet appareil, sauf si vous activez le coach IA"}</span><button className="primary-button" disabled={saving} onClick={() => void save()}>{saving ? "Enregistrement…" : "Enregistrer"}</button></div>
       </article>
       <AiCoachSettings />

@@ -30,7 +30,7 @@ Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le
 
 10. **Lot 2 du 22/10/2026 (branche `lot2-2026-10-22`).** Leçons anglaises en révision 3 (exercices choisis pour l'objectif, au niveau exact, aucun id partagé, pertinence testée ; 22 exercices A1–A2 rédigés dans `content/en/beginner.ts`), `skillTags` sur chaque exercice + liste fermée de compétences (`packages/shared/src/skills.ts`), vue « Mes acquis » (`modules/skills.ts` pur et testé, route `GET /api/skills/:language`, série ciblée `?skill=`), chapitres acquis repliés sur la carte du parcours, variantes contractées des textes à trous, scénario hôtel espagnol `es-hotel-check-in`. Les révisions s'appliquent en cascade et toutes les révisions retirées restent jouables.
 
-Vérifications : `npm run typecheck`, `npm test` (183 tests au 22/10, 14 fichiers), `npm run build`, `node --check apps/web/public/sw.js`.
+Vérifications : `npm run typecheck`, `npm test` (300 tests, 26 fichiers au 26/10/2026), `npm run build`, `node --check apps/web/public/sw.js`.
 
 ## État exécutable au 21 octobre 2026
 
@@ -39,7 +39,7 @@ React 19 + TypeScript + Vite ; le moteur (`packages/engine`) tourne dans le navi
 Fonctionnalités opérationnelles :
 
 - diagnostic A1–C1 indicatif pour les trois langues, ou niveau déclaré ;
-- 942 exercices déterministes avec correction didactique : 897 en anglais (banque générée + rédigée, dont 22 A1–A2 du 22/10), 30 en espagnol, 15 en allemand — l'interface annonce les langues « en construction » ; chaque exercice porte des `skillTags` (24 compétences en anglais, 18 en allemand, 21 en espagnol) ;
+- 6 548 exercices déterministes avec correction didactique (2 132 anglais, 2 176 allemand, 2 240 espagnol) + tests de vocabulaire, phrases du quotidien (`content/phrase-drills.ts`) et fiches de règles (`grammar-rules.ts`, `rules/`) — le détail par fonction est dans la section « État au 26/10/2026 » ci-dessous.
 - 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 3) ont chacune 6 exercices propres à leur objectif, au niveau exact ; les chapitres sous le niveau déclaré se replient ;
 - carte de compétences « Mes acquis » : exposition, dix dernières réponses, stabilité, erreurs ouvertes, prochaine révision et action conseillée, avec série ciblée ;
 - carte du parcours en quatre chapitres, déblocage par maîtrise, recommandation expliquée, abandon possible ;
@@ -81,7 +81,7 @@ npm run build
 node --check apps/web/public/sw.js
 ```
 
-État de référence : 14 fichiers de tests, 183 tests réussis (22/10/2026).
+État de référence : 26 fichiers de tests, 300 tests réussis (26/10/2026).
 
 ## Architecture à connaître
 
@@ -126,7 +126,7 @@ Points d'entrée importants :
 
 ## Limites actuelles importantes
 
-- L'allemand (15 exercices) et l'espagnol (30) restent des ébauches ; leurs 24 leçons réemploient ces petites banques et 4 scénarios par langue.
+- Allemand et espagnol : ~2 200 exercices chacun (A1–B2), non relus par un locuteur natif ; l'espagnol B2 reste mince.
 - La correction est tolérante par règles (contractions, chiffres, US/UK) mais pas sémantique : une formulation juste non prévue peut être refusée.
 - Le score de prononciation mesure la proximité de la transcription, pas les phonèmes, le rythme ou l'accent.
 - Il n'existe pas encore de tests navigateur automatisés du service worker ni de tests de rendu du thème sombre.
@@ -147,3 +147,14 @@ Avant de modifier :
 5. réaliser un lot vertical limité, avec tests et documentation ;
 6. distinguer dans le compte rendu ce qui fonctionne réellement de ce qui reste préparé.
 
+
+
+## État au 26/10/2026
+
+- **Correcteur** (`learning.ts`) : tréma allemand distingué (ä ö ü → ae oe ue, ß → ss), accents ignorés ailleurs ; QCM strict ; « se faire comprendre » (`understandable`, `conceptsCovered`) avec garde-fous : négation, mots qui s'excluent (jours, directions, con/sin), faute de frappe tolérée seulement à partir de 8 lettres, jamais une simple voyelle finale ; heures 3:00 / 8h30 normalisées.
+- **Maîtrise** : le bilan d'une leçon juge le PREMIER essai ; une réussite après avoir vu la correction est « corrigée » (pas d'XP de réussite, erreur mémorisée gardée ouverte). Indice à la demande en leçon. Le plan du jour ne promet une notion que si la leçon la contient.
+- **Phrases du quotidien** (`content/phrase-drills.ts`, `content/<langue>/phrases.ts`, corrections de relecture dans `phrase-fix-data.ts`) : ~500 phrases à formulations multiples, deux sens, mots-clés pour l'intelligibilité.
+- **Règles** : 81 fiches (`rules/`), « Je pars de 0 » (Accueil et Mes objectifs), exercices de genre générés depuis les listes de vocabulaire.
+- **Voix** : enregistrements Piper (`apps/web/public/audio`, régénérés par `scripts/generate-audio.mts`, outils hors dépôt) ; repli sur la voix de l'appareil ; service worker : la page n'est mise en cache qu'avec ses scripts, plages audio gérées, cache des voix séparé.
+- **Coach IA** : délai 10 s sans nouvelle tentative, cumul de dépense sous verrou, libellés selon l'état réel, CSP limitée à l'application et à api.anthropic.com. Le plafond reste une estimation locale : le vrai plafond est la limite de dépense sur console.anthropic.com.
+- **Audits** : les rapports (23, 24 et 26/10/2026) sont dans `docs/audits/` en local, non publiés (dépôt public).

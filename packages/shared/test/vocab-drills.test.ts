@@ -151,3 +151,19 @@ describe("synonymes d'autres listes en saisie", () => {
     expect(evaluateAnswer(drill, "kitchen").correct).toBe(false);
   });
 });
+
+describe("sens vers le français : l'article est retiré sans amputer le mot (audit du 26/10/2026)", () => {
+  it("accepte le nom français sans son article pour chaque mot de chaque langue, et refuse un fragment de mot", () => {
+    const problems: string[] = [];
+    const FR_ARTICLE = /^(?:(?:le|la|les|un|une|des|du|de la|de l')\s+|l'|d')/i;
+    for (const language of LANGUAGES) {
+      for (const drill of drillCandidates(language, "to-french", "typing")) {
+        const bare = drill.answer.replace(/\s*\([^)]*\)/g, "").split(/\s*(?:,|\/|;| ou )\s*/)[0]!.replace(FR_ARTICLE, "").trim();
+        if (bare && !evaluateAnswer(drill, bare).correct) problems.push(`${drill.id} : « ${bare} » refusé`);
+        const fragment = bare.slice(1);
+        if (fragment.length > 2 && evaluateAnswer(drill, fragment).correct) problems.push(`${drill.id} : fragment « ${fragment} » accepté`);
+      }
+    }
+    expect(problems.slice(0, 10)).toEqual([]);
+  });
+});

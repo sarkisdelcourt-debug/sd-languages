@@ -130,12 +130,15 @@ export function stopSpeaking(): void {
 
 export function speakText(text: string, language: LanguageCode, rate = 0.86): boolean {
   // 1) l'enregistrement intégré (voix Piper) quand il existe ; 2) sinon la voix de l'appareil.
-  if (playClip(text, language, rate < 0.75)) {
+  if (playClip(text, language, rate < 0.75, () => speakWithDevice(text, language, rate))) {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     return true;
   }
+  return speakWithDevice(text, language, rate);
+}
+
+function speakWithDevice(text: string, language: LanguageCode, rate: number): boolean {
   if (!("speechSynthesis" in window)) return false;
-  stopClip();
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   const voice = pickVoice(language);

@@ -7,7 +7,7 @@ import type {
 import { ENGLISH_BANK } from "./content/en/index.js";
 import { GERMAN_BANK } from "./content/de/index.js";
 import { SPANISH_BANK } from "./content/es/index.js";
-import { withContractionVariants } from "./content/generators.js";
+import { answerVariants, withContractionVariants } from "./content/generators.js";
 import { SPANISH_A1_EXERCISES } from "./spanish-a1.js";
 
 const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
@@ -832,6 +832,24 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
   ...DIAGNOSTIC_BY_LANGUAGE.es
 ];
 
+/**
+ * Les traductions rédigées acceptent aussi les variantes que les phrases générées acceptaient déjà : chiffres ↔ mots, contractions,
+ * lexique US/UK (audit du 26/10/2026 : « at 3 » refusé pour « at three »). Espagnol : subjonctif en -se pour -ra (hubiera → hubiese).
+ */
+function withTranslationVariants(exercise: Exercise): Exercise {
+  if (exercise.type !== "translation" && exercise.type !== "fill-gap") return exercise;
+  const listed = [exercise.answer, ...(exercise.acceptedAnswers ?? [])];
+  const known = new Set(listed);
+  const extra = listed.flatMap((candidate) => {
+    if (exercise.language === "en") return answerVariants(candidate);
+    if (exercise.language === "es" && /\bhubi[eé]ra(mos|is|n)?\b/i.test(candidate)) {
+      return [candidate.replace(/\bhubi[eé]ramos\b/gi, "hubiésemos").replace(/\bhubiera(is|n)?\b/gi, (_m, ending: string | undefined) => `hubiese${ending ?? ""}`)];
+    }
+    return [];
+  }).filter((variant, index, all) => !known.has(variant) && all.indexOf(variant) === index);
+  return extra.length ? { ...exercise, acceptedAnswers: [...(exercise.acceptedAnswers ?? []), ...extra] } : exercise;
+}
+
 export const EXERCISES: Exercise[] = [
   ...EXERCISES_BY_LANGUAGE.en.map(withContractionVariants),
   ...EXERCISES_BY_LANGUAGE.de,
@@ -840,7 +858,7 @@ export const EXERCISES: Exercise[] = [
   ...ENGLISH_BANK,
   ...SPANISH_BANK,
   ...GERMAN_BANK
-];
+].map(withTranslationVariants);
 
 export function getDiagnosticQuestions(language: LanguageCode): DiagnosticQuestion[] {
   return DIAGNOSTIC_QUESTIONS.filter((question) => question.language === language);

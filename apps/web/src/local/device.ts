@@ -152,8 +152,9 @@ export async function fetchLegacyServerExport(): Promise<string | undefined> {
 export async function eraseDevice(): Promise<void> {
   await store.erase();
   if ("caches" in window) {
+    // On efface les voix gardées, pas l'application elle-même : sinon elle ne se rouvrirait plus hors ligne (audit du 26/10/2026).
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key.startsWith("sd-languages-")).map((key) => caches.delete(key)));
+    await Promise.all(keys.filter((key) => key.startsWith("sd-languages-audio")).map((key) => caches.delete(key)));
   }
   try {
     localStorage.clear();

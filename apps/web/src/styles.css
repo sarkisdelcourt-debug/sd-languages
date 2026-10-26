@@ -511,3 +511,13 @@ main { min-width: 0; }
 
 .skills-untouched { margin-top: 10px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 12px; }
 .skills-untouched > summary { cursor: pointer; color: var(--muted-strong); font-weight: 700; min-height: 40px; display: flex; align-items: center; }
+.hint-reveal > summary { cursor: pointer; font-weight: 700; color: var(--accent-ink); min-height: 40px; display: flex; align-items: center; }
+.hint-reveal > p { margin: 4px 0 0; }
+
+/* Accessibilité (26/10/2026) : la sélection ne repose plus sur la seule couleur, et le focus se voit en clair comme en sombre. */
+button[aria-pressed="true"]:not(.record-button):not(.recognition-button)::before { content: "✓ "; font-weight: 800; }
+.goal-option.selected { position: relative; }
+.goal-option.selected::after { content: "✓"; position: absolute; top: 8px; right: 10px; font-weight: 800; color: var(--accent-ink); }
+.language-pill.active { font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
+:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 2px; }
+.nav-item .nav-badge { margin-left: 4px; }

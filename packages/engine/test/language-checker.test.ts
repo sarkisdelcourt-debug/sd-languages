@@ -88,3 +88,14 @@ describe("correcteur local de l'anglais (erreurs de francophones)", () => {
     expect(checkText("es", "Soy en Madrid.").corrected).toBe("Estoy en Madrid.");
   });
 });
+
+import { checkText as checkTextAudit } from "../src/modules/language-checker.js";
+
+describe("phrases modèles correctes (audit du 26/10/2026, I7)", () => {
+  it("« The informations are on the table » → « The information is on the table »", () => {
+    expect(checkTextAudit("en", "The informations are on the table").corrected).toBe("The information is on the table");
+  });
+  it("« The patient has a fever since two days » → « has had a fever for two days »", () => {
+    expect(checkTextAudit("en", "The patient has a fever since two days").corrected).toBe("The patient has had a fever for two days");
+  });
+});

@@ -54,3 +54,20 @@ describe("coach allemand (21/10/2026)", () => {
     for (const message of messages) expect(message, message).not.toMatch(/\b(Sie|Ihnen|Ihre?|Wählen Sie)\b/u);
   });
 });
+
+import { keywordPresent } from "../src/modules/coach.js";
+import { normalizeAnswer as normalizeForCoach } from "../../shared/src/learning.js";
+
+describe("mots attendus : mots entiers (audit du 26/10/2026, I3)", () => {
+  const present = (text: string, keyword: string) => keywordPresent(normalizeForCoach(text), keyword);
+  it("« by » n'est ni dans « goodbye » ni dans « baby », « dia » n'est pas dans « diabetes »", () => {
+    expect(present("Goodbye, I am going home now", "by")).toBe(false);
+    expect(present("My baby is sick today", "by")).toBe(false);
+    expect(present("Tengo diabetes", "dia")).toBe(false);
+  });
+  it("accepte le mot entier, et une terminaison sur un mot de cinq lettres ou plus", () => {
+    expect(present("I can send it by Friday", "by")).toBe(true);
+    expect(present("See you on fridays", "friday")).toBe(true);
+    expect(present("Tomorrow morning", "tomorrow")).toBe(true);
+  });
+});

@@ -462,7 +462,9 @@ export function createEngine(store: StateStore): Engine {
       }
       const exercise = EXERCISES.find((candidate) => candidate.id === exerciseId && candidate.language === language);
       if (!exercise) return { error: "Exercice pédagogique introuvable." } as const;
-      const applied = applyPracticeAttempt(state, exercise, answer.trim(), attemptId);
+      // La correction a-t-elle déjà été montrée pour cet exercice dans cette séance ? Alors la réussite est « corrigée », pas « maîtrisée ».
+      const assisted = session.attempts.some((attempt) => attempt.exerciseId === exercise.id && !attempt.evaluation.correct);
+      const applied = applyPracticeAttempt(state, exercise, answer.trim(), attemptId, { assisted });
       if (applied.duplicate) return { error: "Identifiant de tentative déjà utilisé." } as const;
       session.attempts.push({ attemptId, exerciseId: exercise.id, submittedAnswer: answer.trim(), evaluation: applied.evaluation, createdAt: new Date().toISOString() });
       session.phase = "correction";

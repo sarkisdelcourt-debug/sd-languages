@@ -42,7 +42,6 @@ const ARTICLES: Record<LanguageCode, RegExp> = {
   de: /^(?:der|die|das|ein|eine|sich)\s+/i,
   es: /^(?:el|la|los|las|un|una|unos|unas)\s+/i
 };
-const FRENCH_ARTICLES = /^(?:le|la|les|l'|un|une|des|du|de la|de l'|d')\s*/i;
 
 function hash(text: string): number {
   let value = 2_166_136_261;
@@ -123,8 +122,8 @@ export function drillExercise(language: LanguageCode, set: VocabSet, item: Vocab
       hint: `Thème : ${set.title.toLowerCase()}.`
     };
   }
-  const first = (answer.replace(toTarget ? ARTICLES[language] : FRENCH_ARTICLES, "").trim()[0] ?? "").toLowerCase();
-  const strip = toTarget ? ARTICLES[language] : FRENCH_ARTICLES;
+  const first = (answer.replace(toTarget ? ARTICLES[language] : FRENCH_KEY_ARTICLES, "").trim()[0] ?? "").toLowerCase();
+  const strip = toTarget ? ARTICLES[language] : FRENCH_KEY_ARTICLES;
   const equivalents = sameMeaning(language, toTarget, item).filter((other) => other !== answer);
   const variants = [...new Set([...typedVariants(answer, strip), ...equivalents, ...equivalents.flatMap((other) => typedVariants(other, strip))])];
   return {

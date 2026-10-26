@@ -49,35 +49,67 @@ export function stopClip(): void {
   current = undefined;
 }
 
-/** Joue l'enregistrement du texte s'il existe ; renvoie false sinon (l'appelant lit alors avec la voix de l'appareil). */
-export function playClip(text: string, language: LanguageCode, slow: boolean): boolean {
+/**
+ * Joue l'enregistrement du texte s'il existe ; renvoie false sinon (l'appelant lit alors avec la voix de l'appareil).
+ * Si l'enregistrement ne peut pas être lu (hors ligne, jamais téléchargé), `onFailure` est appelé : l'appelant se replie sur la
+ * voix de l'appareil au lieu de rester muet (audit du 26/10/2026).
+ */
+export function playClip(text: string, language: LanguageCode, slow: boolean, onFailure?: () => void): boolean {
   const id = idFor(text, language);
   if (!id) return false;
   const useSlow = slow && (manifest?.slow[language] ?? []).includes(id);
   stopClip();
   const audio = new Audio(`${BASE}${language}/${id}${useSlow ? "-s" : ""}.mp3`);
   current = audio;
-  void audio.play().catch(() => undefined);
+  let failed = false;
+  const fail = () => {
+    if (failed || current !== audio) return;
+    failed = true;
+    onFailure?.();
+  };
+  audio.addEventListener("error", fail);
+  void audio.play().catch(fail);
   return true;
 }
 
-/** Télécharge tous les enregistrements d'une langue (le service worker les garde pour l'écoute hors ligne). */
-export async function downloadLanguageClips(language: LanguageCode, onProgress: (done: number, total: number) => void): Promise<void> {
+export interface ClipDownloadResult {
+  total: number;
+  failed: number;
+  /** Combien sont réellement dans le cache de l'appareil après le téléchargement. */
+  cached: number;
+  /** Le service worker contrôle-t-il la page ? Sinon rien n'est gardé : il faut rouvrir l'application une fois. */
+  controlled: boolean;
+}
+
+/** Télécharge tous les enregistrements d'une langue (le service worker les garde pour l'écoute hors ligne) et vérifie le cache. */
+export async function downloadLanguageClips(language: LanguageCode, onProgress: (done: number, total: number) => void): Promise<ClipDownloadResult> {
   const loaded = await loadClipManifest();
   if (!loaded) throw new Error("La liste des voix est introuvable.");
   const ids = [...new Set(Object.values(loaded.clips[language] ?? {}))];
   const urls = [...ids.map((id) => `${BASE}${language}/${id}.mp3`), ...(loaded.slow[language] ?? []).map((id) => `${BASE}${language}/${id}-s.mp3`)];
+  const all = [...urls];
   let done = 0;
-  onProgress(0, urls.length);
+  let failed = 0;
+  onProgress(0, all.length);
   const next = async (): Promise<void> => {
     const url = urls.shift();
     if (!url) return;
-    await fetch(url).then((response) => response.arrayBuffer()).catch(() => undefined);
+    const ok = await fetch(url).then((response) => (response.ok ? response.arrayBuffer().then(() => true) : false)).catch(() => false);
+    if (!ok) failed += 1;
     done += 1;
-    onProgress(done, done + urls.length);
+    onProgress(done, all.length);
     return next();
   };
   await Promise.all(Array.from({ length: 6 }, next));
+  // Vérification : un « ✓ » ne doit jamais s'afficher quand rien n'a été mis en cache (service worker pas encore actif, réseau coupé).
+  let cached = 0;
+  try {
+    const cache = await caches.open("sd-languages-audio-v1");
+    cached = (await Promise.all(all.map((url) => cache.match(new URL(url, location.href).href)))).filter(Boolean).length;
+  } catch {
+    cached = 0;
+  }
+  return { total: all.length, failed, cached, controlled: Boolean(navigator.serviceWorker?.controller) };
 }
 
 export function clipCount(language: LanguageCode): number {

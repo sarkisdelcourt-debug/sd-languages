@@ -26,11 +26,19 @@ import type { GrammarRule } from "@shared/grammar-rules";
 import { engine } from "./local/device";
 import { aiReplyFor } from "./ai/conversation";
 
-export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers"> & {
+export type PublicExercise = Omit<Exercise, "answer" | "acceptedAnswers" | "understandable"> & {
   recommendationScore?: number;
   recommendationReason?: string;
 };
 export interface VocabularySet {
+  id: string;
+  title: string;
+  topic: string;
+  level: string;
+  count: number;
+  seen: number;
+}
+export interface PhraseSituationSummary {
   id: string;
   title: string;
   topic: string;
@@ -86,6 +94,15 @@ export const api = {
     if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
     const suffix = query.toString();
     return request<PublicExercise[]>(`/api/practice/${language}${suffix ? `?${suffix}` : ""}`);
+  },
+  phrases: (language: string) => request<{ language: string; situations: PhraseSituationSummary[] }>(`/api/phrases/${language}`),
+  phraseDrill: (language: string, options: { direction: string; setId?: string; exclude?: string[]; random?: boolean; forLevel?: boolean }) => {
+    const query = new URLSearchParams({ direction: options.direction });
+    if (options.setId) query.set("set", options.setId);
+    if (options.random) query.set("order", "random");
+    if (options.forLevel) query.set("forLevel", "1");
+    if (options.exclude?.length) query.set("exclude", options.exclude.join(","));
+    return request<PublicExercise[]>(`/api/phrases/${language}/drill?${query.toString()}`);
   },
   rules: (language: string) => request<GrammarRule[]>(`/api/rules/${language}`),
   vocabulary: (language: string) => request<{ language: string; sets: VocabularySet[] }>(`/api/vocabulary/${language}`),

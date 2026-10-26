@@ -13,13 +13,14 @@ import { ReviewView } from "./components/ReviewView";
 import { SettingsView } from "./components/SettingsView";
 import { VocabularyView } from "./components/VocabularyView";
 import { RulesView } from "./components/RulesView";
+import { PhrasesView } from "./components/PhrasesView";
 import { SkillsView, type PracticeTarget } from "./components/SkillsView";
 import { SpeakingView, type SpeakingMode } from "./components/SpeakingView";
 import { AI_NOTICE_EVENT } from "./ai/settings";
 import { warmUpAi } from "./ai/conversation";
 import { getRelayStatus, requestPersistentStorage, store, type RelayStatus } from "./local/device";
 
-type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "vocabulary" | "rules" | "conversation" | "settings" | "data";
+type View = "home" | "lesson" | "diagnostic" | "practice" | "review" | "skills" | "vocabulary" | "phrases" | "rules" | "conversation" | "settings" | "data";
 
 const viewLabels: Record<View, string> = {
   home: "Vue d'ensemble",
@@ -30,6 +31,7 @@ const viewLabels: Record<View, string> = {
   skills: "Mes acquis",
   vocabulary: "Vocabulaire",
   rules: "Règles",
+  phrases: "Phrases",
   conversation: "Parler",
   settings: "Mes objectifs",
   data: "Mes données"
@@ -40,7 +42,7 @@ const viewLabels: Record<View, string> = {
  * garde 4 onglets + « Plus » (qui regroupe Mes acquis, Parler, Mes objectifs, Mes données, Diagnostic).
  */
 const primaryViews = ["home", "lesson", "practice", "review"] as const;
-const secondaryViews = ["skills", "rules", "vocabulary", "conversation", "settings", "data", "diagnostic"] as const;
+const secondaryViews = ["skills", "rules", "vocabulary", "phrases", "conversation", "settings", "data", "diagnostic"] as const;
 
 function readSavedLanguage(): LanguageCode {
   try {
@@ -228,6 +230,7 @@ export function App() {
           {view === "diagnostic" ? <DiagnosticView language={viewLanguage} onComplete={refreshDashboard} /> : null}
           {view === "lesson" ? <GuidedLessonView language={viewLanguage} onProgress={refreshDashboard} onHome={() => setView("home")} /> : null}
           {view === "practice" ? <PracticeView language={viewLanguage} onProgress={refreshDashboard} target={practiceTarget} /> : null}
+          {view === "phrases" ? <PhrasesView language={viewLanguage} onProgress={refreshDashboard} /> : null}
           {view === "rules" ? <RulesView language={viewLanguage} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}
           {view === "vocabulary" ? <VocabularyView language={viewLanguage} onProgress={refreshDashboard} /> : null}
           {view === "skills" ? <SkillsView language={viewLanguage} onPractice={(target) => { setPracticeTarget(target); setView("practice"); }} /> : null}

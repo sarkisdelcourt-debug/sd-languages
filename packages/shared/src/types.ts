@@ -46,6 +46,12 @@ export interface Exercise {
   audioText?: string;
   answer: string;
   acceptedAnswers?: string[];
+  /**
+   * « Se faire comprendre » (26/10/2026) : concepts que la réponse doit faire passer. Chaque entrée est un concept, et liste les
+   * mots qui l'expriment (forme avec « * » final = début de mot). Une réponse qui contient TOUS les concepts est comptée juste
+   * (verdict « minor ») même si elle n'est pas dans la liste des formulations acceptées.
+   */
+  understandable?: string[][];
   explanation: string;
   hint: string;
   focus: string;
@@ -63,7 +69,7 @@ export interface AnswerEvaluation {
   explanation: string;
   feedback: string;
   issues: Array<{
-    kind: "accent" | "orthography" | "grammar" | "vocabulary" | "formulation";
+    kind: "accent" | "orthography" | "grammar" | "vocabulary" | "formulation" | "understood";
     message: string;
   }>;
 }
@@ -103,7 +109,7 @@ export interface MistakeRecord {
   resolvedCount: number;
   firstSeenAt: string;
   lastSeenAt: string;
-  kind?: "accent" | "orthography" | "grammar" | "vocabulary" | "formulation";
+  kind?: "accent" | "orthography" | "grammar" | "vocabulary" | "formulation" | "understood";
 }
 
 export type ReviewRating = "again" | "hard" | "good" | "easy";

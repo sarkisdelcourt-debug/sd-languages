@@ -12,6 +12,7 @@ import { runInThisContext } from "node:vm";
 import { EXERCISES } from "../packages/shared/src/curriculum.js";
 import { PRONUNCIATION_PROMPTS } from "../packages/shared/src/pronunciation.js";
 import { GRAMMAR_RULES } from "../packages/shared/src/grammar-rules.js";
+import { PHRASES } from "../packages/shared/src/content/phrase-drills.js";
 import { VOCAB_SETS } from "../packages/shared/src/content/vocab-drills.js";
 
 const require = createRequire(import.meta.url);
@@ -42,6 +43,8 @@ function collect(language: Lang): { texts: Set<string>; sentences: Set<string> }
   for (const prompt of PRONUNCIATION_PROMPTS) if (prompt.language === language) { texts.add(prompt.text); sentences.add(prompt.text); }
   // Exemples des fiches de règles : le bouton ▶ de chaque exemple joue ces enregistrements.
   for (const rule of GRAMMAR_RULES) if (rule.language === language) for (const example of rule.examples) { texts.add(example.target); if (example.target.split(/\s+/).length >= 3) sentences.add(example.target); }
+  // Phrases du quotidien : toutes les formulations (le sens langue → français lit la première, ▶ lit la réponse du sens inverse).
+  for (const item of PHRASES[language]) for (const target of item.targets) { texts.add(target); if (target.split(/\s+/).length >= 3) sentences.add(target); }
   for (const set of VOCAB_SETS[language]) for (const item of set.items) texts.add(item.en);
   return { texts, sentences };
 }

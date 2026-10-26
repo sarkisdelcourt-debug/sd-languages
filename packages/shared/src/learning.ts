@@ -40,6 +40,8 @@ export function matchPairsAnswer(pairs: Array<{ target: string; native: string }
 function tolerateSpelling(value: string): string {
   return value
     .replace(/[’']/g, "'")
+    // Heures : 3:00, 8h30 et 15h s'écrivent aussi « 3 00 », « 8 30 » et « 15 » (le « : » et le « h » ne sont pas des mots).
+    .replace(/(\d)\s*[:h](?=\d{2}|\s|$)/gi, "$1 ")
     .replace(/\b([ap])\.m\.?(?=\s|$)/g, "$1m")
     .replace(/[^\p{L}\p{N}'\s-]/gu, "")
     .replace(/-/g, " ")
@@ -50,7 +52,7 @@ function tolerateSpelling(value: string): string {
 }
 
 export function normalizeAnswer(value: string): string {
-  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr").replace(/œ/g, "oe").replace(/æ/g, "ae"));
+  return tolerateSpelling(value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("fr").replace(/œ/g, "oe").replace(/æ/g, "ae").replace(/ß/g, "ss"));
 }
 
 function normalizeSurface(value: string): string {
@@ -158,6 +160,31 @@ export function assessPronunciation(prompt: PronunciationPrompt, transcript: str
   };
 }
 
+/** Vrai quand la réponse fait passer tous les concepts (un mot de chaque groupe ; « * » final = début de mot ; une faute de frappe tolérée sur les mots de 5 lettres ou plus). */
+export function conceptsCovered(normalizedAnswer: string, concepts: string[][]): boolean {
+  // L'apostrophe sépare les mots (l'addition = l + addition) : un concept « addition » est reconnu dans « l'addition ».
+  const flatten = (text: string) => text.replace(/'/g, " ").replace(/\s+/g, " ").trim();
+  const flat = flatten(normalizedAnswer);
+  const tokens = flat.split(" ").filter(Boolean);
+  const padded = ` ${flat} `;
+  return concepts.length > 0 && concepts.every((group) => group.some((raw) => {
+    const prefix = raw.endsWith("*");
+    const alt = flatten(normalizeAnswer(prefix ? raw.slice(0, -1) : raw));
+    if (!alt) return false;
+    if (prefix ? padded.includes(` ${alt}`) : padded.includes(` ${alt} `)) return true;
+    // Faute de frappe tolérée seulement sur un mot de 7 lettres ou plus qui garde la même première et la même dernière lettre :
+    // derecho/derecha, hermano/hermana, cuesta/cuenta ne se confondent plus.
+    // Une faute de frappe n'est tolérée que sur un mot de 6 lettres ou plus qui garde sa première lettre, et jamais quand seule la
+    // voyelle finale change (derecho/derecha, hermano/hermana : ce sont deux mots, pas une faute). where/here, train/rain restent distincts.
+    const genderSwap = (token: string) => token.slice(0, -1) === alt.slice(0, -1) && /[aoe]$/.test(token) && /[aoe]$/.test(alt);
+    return !alt.includes(" ") && alt.length >= 6 && tokens.some((token) => token.length >= 5 && token[0] === alt[0] && !genderSwap(token) && editDistance(token, alt) <= 1);
+  }));
+}
+
+/** Négation (français, anglais, allemand, espagnol) : un contresens ne doit pas passer pour « compris ». */
+const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne)(?: |$)|n't(?: |$)/;
+const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/'/g, " ").replace(/\s+/g, " ").trim());
+
 export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): AnswerEvaluation {
   const normalizedAnswer = normalizeAnswer(submittedAnswer);
   const answers = [exercise.answer, ...(exercise.acceptedAnswers ?? [])];
@@ -171,6 +198,19 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
   const correct = matchedIndex >= 0;
   const exactSurface = correct && acceptedSurface[matchedIndex] === normalizeSurface(submittedAnswer);
   const nearMiss = !correct && normalizedAnswer.length >= 6 && accepted.some((candidate) => editDistance(candidate, normalizedAnswer) === 1);
+  // Une négation qu'aucune formulation prévue ne contient (ou l'inverse) annonce un contresens : pas de « on vous comprendrait ».
+  const sameNegation = accepted.some((candidate) => hasNegation(candidate) === hasNegation(normalizedAnswer));
+  if (!correct && exercise.understandable?.length && sameNegation && conceptsCovered(normalizedAnswer, exercise.understandable)) {
+    return {
+      correct: true,
+      verdict: "minor",
+      normalizedAnswer,
+      expectedAnswer: exercise.answer,
+      explanation: exercise.explanation,
+      feedback: `On vous comprendrait ! Pour sonner plus naturel : « ${exercise.answer} ».`,
+      issues: [{ kind: "understood", message: "Votre phrase passe le message : c'est l'essentiel. Comparez avec la forme la plus naturelle pour la prochaine fois." }]
+    };
+  }
   const verdict = correct ? (exactSurface ? "exact" : "minor") : "incorrect";
   const issues = verdict === "exact"
     ? []

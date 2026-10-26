@@ -154,7 +154,7 @@ export function PracticeView({ language, onProgress, target }: { language: Langu
               {evaluation.verdict !== "exact" && exercise.type !== "match-pairs" ? <div><span>Réponse modèle</span><strong>{evaluation.expectedAnswer}</strong></div> : null}
               {evaluation.verdict !== "exact" && exercise.type === "match-pairs" ? <div><span>À corriger</span><MatchPairsFeedback submitted={answer} expected={evaluation.expectedAnswer} /></div> : null}
               <div><span>Pourquoi ?</span><strong>{evaluation.explanation}</strong></div>
-              {evaluation.issues.map((issue) => <div key={`${issue.kind}-${issue.message}`}><span>{issue.kind === "accent" ? "Point d'attention" : "Piste de correction"}</span><strong>{issue.message}</strong></div>)}
+              {evaluation.issues.map((issue) => <div key={`${issue.kind}-${issue.message}`}><span>{issue.kind === "accent" ? "Point d'attention" : issue.kind === "understood" ? "Message passé" : "Piste de correction"}</span><strong>{issue.message}</strong></div>)}
             </div>
             {exercise.type !== "match-pairs" && getSpeechCapabilities().synthesis ? (
               <button className="text-button listen-model" onClick={() => speakText(evaluation.expectedAnswer, language, 0.85)}>▶ Écouter la phrase</button>

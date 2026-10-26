@@ -2,6 +2,7 @@ import { DIAGNOSTIC_QUESTIONS, EXERCISES } from "../../shared/src/curriculum.js"
 import { drillCandidates, drillSets, findDrillExercise, type VocabDirection, type VocabMode } from "../../shared/src/content/vocab-drills.js";
 import { slug } from "../../shared/src/content/generators.js";
 import { rulesFor } from "../../shared/src/grammar-rules.js";
+import { findPhraseExercise, phraseCandidates, phraseSituations, PHRASES, type PhraseDirection } from "../../shared/src/content/phrase-drills.js";
 import { CONVERSATION_SCENARIOS } from "../../shared/src/scenarios.js";
 import { LANGUAGE_CODES, LANGUAGES, isLanguageCode } from "../../shared/src/catalog.js";
 import { estimateLevel, isDue, scheduleReview } from "../../shared/src/learning.js";
@@ -170,6 +171,55 @@ export function createEngine(store: StateStore): Engine {
     return ok(rulesFor(params.language));
   });
 
+  route("GET", "/api/phrases/:language", async ({ params }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const state = await store.read();
+    const history = state.exerciseHistory ?? {};
+    return ok({
+      language,
+      situations: phraseSituations(language).map((situation) => {
+        const items = PHRASES[language].filter((item) => item.situation === situation.id);
+        return {
+          id: situation.id, title: situation.title, topic: situation.topic, level: situation.level, count: items.length,
+          seen: items.filter((item) => history[`ph~tf~${item.id}`] || history[`ph~ff~${item.id}`]).length
+        };
+      })
+    });
+  });
+
+  route("GET", "/api/phrases/:language/drill", async ({ params, query }) => {
+    const language = params.language;
+    if (!isLanguageCode(language)) return unknownLanguage();
+    const direction = (query.get("direction") ?? "mixed") as PhraseDirection;
+    if (!["to-target", "to-french", "mixed"].includes(direction)) return fail(400, "Sens invalide.");
+    const situationId = query.get("set") ?? undefined;
+    if (situationId && !phraseSituations(language).some((situation) => situation.id === situationId)) return fail(404, "Situation introuvable.");
+    const count = Math.min(20, Math.max(5, Number(query.get("count")) || 10));
+    const excluded = new Set((query.get("exclude") ?? "").split(",").filter(Boolean));
+    const state = await store.read();
+    const day = new Date().toISOString().slice(0, 10);
+    const daily = (id: string) => Array.from(`${day}${id}`).reduce((sum, character) => (sum * 31 + (character.codePointAt(0) ?? 0)) >>> 0, 7);
+    const rank = (id: string) => {
+      const seen = state.exerciseHistory?.[id];
+      return !seen ? 1 : seen.lastCorrect ? 2 : 0;
+    };
+    let all = phraseCandidates(language, direction, situationId);
+    // « Pour maintenant » : phrases du niveau actuel et du niveau juste au-dessus.
+    if (query.get("forLevel") === "1") {
+      const reference = cefrRank[currentLevel(state, language) ?? "A1"];
+      const near = all.filter((exercise) => Math.abs(cefrRank[exercise.level] - reference) <= 1);
+      if (near.length >= count) all = near;
+    }
+    const fresh = all.filter((exercise) => !excluded.has(exercise.id));
+    const pool = fresh.length >= Math.min(count, all.length) ? fresh : all;
+    const random = query.get("order") === "random";
+    const ordered = random
+      ? [...pool].map((exercise) => ({ exercise, key: Math.random() })).sort((a, b) => a.key - b.key).map((entry) => entry.exercise)
+      : [...pool].sort((a, b) => rank(a.id) - rank(b.id) || daily(a.id) - daily(b.id));
+    return ok(ordered.slice(0, count).map(({ answer: _answer, acceptedAnswers: _accepted, understandable: _understandable, ...publicExercise }) => publicExercise));
+  });
+
   route("GET", "/api/vocabulary/:language", async ({ params }) => {
     const language = params.language;
     if (!isLanguageCode(language)) return unknownLanguage();
@@ -219,7 +269,7 @@ export function createEngine(store: StateStore): Engine {
   });
 
   route("POST", "/api/practice/:exerciseId/answer", async ({ params, body }) => {
-    const exercise = EXERCISES.find((candidate) => candidate.id === params.exerciseId) ?? findDrillExercise(params.exerciseId);
+    const exercise = EXERCISES.find((candidate) => candidate.id === params.exerciseId) ?? findDrillExercise(params.exerciseId) ?? findPhraseExercise(params.exerciseId);
     if (!exercise) return fail(404, "Exercice introuvable.");
     const answer = body?.answer;
     const attemptId = body?.attemptId;

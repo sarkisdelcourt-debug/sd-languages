@@ -246,3 +246,57 @@ describe("retour ciblé des exercices « associer »", () => {
     expect(matchPairsMistakes("", expected)).toHaveLength(3);
   });
 });
+
+describe("« se faire comprendre » : concepts clés (26/10/2026)", () => {
+  const exercise = {
+    id: "t", language: "en", level: "A1", type: "translation", prompt: "Dites en anglais : « Je voudrais un café, s'il vous plaît. »",
+    answer: "I would like a coffee, please.", acceptedAnswers: ["Can I have a coffee, please?"],
+    understandable: [["coffee"], ["would", "can", "could", "want", "have", "like"]], explanation: "…", hint: "…", focus: "Café"
+  } as const;
+  it("compte exacte une formulation prévue, et juste (« minor ») une phrase imparfaite qui porte le message", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    expect(evaluateAnswer(exercise, "I would like a coffee please").verdict).toBe("exact");
+    const understood = evaluateAnswer(exercise, "I want coffee please");
+    expect(understood.correct).toBe(true);
+    expect(understood.verdict).toBe("minor");
+    expect(understood.issues[0]?.kind).toBe("understood");
+    expect(understood.feedback).toContain("On vous comprendrait");
+  });
+  it("refuse une phrase qui ne fait pas passer tous les concepts", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    expect(evaluateAnswer(exercise, "I want tea please").correct).toBe(false);
+    expect(evaluateAnswer(exercise, "coffee").correct).toBe(false);
+  });
+  it("tolère une faute de frappe sur un mot de cinq lettres ou plus, et les débuts de mot (*)", async () => {
+    const { conceptsCovered, normalizeAnswer } = await import("../src/learning");
+    expect(conceptsCovered(normalizeAnswer("I would like a cofee"), [["coffee"]])).toBe(true);
+    expect(conceptsCovered(normalizeAnswer("Quisiera dos cafés"), [["caf*"]])).toBe(true);
+    expect(conceptsCovered(normalizeAnswer("tea"), [["coffee"]])).toBe(false);
+  });
+});
+
+describe("concepts clés et apostrophes françaises", () => {
+  it("reconnaît « addition » dans « l'addition » et « hui » dans « aujourd'hui »", async () => {
+    const { conceptsCovered, normalizeAnswer } = await import("../src/learning");
+    expect(conceptsCovered(normalizeAnswer("L'addition, s'il vous plaît"), [["addition"]])).toBe(true);
+    expect(conceptsCovered(normalizeAnswer("Il fait beau aujourd'hui"), [["aujourd'hui"]])).toBe(true);
+  });
+});
+
+describe("« se faire comprendre » : garde-fous (négation, ß)", () => {
+  const exercise = {
+    id: "t2", language: "de", level: "A1", type: "translation", prompt: "Dites en allemand : « La climatisation ne marche pas. »",
+    answer: "Die Klimaanlage funktioniert nicht.", acceptedAnswers: ["Die Klimaanlage geht nicht."],
+    understandable: [["klimaanlage"], ["funktioniert", "geht", "arbeitet"]], explanation: "…", hint: "…", focus: "Hôtel"
+  } as const;
+  it("n'accepte pas comme « compris » le contraire d'une phrase négative", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    expect(evaluateAnswer(exercise, "Die Klimaanlage funktioniert.").correct).toBe(false);
+    expect(evaluateAnswer(exercise, "Klimaanlage funktioniert nicht").correct).toBe(true);
+  });
+  it("traite ß comme ss pour qui n'a pas la touche", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const heisse = { ...exercise, answer: "Ich heiße Marc.", acceptedAnswers: undefined, understandable: undefined } as const;
+    expect(evaluateAnswer(heisse, "Ich heisse Marc").correct).toBe(true);
+  });
+});

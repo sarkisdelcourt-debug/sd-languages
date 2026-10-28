@@ -20,11 +20,14 @@ function searchableText(item: Exercise): string {
   ].join(" ").toLocaleLowerCase("en");
 }
 
-describe("leçons guidées anglaises, révision 3 (22/10/2026)", () => {
+/** Leçons corrigées par la révision 4 (28/10/2026) ; les sept autres restent à la révision 3. */
+const REVISION_4 = new Set(["lesson-en-explain-availability", "lesson-en-daily-basics", "lesson-en-ask-and-clarify", "lesson-en-count-and-describe", "lesson-en-compare-options"]);
+
+describe("leçons guidées anglaises, révisions 3 (22/10/2026) et 4 (28/10/2026)", () => {
   it("donne à chacune des 12 leçons six exercices anglais distincts, sur au moins quatre formats", () => {
     expect(english).toHaveLength(12);
     for (const lesson of english) {
-      expect(lesson.revision, lesson.id).toBe(3);
+      expect(lesson.revision, lesson.id).toBe(REVISION_4.has(lesson.id) ? 4 : 3);
       expect(lesson.exerciseIds, lesson.id).toHaveLength(6);
       expect(new Set(lesson.exerciseIds).size, lesson.id).toBe(6);
       expect(lesson.exerciseIds.every((id) => exercise(id).language === "en"), lesson.id).toBe(true);
@@ -86,5 +89,20 @@ describe("leçons guidées anglaises, révision 3 (22/10/2026)", () => {
     expect(current.scenarioId).toBe("en-work-project-update");
     // Chaque révision retirée reste jouable : tous ses exercices existent encore.
     for (const lesson of RETIRED_LESSON_REVISIONS) for (const id of lesson.exerciseIds) expect(exercise(id).id, `${lesson.id} r${lesson.revision}`).toBe(id);
+  });
+
+  it("donne à « Expliquer une indisponibilité » un exercice de durée (révision 4) et garde la révision 3 jouable", () => {
+    const current = english.find((lesson) => lesson.id === "lesson-en-explain-availability")!;
+    expect(current.revision).toBe(4);
+    expect(current.exerciseIds).toContain("en-hw-g-010");
+    expect(exercise("en-hw-g-010").prompt).toContain("How long");
+    expect(current.exerciseIds).not.toContain("en-med-v-hospital-pairs-2");
+    const retired = RETIRED_LESSON_REVISIONS.filter((lesson) => lesson.id === current.id);
+    expect(retired.map((lesson) => lesson.revision)).toEqual([1, 2, 3]);
+    expect(retired[2]!.exerciseIds).toEqual(["en-b1-translation-doctor-appointment", "en-day-s-041-listen", "en-day-s-029-build", "en-hw-g-020", "en-hw-g-018", "en-med-v-hospital-pairs-2"]);
+    // Un seul exercice change, et l'exercice ajouté n'est dans aucune autre leçon.
+    expect(current.exerciseIds.filter((id) => !retired[2]!.exerciseIds.includes(id))).toEqual(["en-hw-g-010"]);
+    expect(GUIDED_LESSONS.filter((lesson) => lesson.exerciseIds.includes("en-hw-g-010"))).toHaveLength(1);
+    expect(current.relevance?.keywords).toContain("how long");
   });
 });

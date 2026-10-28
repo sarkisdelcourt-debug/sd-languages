@@ -110,5 +110,41 @@ const REVISION_3: EnglishLessonRevision[] = [
   }
 ];
 
+/**
+ * Révision 4 (28/10/2026) : audit indépendant. Cinq leçons changent un ou deux exercices, la
+ * révision 3 restant jouable à l'identique (RETIRED_LESSON_REVISIONS) :
+ * - « Expliquer une indisponibilité » gagne un exercice de durée (« How long have you been waiting? »)
+ *   à la place du vocabulaire hospitalier, hors sujet ;
+ * - les leçons de café, de questions, de famille et de comparaison proposaient la construction ET la
+ *   dictée de la même phrase : la construction est remplacée par un exercice d'un autre format.
+ */
+const REVISION_4: EnglishLessonRevision[] = [
+{
+    id: "lesson-en-explain-availability", revision: 4, estimatedMinutes: 15,
+    exerciseIds: ["en-b1-translation-doctor-appointment", "en-day-s-041-listen", "en-day-s-029-build", "en-hw-g-020", "en-hw-g-018", "en-hw-g-010"],
+    relevance: { keywords: ["appointment", "free", "arrive", "on friday", "booked", "running late", "busy", "available", "how long", "since"] }
+  },
+  {
+    id: "lesson-en-daily-basics", revision: 4, estimatedMinutes: 10,
+    exerciseIds: ["en-hw-a1-cafe-pairs", "en-hw-a1-cafe-gap-like", "en-hw-a1-cafe-listen", "en-hw-a1-cafe-mcq-here", "en-hw-a1-cafe-gap-have", "en-hw-a1-cafe-translation"],
+    relevance: { keywords: ["coffee", "tea", "sandwich", "would like", "for here", "take away", "something to eat"] }
+  },
+  {
+    id: "lesson-en-ask-and-clarify", revision: 4, estimatedMinutes: 10,
+    exerciseIds: ["en-a1-mcq-airport-gate", "en-hw-a1-ask-mcq-where", "en-hw-a1-ask-listen", "en-hw-a1-ask-gap-am", "en-hw-a1-ask-translation", "en-hw-a1-ask-pairs"],
+    relevance: { keywords: ["where", "from", "my name", "gate", "when", "who", "how much"] }
+  },
+  {
+    id: "lesson-en-count-and-describe", revision: 4, estimatedMinutes: 10,
+    exerciseIds: ["en-a1-mcq-have", "en-a1-gap-plural", "en-hw-a1-family-pairs", "en-hw-a1-family-gap-has", "en-hw-a1-family-listen", "en-hw-a1-family-translation"],
+    relevance: { keywords: ["has", "child", "children", "brother", "sister", "parents", "two", "three"] }
+  },
+  {
+    id: "lesson-en-compare-options", revision: 4, estimatedMinutes: 12,
+    exerciseIds: ["en-a2-mcq-comparative", "en-a2-gap-grocery-any", "en-hw-a2-compare-mcq-than", "en-hw-a2-compare-listen", "en-hw-a2-compare-pairs", "en-hw-a2-compare-translation"],
+    relevance: { keywords: ["than", "cheaper", "better", "bigger", "more", "any", "some"] }
+  }
+];
+
 /** Toutes les révisions publiées après la première, de la plus ancienne à la plus récente. */
-export const ENGLISH_LESSON_REVISIONS: EnglishLessonRevision[] = [...REVISION_2, ...REVISION_3];
+export const ENGLISH_LESSON_REVISIONS: EnglishLessonRevision[] = [...REVISION_2, ...REVISION_3, ...REVISION_4];

@@ -214,5 +214,37 @@ export const BEGINNER_EXERCISES: HandwrittenExercise[] = [
     ],
     explanation: "Se lever se dit get up ; usually se place avant le verbe ; l'heure est introduite par at.",
     hint: "I usually get up at…", focus: "Adverbes de fréquence"
+  },
+
+  // --- Révision 4 (28/10/2026) : exercices de format différent pour remplacer les constructions redondantes ---
+  {
+    id: "en-hw-a1-cafe-gap-like", skillTags: ["polite-requests", "present-simple"], language: "en", level: "A1", topic: "everyday", type: "fill-gap",
+    prompt: "Complétez : I would ___ a tea, please. (aimer)",
+    answer: "like",
+    explanation: "I would like (ou I'd like) est la façon polie de commander ; après would, le verbe reste à la base verbale : like.",
+    hint: "Le verbe « aimer » à la base verbale.", focus: "Commander au café"
+  },
+  {
+    id: "en-hw-a1-ask-mcq-where", skillTags: ["questions"], language: "en", level: "A1", topic: "everyday", type: "multiple-choice",
+    prompt: "Complétez la question : ___ is the bus stop, please? (où)",
+    choices: ["Where", "When", "Who", "How much"],
+    answer: "Where",
+    explanation: "Where demande un lieu : Where is the bus stop? When = quand, who = qui, how much = combien.",
+    hint: "On cherche un lieu.", focus: "Poser une question simple"
+  },
+  {
+    id: "en-hw-a1-family-gap-has", skillTags: ["present-simple"], language: "en", level: "A1", topic: "everyday", type: "fill-gap",
+    prompt: "Complétez : My brother ___ three children. (avoir)",
+    answer: "has",
+    explanation: "Avec he, she ou un nom singulier comme my brother, have devient has.",
+    hint: "Un sujet singulier à la troisième personne.", focus: "Dire ce que quelqu'un possède"
+  },
+  {
+    id: "en-hw-a2-compare-mcq-than", skillTags: ["comparatives"], language: "en", level: "A2", topic: "everyday", type: "multiple-choice",
+    prompt: "Choisissez la phrase correcte : le train est plus rapide que le bus.",
+    choices: ["The train is faster than the bus.", "The train is more fast than the bus.", "The train is fast than the bus.", "The train is faster that the bus."],
+    answer: "The train is faster than the bus.",
+    explanation: "Un adjectif court prend -er : fast → faster ; la comparaison s'introduit par than, jamais that.",
+    hint: "Adjectif court + -er, puis than.", focus: "Comparer deux options"
   }
 ];

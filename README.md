@@ -56,8 +56,8 @@ Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils
 
 | Domaine | État MVP | Détail |
 |---|---|---|
-| Anglais | Opérationnel | 2 132 exercices (médical, conversation, voyage, grammaire A2–B2, phrasal verbs, verbes irréguliers, faux amis), 839 mots et verbes, 160 phrases du quotidien, 22 fiches de règles |
-| Allemand, espagnol | Opérationnels | 2 176 et 2 240 exercices de l'A1 au B2 (60 % de QCM), 815 et 836 mots et verbes, 160 et 180 phrases du quotidien, 28 et 31 fiches de règles (dont un parcours « Premiers pas » pour partir de zéro en espagnol) |
+| Anglais | Opérationnel | 2 132 exercices (médical, conversation, voyage, grammaire A2–B2, phrasal verbs, verbes irréguliers, faux amis), 839 mots et verbes, 260 phrases du quotidien, 22 fiches de règles |
+| Allemand, espagnol | Opérationnels | 2 176 et 2 240 exercices de l'A1 au B2 (60 % de QCM), 815 et 836 mots et verbes, 264 et 280 phrases du quotidien, 28 et 31 fiches de règles (dont un parcours « Premiers pas » pour partir de zéro en espagnol) |
 | Niveau | Opérationnel | Diagnostic pondéré A1–C1 indicatif, ou niveau déclaré par l'apprenant (les leçons inférieures passent « Acquis ») |
 | Exercices | Opérationnel | QCM, texte à trous, traduction, phrase à construire, paires à associer, dictée ; séries de 6 variées par format et par thème |
 | Correction didactique | Opérationnel, déterministe | Verdict exact, détail mineur (accent, apostrophe) ou erreur ; contractions, chiffres en lettres, variantes US/UK, « 3 pm » acceptés |

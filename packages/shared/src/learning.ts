@@ -41,7 +41,9 @@ function tolerateSpelling(value: string): string {
   return value
     .replace(/[’']/g, "'")
     // Heures : 3:00, 8h30 et 15h s'écrivent aussi « 3 00 », « 8 30 » et « 15 » (le « : » et le « h » ne sont pas des mots).
-    .replace(/(\d)\s*[:h](?=\d{2}|\s|$)/gi, "$1 ")
+    .replace(/(\d)\s*[:h.](?=\d{2}|[\s.,;:!?]|$)/gi, "$1 ")
+    // Les signes monétaires sont lus comme des mots (« 200 € » = « 200 euros ») avant le filtrage de la ponctuation.
+    .replace(/€/g, " euros ").replace(/£/g, " pounds ")
     .replace(/\b([ap])\.m\.?(?=\s|$)/g, "$1m")
     .replace(/[^\p{L}\p{N}'\s-]/gu, "")
     .replace(/-/g, " ")
@@ -185,7 +187,7 @@ export function conceptsCovered(normalizedAnswer: string, concepts: string[][]):
 }
 
 /** Négation (français, anglais, allemand, espagnol) : un contresens ne doit pas passer pour « compris ». */
-const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne|sin|ohne|sans|without)(?: |$)|n't(?: |$)|(?:^| )(?:isn|aren|wasn|weren|don|doesn|didn|can|couldn|won|wouldn|shouldn|hasn|haven|hadn|mustn|needn)t(?: |$)/;
+const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|cannot|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne|sin|ohne|sans|without)(?: |$)|n't(?: |$)|(?:^| )(?:isn|aren|wasn|weren|don|doesn|didn|can|couldn|won|wouldn|shouldn|hasn|haven|hadn|mustn|needn)t(?: |$)/;
 // L'apostrophe est conservée pour reconnaître « isn't » : la retirer d'abord rendait « n't » invisible.
 const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/\s+/g, " ").trim());
 

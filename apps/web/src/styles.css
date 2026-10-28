@@ -521,3 +521,27 @@ button[aria-pressed="true"]:not(.record-button):not(.recognition-button)::before
 .language-pill.active { font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
 :focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 2px; }
 .nav-item .nav-badge { margin-left: 4px; }
+
+/* Couleurs franches par langue (28/10/2026) : bandeau plein en haut, fond teinté, pastille et menu à la couleur de la langue.
+   Anglais = bleu, allemand = jaune ambré, espagnol = rouge. Le nom de la langue reste écrit partout (daltonisme). */
+.app-shell { --lang-a: #b9d0ff; --lang-b: #e1ebff; --lang-solid: #1d4ed8; --lang-ink: #ffffff; --lang-bar: #1d4ed8; --lang-side: #7aa7ff; }
+.app-shell[data-language="de"] { --lang-a: #ffd47e; --lang-b: #fff0c6; --lang-solid: #f5a30a; --lang-ink: #1b1200; --lang-bar: #f5a30a; --lang-side: #ffc23d; }
+.app-shell[data-language="es"] { --lang-a: #ffbdb2; --lang-b: #ffe2dc; --lang-solid: #d92d20; --lang-ink: #ffffff; --lang-bar: #d92d20; --lang-side: #ff7a6b; }
+.app-shell > main { border-top: 0; background: linear-gradient(170deg, var(--lang-a) 0%, var(--lang-b) 42%, var(--bg) 100%); }
+.app-shell > main > .topbar { background: var(--lang-solid); color: var(--lang-ink); border-bottom: 0; box-shadow: 0 3px 14px rgba(0, 0, 0, .18); }
+.app-shell > main > .topbar .eyebrow, .app-shell > main > .topbar h1 { color: var(--lang-ink); }
+.app-shell > main > .topbar .language-switcher { background: rgba(255, 255, 255, .28); border-color: rgba(255, 255, 255, .45); }
+.app-shell > main > .topbar .language-pill:not(.active) { color: var(--lang-ink); }
+.app-shell > main > .topbar .language-pill.active { background: #ffffff; color: #101827; }
+.app-shell .brand-mark { background: var(--lang-solid); color: var(--lang-ink); }
+.app-shell .nav-item.active { box-shadow: inset 4px 0 var(--lang-side); }
+@media (max-width: 760px) { .app-shell .nav-item.active { box-shadow: inset 0 4px var(--lang-side); } }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-shell { --lang-a: #12306e; --lang-b: #0f1b36; --lang-solid: #1e40af; --lang-ink: #ffffff; --lang-bar: #6f9cf0; --lang-side: #7aa7ff; }
+  :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-a: #5a3f06; --lang-b: #2a2008; --lang-solid: #b45309; --lang-ink: #ffffff; --lang-bar: #e3a834; --lang-side: #ffc23d; }
+  :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-a: #6a1a18; --lang-b: #2e1517; --lang-solid: #b91c1c; --lang-ink: #ffffff; --lang-bar: #f08470; --lang-side: #ff7a6b; }
+  :root:not([data-theme="light"]) .app-shell > main { background: linear-gradient(170deg, var(--lang-a) 0%, var(--lang-b) 42%, var(--bg) 100%); }
+}
+:root[data-theme="dark"] .app-shell { --lang-a: #12306e; --lang-b: #0f1b36; --lang-solid: #1e40af; --lang-ink: #ffffff; --lang-side: #7aa7ff; }
+:root[data-theme="dark"] .app-shell[data-language="de"] { --lang-a: #5a3f06; --lang-b: #2a2008; --lang-solid: #b45309; --lang-ink: #ffffff; --lang-side: #ffc23d; }
+:root[data-theme="dark"] .app-shell[data-language="es"] { --lang-a: #6a1a18; --lang-b: #2e1517; --lang-solid: #b91c1c; --lang-ink: #ffffff; --lang-side: #ff7a6b; }

@@ -258,13 +258,13 @@ function swappedClauseVariant(sentence: string, language: LanguageCode): string 
 export function sentenceExercises(items: SentenceItem[], language: LanguageCode = LANGUAGE): TopicExercise[] {
   // Les règles de distracteurs, contractions et compétences déduites sont propres à l'anglais.
   const english = language === "en";
-  const pool = items.flatMap((item) => sentenceTiles(item.en).slice(1).map((word) => word.toLowerCase()));
+  const pool = items.flatMap((item) => sentenceTiles(item.en).slice(1).map((word) => (language === "de" ? word : word.toLowerCase())));
   return items.flatMap((item): TopicExercise[] => {
     const words = sentenceTiles(item.en);
     const present = new Set(words.map((word) => word.toLowerCase()));
     // Distracteurs : d'abord grammaticaux (auxiliaire, préposition, article de la phrase), sinon deux mots de la banque.
     const grammatical = english ? grammarDistractors(words, item.id) : [];
-    const candidates = [...new Set(pool.filter((word) => !present.has(word) && word.length > 2 && !grammatical.includes(word)))];
+    const candidates = [...new Set(pool.filter((word) => !present.has(word.toLowerCase()) && word.length > 2 && !grammatical.includes(word.toLowerCase())))];
     const start = candidates.length ? hash(item.id) % candidates.length : 0;
     const fallback = candidates.length >= 2 ? [candidates[start]!, candidates[(start + 7) % candidates.length]!].filter((word, index, all) => all.indexOf(word) === index) : [];
     const distractors = [...grammatical, ...fallback].slice(0, 2);
@@ -297,8 +297,10 @@ export function phrasalVerbExercises(items: PhrasalVerbItem[]): TopicExercise[] 
     return {
       id: `${item.id}-gap`, language: LANGUAGE, level: item.level, topic: "phrasal-verbs", type: "fill-gap", skillTags: ["phrasal-verbs"],
       prompt: `Complétez (« ${item.fr} ») : ${item.example.replace(item.form, blanks)}`, answer: item.form,
+      // Rien dans la phrase n'impose le temps : la forme de base est aussi juste (audit du 26/10/2026).
+      ...(item.verb.toLowerCase() !== item.form.toLowerCase() ? { acceptedAnswers: [item.verb] } : {}),
       explanation: `« ${item.verb} » = ${item.fr}. Dans cette phrase : « ${item.form} ».`,
-      hint: `Verbe à particule en ${item.form.split(/\s+/).length} mots.`, focus: "Phrasal verbs"
+      hint: `Verbe à particule en ${item.form.split(/\s+/).length} mots : « ${item.verb} », à conjuguer.`, focus: "Phrasal verbs"
     };
   });
   const pairs = chunkForPairs(items).map((group, index): TopicExercise => {
@@ -324,7 +326,10 @@ export function irregularVerbExercises(items: IrregularVerbItem[]): TopicExercis
     } as const;
     // Verbes invariants (put, read, cut…) : demander le prétérit n'apprend rien, on garde le participe.
     const invariant = past === item.base;
-    const example = item.example ? ` — ex. « ${item.example} »` : "";
+    // Un exemple au prétérit contenait la réponse (« He went home ») : on masque la forme demandée.
+    const escapedPast = past!.replace(/[.*+?^${}()|[\]\\]/g, (char) => `\\${char}`);
+    const masked = item.example ? item.example.replace(new RegExp(`\\b${escapedPast}\\b`, "gi"), "___") : "";
+    const example = masked ? ` — ex. « ${masked} »` : "";
     return [
       ...(invariant ? [] : [{
         ...base, id: `en-irr-${slug(item.base)}-past`, skillTags: ["irregular-past"], prompt: `Prétérit de « to ${item.base} » (${item.fr})${example}`,
@@ -359,7 +364,7 @@ export function articleExercises(sets: VocabSet[], language: LanguageCode): Topi
     const noun = match[2]!;
     return [{
       id: `${set.id}-art-${slug(noun)}`, language, level: set.level, topic: set.topic, type: "multiple-choice", skillTags: ["articles-gender"],
-      prompt: `Quel article pour « ${noun} » (${item.fr}) ?`, choices: rule.choices, answer: article,
+      prompt: `Quel article pour « ${noun} » (${item.fr.replace(/^(?:le|la|les|un|une)\s+/i, "").replace(/^l'/i, "")}) ?`, choices: rule.choices, answer: article,
       explanation: `${article} ${noun} — ${item.fr}. Apprenez toujours le nom avec son article.`,
       hint: language === "de" ? "Pensez au suffixe : -ung, -heit, -keit sont féminins ; -chen est neutre." : "Les noms en -o sont souvent masculins, ceux en -a, -ción, -dad féminins.",
       focus: "Genre des noms"

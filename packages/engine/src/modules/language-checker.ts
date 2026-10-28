@@ -194,8 +194,20 @@ const ENGLISH_RULES: Rule[] = [
     explanation: "Better, easier, cheaper… sont déjà des comparatifs : pas de « more » devant."
   },
   {
+    id: "responsible-of",
+    pattern: /\bresponsible of\b/gi,
+    replace: (match) => match.replace(/of$/i, "for"),
+    explanation: "« Responsable de » se dit responsible for : « I am responsible for the unit »."
+  },
+  {
+    id: "borrow-me",
+    pattern: /\bborrow\s+(me|him|her|us|them)\b/gi,
+    replace: (_match, pronoun) => `lend ${pronoun}`,
+    explanation: "Borrow = emprunter (« borrow a pen from you »), lend = prêter : « Can you lend me a pen? »."
+  },
+  {
     id: "age-have",
-    pattern: /\b(I|you|we|they|he|she)\s+(have|has)\s+(\d+)\s+years\b(?!\s+old)/gi,
+    pattern: /\b(I|you|we|they|he|she)\s+(have|has)\s+(\d+)\s+years(?:\s+old)?\b/gi,
     replace: (_match, subject, _verb, age) => `${subject} ${({ i: "am", he: "is", she: "is" } as Record<string, string>)[subject!.toLowerCase()] ?? "are"} ${age} years old`,
     explanation: "L'âge se dit avec be : « I am 45 (years old) »."
   },

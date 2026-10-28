@@ -147,7 +147,7 @@ describe("générateurs plus didactiques (21/10/2026)", () => {
       { base: "go", past: "went", participle: "gone", fr: "aller", level: "A1", example: "She went home after the scan." }
     ]);
     expect(drills.map((drill) => drill.id)).toEqual(["en-irr-put-pp", "en-irr-go-past", "en-irr-go-pp"]);
-    expect(drills.find((drill) => drill.id === "en-irr-go-past")!.prompt).toContain("She went home after the scan.");
+    expect(drills.find((drill) => drill.id === "en-irr-go-past")!.prompt).toContain("She ___ home after the scan.");
   });
 });
 

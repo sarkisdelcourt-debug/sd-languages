@@ -60,7 +60,7 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       language: "en",
       level: "B2",
       type: "fill-gap",
-      prompt: "Complétez : If I had known about the delay, I ___ earlier.",
+      prompt: "Complétez (verbe leave) : If I had known about the delay, I ___ earlier.",
       answer: "would have left",
       explanation: "Le troisième conditionnel suit le modèle if + past perfect, puis would have + participe passé.",
       hint: "Utilisez would have suivi du participe passé de leave.",
@@ -90,7 +90,12 @@ const DIAGNOSTIC_BY_LANGUAGE: Record<LanguageCode, DiagnosticQuestion[]> = {
       acceptedAnswers: [
         "Whatever happens, we'll stand by our decision.",
         "No matter what happens, we will stand by our decision.",
-        "No matter what happens, we'll stand by our decision."
+        "No matter what happens, we'll stand by our decision.",
+        "Whatever happens, we will uphold our decision.",
+        "Whatever happens, we will stick to our decision.",
+        "Whatever happens, we will maintain our decision.",
+        "No matter what happens, we will uphold our decision.",
+        "No matter what happens, we will stick to our decision."
       ],
       explanation: "« Whatever happens » introduit une concession et « stand by a decision » signifie maintenir une décision.",
       hint: "Commencez par Whatever happens ou No matter what happens.",

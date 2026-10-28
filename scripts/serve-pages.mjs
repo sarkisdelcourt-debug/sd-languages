@@ -8,10 +8,12 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../apps/web/dist");
 const port = process.env.PORT ?? "8796";
 const prefix = "/sd-languages/";
-const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json" };
+const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json", ".mp3": "audio/mpeg", ".json": "application/json" };
 
 createServer(async (request, response) => {
   const url = new URL(request.url, "http://local");
+  // Comme GitHub Pages : /sd-languages → /sd-languages/
+  if (url.pathname === prefix.slice(0, -1)) return response.writeHead(301, { Location: prefix }).end();
   if (!url.pathname.startsWith(prefix)) return response.writeHead(404).end("404");
   let relative = decodeURIComponent(url.pathname.slice(prefix.length)) || "index.html";
   const file = path.join(root, relative);

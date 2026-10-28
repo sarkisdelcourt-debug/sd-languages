@@ -99,3 +99,11 @@ describe("phrases modèles correctes (audit du 26/10/2026, I7)", () => {
     expect(checkTextAudit("en", "The patient has a fever since two days").corrected).toBe("The patient has had a fever for two days");
   });
 });
+
+describe("règles ajoutées après l'audit du 26/10/2026", () => {
+  it("corrige « I have 42 years old », « responsible of » et « borrow me »", () => {
+    expect(checkText("en", "I have 42 years old.").corrected).toContain("I am 42 years old");
+    expect(checkText("en", "I am responsible of the unit.").corrected).toContain("responsible for");
+    expect(checkText("en", "Can you borrow me a pen?").corrected).toContain("lend me");
+  });
+});

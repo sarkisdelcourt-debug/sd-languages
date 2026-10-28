@@ -130,7 +130,7 @@ export function drillExercise(language: LanguageCode, set: VocabSet, item: Vocab
     ...base, type: "translation",
     ...(variants.length ? { acceptedAnswers: variants } : {}),
     prompt: toTarget ? `Traduisez en ${LANGUAGE_NAMES[language]} : « ${question} »` : `Traduisez en français : « ${question} »`,
-    hint: `Commence par « ${first} » (l'article est facultatif).`
+    hint: `Commencez par « ${first} » (l'article est facultatif).`
   };
 }
 

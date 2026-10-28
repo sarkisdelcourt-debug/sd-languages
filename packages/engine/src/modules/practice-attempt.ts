@@ -28,6 +28,11 @@ export function applyPracticeAttempt(
   recordPractice(state, exercise.language, credited);
   // Registre compact par exercice : permet de proposer du neuf au lieu de tourner en rond.
   const history = (state.exerciseHistory ??= {});
+  // Le registre ne grossit pas sans fin : au-delà de 8 000 exercices vus, on retire les 1 000 plus anciens (audit du 26/10/2026).
+  const known = Object.keys(history);
+  if (known.length > 8_000) {
+    known.sort((left, right) => (history[left]?.lastSeenAt ?? "").localeCompare(history[right]?.lastSeenAt ?? "")).slice(0, 1_000).forEach((id) => delete history[id]);
+  }
   const seen = history[exercise.id];
   history[exercise.id] = {
     seen: (seen?.seen ?? 0) + 1,

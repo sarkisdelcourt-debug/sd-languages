@@ -79,6 +79,8 @@ export async function exportProgress(): Promise<ExportOutcome> {
   const name = `sd-languages-${device.toLowerCase()}-${fileDate(now)}.json`;
   const text = `${JSON.stringify(backup, null, 1)}\n`;
   const file = new File([text], name, { type: "application/json" });
+  // La reprise refuse un fichier de plus de 5 Mo : mieux vaut le dire à l'envoi qu'au moment de la reprise (audit du 26/10/2026).
+  if (text.length > 4_000_000) window.dispatchEvent(new CustomEvent("sd-languages-ai-notice", { detail: "Le fichier d'envoi approche la taille maximale acceptée à la reprise (5 Mo). Envoyez-le sans tarder, et envisagez d'effacer l'historique d'exercices très ancien." }));
 
   let outcome: ExportOutcome;
   if (navigator.canShare?.({ files: [file] })) {

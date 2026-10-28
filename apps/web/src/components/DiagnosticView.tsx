@@ -56,6 +56,7 @@ export function DiagnosticView({ language, onComplete }: { language: LanguageCod
       <article className="exercise-card">
         <div className="exercise-meta"><span>{question.level}</span><span>{question.focus}</span></div>
         <h2>{question.prompt}</h2>
+        <details className="hint hint-reveal"><summary>Besoin d'un indice ?</summary><p>{question.hint}</p></details>
         {question.choices ? (
           <div className="choice-list">
             {question.choices.map((choice) => (

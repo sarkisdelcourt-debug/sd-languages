@@ -1,0 +1,79 @@
+/* ===== Leçons et exercices : nouveau décor (29/10/2026) =====
+   Police de texte Atkinson Hyperlegible (conçue pour distinguer les lettres : utile pour lire des mots étrangers),
+   police de titres Bricolage Grotesque, toutes deux embarquées (elles marchent aussi hors ligne et sur iPhone).
+   Les accents de la leçon suivent la couleur de la langue (bleu, ambre, rouge). */
+:root { font-family: "Atkinson Hyperlegible", Aptos, "Segoe UI", system-ui, sans-serif; }
+h1, h2, h3, .target-phrase, .stage-number, .verdict-mark { font-family: "Bricolage Grotesque Variable", "Atkinson Hyperlegible", system-ui, sans-serif; }
+h1, h2, h3 { font-weight: 750; letter-spacing: -.02em; }
+
+.app-shell { --lang-deep: #1e3a8a; --lang-hero: #132a63; --lang-tint: #e6eeff; --lang-text: #1e3a8a; }
+.app-shell[data-language="de"] { --lang-deep: #7a4f00; --lang-hero: #4a3200; --lang-tint: #fff1cf; --lang-text: #7a4f00; }
+.app-shell[data-language="es"] { --lang-deep: #a3211a; --lang-hero: #5e1510; --lang-tint: #ffe6e1; --lang-text: #a3211a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-shell { --lang-tint: #14275a; --lang-text: #a9c4ff; }
+  :root:not([data-theme="light"]) .app-shell[data-language="de"] { --lang-tint: #3a2a06; --lang-text: #ffd27a; }
+  :root:not([data-theme="light"]) .app-shell[data-language="es"] { --lang-tint: #4a1a17; --lang-text: #ffb4a8; }
+}
+:root[data-theme="dark"] .app-shell { --lang-tint: #14275a; --lang-text: #a9c4ff; }
+:root[data-theme="dark"] .app-shell[data-language="de"] { --lang-tint: #3a2a06; --lang-text: #ffd27a; }
+:root[data-theme="dark"] .app-shell[data-language="es"] { --lang-tint: #4a1a17; --lang-text: #ffb4a8; }
+
+/* Carte d'étape : bandeau de couleur, grand numéro discret, entrée douce quand l'étape change. */
+.guided-lesson .lesson-stage { border-radius: 20px; border-top: 6px solid var(--lang-solid); box-shadow: 0 1px 2px rgba(20, 30, 50, .08), 0 14px 34px rgba(20, 30, 50, .1); animation: stage-in .3s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes stage-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .guided-lesson .lesson-stage { animation: none; } }
+.guided-lesson .stage-number { color: var(--lang-tint); font-size: 76px; font-weight: 800; top: 10px; right: 22px; line-height: 1; }
+@media (max-width: 760px) { .guided-lesson .stage-number { display: none; } }
+.guided-lesson .course-copy, .guided-lesson .practice-stage > * { position: relative; z-index: 1; }
+.guided-lesson .lesson-kicker { color: var(--lang-text); }
+.guided-lesson .course-copy h2, .guided-lesson .practice-stage h2 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; }
+.guided-lesson .course-intro { font-size: 18px; color: var(--ink); opacity: .82; }
+
+/* Les repères deviennent des pastilles numérotées. */
+.guided-lesson .course-copy ul { counter-reset: repere; gap: 14px; }
+.guided-lesson .course-copy li { padding: 2px 0 2px 44px; min-height: 32px; counter-increment: repere; }
+.guided-lesson .course-copy li::before { content: counter(repere); width: 30px; height: 30px; left: 0; top: 0; border-radius: 50%; background: var(--lang-solid); color: var(--lang-ink); display: grid; place-items: center; font-size: 14px; font-weight: 700; transform: none; }
+
+/* Exemples : une bulle par phrase, la phrase étudiée en grand, le français dessous. */
+.guided-lesson .example-board { padding: 0; border: 0; grid-template-columns: 1fr; gap: 12px; }
+.guided-lesson .example-board > div { padding: 14px 18px; border: 0; border-left: 5px solid var(--lang-solid); border-radius: 4px 16px 16px 4px; background: var(--lang-tint); gap: 4px; }
+.guided-lesson .example-board > div + div { border-left: 5px solid var(--lang-solid); }
+.guided-lesson .example-board strong { color: var(--ink); font-family: "Bricolage Grotesque Variable", sans-serif; font-size: 19px; font-weight: 700; line-height: 1.25; }
+.guided-lesson .example-board span { color: var(--muted); font-size: 14px; }
+
+/* Étapes : pastilles pleines et trait qui se remplit. */
+.guided-lesson .lesson-stepper li span { width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--line); background: var(--paper); color: var(--muted); }
+.guided-lesson .lesson-stepper li.active span { border-color: var(--lang-solid); background: var(--lang-solid); color: var(--lang-ink); box-shadow: 0 0 0 4px var(--lang-tint); }
+.guided-lesson .lesson-stepper li.done span { border-color: var(--lang-solid); background: var(--lang-tint); color: var(--lang-text); }
+.guided-lesson .lesson-stepper li.active small { color: var(--ink); font-weight: 700; }
+.guided-lesson .lesson-stepper li::after { height: 3px; left: 34px; right: -4px; top: 13px; border-radius: 2px; z-index: 0; }
+.guided-lesson .lesson-stepper li:last-child::after { display: none; }
+.guided-lesson .lesson-stepper li span { position: relative; z-index: 1; }
+.guided-lesson .lesson-stepper li.done::after { background: var(--lang-solid); }
+
+/* Boutons de leçon à la couleur de la langue. */
+.guided-lesson .primary-button { min-height: 50px; padding: 0 24px; border-radius: 14px; background: var(--lang-solid); color: var(--lang-ink); font-size: 16px; box-shadow: 0 6px 16px rgba(20, 30, 50, .2); transition: transform .12s ease, box-shadow .12s ease; }
+.guided-lesson .primary-button:hover:not(:disabled) { background: var(--lang-solid); filter: brightness(1.06); box-shadow: 0 9px 20px rgba(20, 30, 50, .26); }
+.guided-lesson .primary-button:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+.guided-lesson .primary-button:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
+.guided-lesson .secondary-button { min-height: 50px; border-radius: 14px; border: 2px solid var(--lang-solid); background: transparent; color: var(--lang-text); }
+
+/* Réponses à choix : grandes tuiles avec une lettre, bien tactiles. */
+.choice-list { counter-reset: reponse; gap: 12px; }
+.choice { min-height: 62px; padding: 12px 16px; border: 2px solid var(--line); border-radius: 16px; font-size: 18px; counter-increment: reponse; transition: border-color .14s ease, background-color .14s ease, transform .12s ease; }
+.choice .radio { display: none; }
+.choice::before { content: counter(reponse, upper-alpha); flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--surface-2); color: var(--muted-strong); display: grid; place-items: center; font-size: 15px; font-weight: 700; transition: background-color .14s ease, color .14s ease; }
+.choice:hover:not(:disabled) { border-color: var(--lang-solid); }
+.choice:active:not(:disabled) { transform: scale(.99); }
+.choice.selected { border-color: var(--lang-solid); background: var(--lang-tint); font-weight: 700; }
+.choice.selected::before { background: var(--lang-solid); color: var(--lang-ink); }
+.answer-field input { border: 2px solid var(--line); border-radius: 14px; font-size: 18px; }
+.answer-field input:focus { border-color: var(--lang-solid); outline: 3px solid var(--lang-tint); }
+.word-tile { border-radius: 12px; font-size: 17px; }
+
+/* Page d'accueil de la leçon : le fond prend la teinte de la langue. */
+.app-shell .lesson-welcome { background: var(--lang-hero); border-radius: 22px; }
+.app-shell .lesson-welcome .lesson-kicker { color: var(--lang-side); }
+.app-shell .lesson-welcome h2 { font-weight: 800; }
+.app-shell .lesson-welcome .primary-button { background: var(--lang-side); color: #101827; }
+.app-shell .lesson-route { background: rgba(0, 0, 0, .22); }

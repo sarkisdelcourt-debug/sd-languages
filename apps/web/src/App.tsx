@@ -102,7 +102,9 @@ export function App() {
   }, [refreshDashboard]);
 
   useEffect(() => {
-    document.querySelector<HTMLElement>("#view-title")?.focus();
+    // Un nouvel écran s'ouvre toujours en haut de page : sans cela, la position de défilement de l'écran précédent était conservée.
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.querySelector<HTMLElement>("#view-title")?.focus({ preventScroll: true });
     setMoreOpen(false);
     if (view !== "practice") setPracticeTarget(undefined);
   }, [view]);

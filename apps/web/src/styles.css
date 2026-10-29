@@ -545,3 +545,6 @@ button[aria-pressed="true"]:not(.record-button):not(.recognition-button)::before
 :root[data-theme="dark"] .app-shell { --lang-a: #12306e; --lang-b: #0f1b36; --lang-solid: #1e40af; --lang-ink: #ffffff; --lang-side: #7aa7ff; }
 :root[data-theme="dark"] .app-shell[data-language="de"] { --lang-a: #5a3f06; --lang-b: #2a2008; --lang-solid: #b45309; --lang-ink: #ffffff; --lang-side: #ffc23d; }
 :root[data-theme="dark"] .app-shell[data-language="es"] { --lang-a: #6a1a18; --lang-b: #2e1517; --lang-solid: #b91c1c; --lang-ink: #ffffff; --lang-side: #ff7a6b; }
+
+/* Tableaux de règles : un élément de grille ne rétrécit pas sous son contenu sans min-width: 0, d'où un tableau plus large que l'écran (29/10/2026). */
+.rule-body > *, .rule-section, .rule-table-wrap { min-width: 0; max-width: 100%; }

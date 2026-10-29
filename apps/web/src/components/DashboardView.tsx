@@ -15,17 +15,28 @@ interface Props {
 
 export function DashboardView({ dashboard, language, onNavigate }: Props) {
   const progress = dashboard.progress[language];
-  const [mistakes, setMistakes] = useState<MistakeRecord[]>([]);
-  const [plan, setPlan] = useState<DailyPlan>();
-  const [settings, setSettings] = useState<LanguageSettings>();
-  const [unavailable, setUnavailable] = useState(false);
+  // Les trois lectures arrivent ensemble : avant, le bandeau, le plan et les erreurs apparaissaient l'un après l'autre à chaque
+  // changement de langue et la page sautait. Pendant le chargement on garde l'écran précédent, légèrement estompé.
+  const [loaded, setLoaded] = useState<{ language: LanguageCode; mistakes: MistakeRecord[]; plan?: DailyPlan; settings?: LanguageSettings; unavailable: boolean }>();
   useEffect(() => {
-    setUnavailable(false);
-    const unavailableNow = () => setUnavailable(true);
-    api.mistakes(language).then(setMistakes).catch(() => { setMistakes([]); unavailableNow(); });
-    api.plan(language).then(setPlan).catch(() => { setPlan(undefined); unavailableNow(); });
-    api.settings(language).then(setSettings).catch(() => { setSettings(undefined); unavailableNow(); });
+    let cancelled = false;
+    void Promise.allSettled([api.mistakes(language), api.plan(language), api.settings(language)]).then(([mistakesResult, planResult, settingsResult]) => {
+      if (cancelled) return;
+      setLoaded({
+        language,
+        mistakes: mistakesResult.status === "fulfilled" ? mistakesResult.value : [],
+        plan: planResult.status === "fulfilled" ? planResult.value : undefined,
+        settings: settingsResult.status === "fulfilled" ? settingsResult.value : undefined,
+        unavailable: [mistakesResult, planResult, settingsResult].some((result) => result.status === "rejected")
+      });
+    });
+    return () => { cancelled = true; };
   }, [language, progress.completedExercises]);
+  const mistakes = loaded?.mistakes ?? [];
+  const plan = loaded?.plan;
+  const settings = loaded?.settings;
+  const unavailable = loaded?.unavailable ?? false;
+  const stale = loaded !== undefined && loaded.language !== language;
   // « Je pars de 0 » : niveau A1 déclaré, objectif de base, puis les premières fiches de règles.
   const startFromScratch = async () => {
     try {
@@ -42,7 +53,7 @@ export function DashboardView({ dashboard, language, onNavigate }: Props) {
   );
 
   return (
-    <div className="stack-large">
+    <div className={stale ? "stack-large is-stale" : "stack-large"} aria-busy={stale}>
       {unavailable ? (
         <div className="alert" role="alert">
           Vos données locales sont inaccessibles pour le moment (navigation privée ou stockage bloqué ?). Le plan du jour et la mémoire des erreurs ne peuvent pas s'afficher.

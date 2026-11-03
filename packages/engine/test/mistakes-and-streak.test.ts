@@ -188,4 +188,29 @@ describe("preuve de maîtrise : recopier la correction ne vaut pas maîtrise (au
     expect(state.mistakes[0]!.resolvedCount).toBe(1);
     expect(createEngine).toBeDefined();
   });
+  it("une réponse recopiée reporte la carte de révision au lendemain : la preuve se fait à la prochaine séance (décision du 03/11/2026)", async () => {
+    const state = createInitialState();
+    const exercise = EXERCISES.find((candidate) => candidate.language === "en" && candidate.type === "fill-gap")!;
+    const { applyPracticeAttempt } = await import("../src/modules/practice-attempt.js");
+    const { isDue } = await import("../../shared/src/learning.js");
+    applyPracticeAttempt(state, exercise, "zzz", "attempt-1");
+    const card = () => state.reviewCards.find((candidate) => candidate.sourceExerciseId === exercise.id)!;
+    expect(isDue(card())).toBe(true);
+    applyPracticeAttempt(state, exercise, exercise.answer, "attempt-2", { assisted: true });
+    expect(isDue(card())).toBe(false);
+    const inADay = new Date(Date.now() + 25 * 3_600_000);
+    expect(isDue(card(), inADay)).toBe(true);
+    // Une carte mûre (intervalle long, déjà en retard) repart elle aussi au lendemain : l'échec est réel.
+    const mature = card();
+    mature.repetitions = 4; mature.intervalDays = 20; mature.nextReviewAt = new Date(Date.now() - 86_400_000).toISOString();
+    applyPracticeAttempt(state, exercise, "zzz", "attempt-m1");
+    applyPracticeAttempt(state, exercise, exercise.answer, "attempt-m2", { assisted: true });
+    expect(isDue(card())).toBe(false);
+    expect(isDue(card(), inADay)).toBe(true);
+    expect(card().repetitions).toBe(0);
+    // Une vraie réussite (non assistée) ne touche pas à la carte : c'est la révision qui la replanifie.
+    const before = card().nextReviewAt;
+    applyPracticeAttempt(state, exercise, exercise.answer, "attempt-3");
+    expect(card().nextReviewAt).toBe(before);
+  });
 });

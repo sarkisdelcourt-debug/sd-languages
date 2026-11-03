@@ -30,7 +30,7 @@ Sarkis utilise l'application **sur iPhone le soir (souvent hors ligne) et sur le
 
 10. **Lot 2 du 22/10/2026 (branche `lot2-2026-10-22`).** Leçons anglaises en révision 3 (exercices choisis pour l'objectif, au niveau exact, aucun id partagé, pertinence testée ; 22 exercices A1–A2 rédigés dans `content/en/beginner.ts`), `skillTags` sur chaque exercice + liste fermée de compétences (`packages/shared/src/skills.ts`), vue « Mes acquis » (`modules/skills.ts` pur et testé, route `GET /api/skills/:language`, série ciblée `?skill=`), chapitres acquis repliés sur la carte du parcours, variantes contractées des textes à trous, scénario hôtel espagnol `es-hotel-check-in`. Les révisions s'appliquent en cascade et toutes les révisions retirées restent jouables.
 
-Vérifications : `npm run typecheck`, `npm test` (300 tests, 26 fichiers au 26/10/2026), `npm run build`, `node --check apps/web/public/sw.js`.
+Vérifications : `npm run typecheck`, `npm test` (315 tests, 27 fichiers au 03/11/2026), `npm run build`, `node --check apps/web/public/sw.js`.
 
 ## État exécutable au 21 octobre 2026
 
@@ -81,7 +81,7 @@ npm run build
 node --check apps/web/public/sw.js
 ```
 
-État de référence : 26 fichiers de tests, 300 tests réussis (26/10/2026).
+État de référence : 27 fichiers de tests, 315 tests réussis (03/11/2026).
 
 ## Architecture à connaître
 
@@ -157,4 +157,13 @@ Avant de modifier :
 - **Règles** : 81 fiches (`rules/`), « Je pars de 0 » (Accueil et Mes objectifs), exercices de genre générés depuis les listes de vocabulaire.
 - **Voix** : enregistrements Piper (`apps/web/public/audio`, régénérés par `scripts/generate-audio.mts`, outils hors dépôt) ; repli sur la voix de l'appareil ; service worker : la page n'est mise en cache qu'avec ses scripts, plages audio gérées, cache des voix séparé.
 - **Coach IA** : délai 10 s sans nouvelle tentative, cumul de dépense sous verrou, libellés selon l'état réel, CSP limitée à l'application et à api.anthropic.com. Le plafond reste une estimation locale : le vrai plafond est la limite de dépense sur console.anthropic.com.
-- **Audits** : les rapports (23, 24 et 26/10/2026) sont dans `docs/audits/` en local, non publiés (dépôt public).
+- **Audits** : les rapports (23, 24 et 26/10/2026) sont dans `docs/audits/` (le rapport du 26/10 : `docs/audits/2026-10-26-claude/RAPPORT_AUDIT.md`).
+
+## Décisions de Sarkis du 03/11/2026 (réponses aux questions du rapport du 26/10)
+
+1. **Réussite après avoir vu la correction** : elle compte « corrigée » (ni erreur ni maîtrise) et **la carte de révision de l'exercice est reportée au lendemain** (minuit local ; intervalle remis à 1 jour, même pour une carte mûre) pour prouver l'acquis (`practice-attempt.ts`, option `assisted`). L'exercice peut encore revenir le soir même dans une série libre (erreur ouverte) : c'est accepté.
+2. **Indice** : à la demande en leçon, visible en série libre.
+3. **« Se faire comprendre »** : tolérance conservée, stricte sur la polarité (`polarityConsistent` dans `learning.ts`, relue indépendamment) : même polarité qu'une formulation prévue ; la négation doit porter sur ce que nie la formulation, dans la même proposition (« I understand, don't worry » et « Don't worry, I understand » ≠ « I don't understand » ; « Je comprends pas » = « Je ne comprends pas ») ; une formulation secondaire de polarité opposée (« is broken ») n'accepte que ses propres mots. Balayage de la banque (1 608 exercices, 5 451 formulations, 19 839 variantes) : 0 formulation prévue refusée ; contresens générés acceptés 294 au lieu de 733 ; reformulations justes perdues : « ne … plus » sans « ne » (« Je trouve plus mon fils »). Les clés des phrases à formulations mixtes doivent porter la polarité (fait pour `en-ph-hotel-005`, `en-ph-medical-010`, `en-ph-emergency-010`, `es-ph-work-009`) ; il reste des phrases où une formulation secondaire sans clé de polarité laisse passer son contraire. Ce verdict donne autant d'XP qu'une réponse exacte. Tests : `learning.test.ts` (synthétiques), `phrase-drills.test.ts` (balayage négation retirée dans les deux sens, 25 cas réels dont négation déplacée).
+4. **Clé Anthropic** : pas d'avis ; la consigne reste telle quelle, le consentement rappelle de n'écrire aucune information sur des patients.
+5. **GitHub Pages** : Sarkis s'engage à ne publier **aucun autre site** sur `sarkisdelcourt-debug.github.io` (la clé IA, stockée dans IndexedDB, est lisible par tout site de cette origine).
+6. **Diagnostic** : réparé (verbe imposé, indice affiché, calibrage : tout juste jusqu'à B1 = B1).

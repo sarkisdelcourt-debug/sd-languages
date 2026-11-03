@@ -32,7 +32,8 @@
   --sidebar-active: #20383d;
   --sidebar-line: #283244;
   --sidebar-muted: #aab2c0;
-  --focus-ring: rgba(15, 118, 110, .3);
+  /* Anneau de focus opaque : ≥ 3:1 sur le fond, lisible au clavier (audit du 26/10/2026, I6). */
+  --focus-ring: #0f766e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,7 +66,7 @@
     --sidebar-active: #173236;
     --sidebar-line: #1f2a38;
     --sidebar-muted: #aab4c0;
-    --focus-ring: rgba(127, 224, 211, .45);
+    --focus-ring: #7fe0d3;
   }
 }
 

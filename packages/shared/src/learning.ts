@@ -192,6 +192,100 @@ const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|cannot|nicht|kein|keine|
 const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/\s+/g, " ").trim());
 
 /**
+ * Polarité (audit du 26/10/2026, suite du 03/11/2026 avec relecture indépendante) : une phrase « comprise » doit dire la même
+ * chose qu'une formulation prévue.
+ * - Même polarité qu'une formulation prévue (négative ou affirmative) : obligatoire.
+ * - Polarité d'une formulation secondaire (« is broken » quand la principale est « isn't working ») : chaque concept doit être
+ *   porté par un mot que cette formulation emploie aussi (après canonisation can't → cannot, 'm → am), sinon « is working »
+ *   passerait pour « is broken ».
+ * - Phrase négative : on ancre la négation (le même mot négatif si possible : « pas » ↔ « pas », sinon le premier), on repère
+ *   dans la formulation le concept nié (le plus proche de la négation, dans la même proposition — la ponctuation sépare les
+ *   propositions), et on exige qu'il soit du même côté de la négation et dans la même proposition de la réponse :
+ *   « I understand, don't worry » ≠ « I don't understand » ; « Je comprends pas » = « Je ne comprends pas ».
+ * Limites connues : « ne … plus » sans « ne » (« Je trouve plus mon fils ») est refusé ; une formulation secondaire dont aucune
+ * clé ne porte la polarité (« persiste » pour « ne baisse pas ») laisse encore passer son contraire.
+ */
+function atomsOf(normalized: string): Array<{ atom: string; word: number }> {
+  return normalized.split(" ").filter(Boolean).flatMap((token, word) => token.split("'").filter(Boolean).map((atom) => ({ atom, word })));
+}
+
+/** Indice du premier mot négatif d'une phrase normalisée (-1 s'il n'y en a pas). */
+function negationIndex(normalized: string): number {
+  return normalized.split(" ").filter(Boolean).findIndex((token) => NEGATION.test(` ${token} `));
+}
+
+type Span = { start: number; end: number };
+function conceptSpans(atoms: Array<{ atom: string; word: number }>, raw: string): Span[] {
+  const prefix = raw.endsWith("*");
+  const parts = normalizeAnswer(prefix ? raw.slice(0, -1) : raw).replace(/'/g, " ").split(" ").filter(Boolean);
+  if (!parts.length) return [];
+  const spans: Span[] = [];
+  for (let start = 0; start + parts.length <= atoms.length; start += 1) {
+    const matches = parts.every((part, offset) => {
+      const atom = atoms[start + offset]!.atom;
+      return offset === parts.length - 1 && prefix ? atom.startsWith(part) : atom === part;
+    });
+    if (matches) spans.push({ start: atoms[start]!.word, end: atoms[start + parts.length - 1]!.word });
+  }
+  return spans;
+}
+/** Proposition (clause) de chaque mot normalisé : la ponctuation de la saisie brute sépare les propositions. */
+function clauseIds(raw: string, normalized: string): number[] {
+  const count = normalized.split(" ").filter(Boolean).length;
+  const ids: number[] = [];
+  raw.split(/[,;!?¿¡—–]+|[.:](?=\s|$)|\s-\s/).forEach((piece, index) => {
+    for (const _ of normalizeAnswer(piece).split(" ").filter(Boolean)) ids.push(index);
+  });
+  return ids.length === count ? ids : Array.from({ length: count }, () => 0);
+}
+const canon = (alt: string) => normalizeAnswer(alt).replace(/\bcan't\b/g, "cannot").replace(/n't\b/g, " not").replace(/'m\b/g, " am").replace(/'s\b/g, " is").replace(/\s+/g, " ");
+function polarityConsistent(rawAnswer: string, normalizedAnswer: string, rawList: string[], acceptedList: string[], concepts: string[][]): boolean {
+  const negative = hasNegation(normalizedAnswer);
+  const sameSide = acceptedList.map((c, i) => ({ c, raw: rawList[i] ?? c })).filter(({ c }) => hasNegation(c) === negative);
+  if (!sameSide.length) return false;
+  const mainNegative = hasNegation(acceptedList[0] ?? "");
+  const answerAtoms = atomsOf(normalizedAnswer);
+  const answerTokens = normalizedAnswer.split(" ").filter(Boolean);
+  const answerClauses = clauseIds(rawAnswer, normalizedAnswer);
+  const anchorA = negationIndex(normalizedAnswer);
+  const lexeme = answerTokens[anchorA];
+  const matchedCanon = (atoms: Array<{ atom: string; word: number }>, group: string[]) => group.filter((raw) => conceptSpans(atoms, raw).length > 0).map(canon);
+  return sameSide.some(({ c: candidate, raw }) => {
+    const candidateAtoms = atomsOf(candidate);
+    if (hasNegation(candidate) !== mainNegative) {
+      const ok = concepts.every((group) => {
+        const inC = matchedCanon(candidateAtoms, group);
+        return !inC.length || matchedCanon(answerAtoms, group).some((w) => inC.includes(w));
+      });
+      if (!ok) return false;
+    }
+    if (!negative || anchorA < 0) return true;
+    const candTokens = candidate.split(" ").filter(Boolean);
+    const sameLex = lexeme ? candTokens.indexOf(lexeme) : -1;
+    const anchorC = sameLex >= 0 ? sameLex : negationIndex(candidate);
+    if (anchorC < 0) return true;
+    const candClauses = clauseIds(raw, candidate);
+    const side = (s: Span, a: number) => (s.start <= a && s.end >= a ? 0 : s.start > a ? 1 : -1);
+    // Une négation seule (« pas », « ne », « no ») n'est jamais « le concept nié » : elle porte la négation, elle ne la subit pas.
+    const pure = (s: Span, a: number, tokens: string[]) => s.start === s.end && (s.start === a || NEGATION.test(` ${tokens[s.start] ?? ""} `));
+    // Concept nié : le plus proche de la négation, dans la même proposition de la formulation, hors négation seule.
+    let best: { index: number; side: number; distance: number } | undefined;
+    concepts.forEach((group, index) => {
+      for (const s of group.flatMap((r) => conceptSpans(candidateAtoms, r))) {
+        if (pure(s, anchorC, candTokens) || candClauses[s.start] !== candClauses[anchorC]) continue;
+        const sd = side(s, anchorC);
+        const distance = sd === 0 ? 0 : sd > 0 ? s.start - anchorC : anchorC - s.end;
+        if (!best || distance < best.distance || (distance === best.distance && sd > best.side)) best = { index, side: sd, distance };
+      }
+    });
+    if (!best) return true;
+    const target = best;
+    return concepts[target.index]!.flatMap((r) => conceptSpans(answerAtoms, r))
+      .some((s) => !pure(s, anchorA, answerTokens) && side(s, anchorA) === target.side && answerClauses[s.start] === answerClauses[anchorA]);
+  });
+}
+
+/**
  * Mots qui s'excluent : gauche/droite, jours, mois… Une réponse qui contient un de ces mots absent de toutes les formulations
  * prévues, alors qu'une formulation en contient un autre du même groupe, dit autre chose (lundi ≠ mardi, links ≠ geradeaus).
  */
@@ -236,9 +330,9 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
   const correct = matchedIndex >= 0;
   const exactSurface = correct && acceptedSurface[matchedIndex] === normalizeSurface(submittedAnswer);
   const nearMiss = !correct && normalizedAnswer.length >= 6 && accepted.some((candidate) => editDistance(candidate, normalizedAnswer) === 1);
-  // Une négation qu'aucune formulation prévue ne contient (ou l'inverse) annonce un contresens : pas de « on vous comprendrait ».
-  const sameNegation = accepted.some((candidate) => hasNegation(candidate) === hasNegation(normalizedAnswer));
-  if (!correct && exercise.understandable?.length && sameNegation && !exclusiveMismatch(normalizedAnswer, accepted) && conceptsCovered(normalizedAnswer, exercise.understandable)) {
+  // Une négation qu'aucune formulation prévue ne contient (ou l'inverse), ou mal placée, annonce un contresens : pas de « on vous comprendrait ».
+  if (!correct && exercise.understandable?.length && !exclusiveMismatch(normalizedAnswer, accepted)
+    && conceptsCovered(normalizedAnswer, exercise.understandable) && polarityConsistent(submittedAnswer, normalizedAnswer, answers, accepted, exercise.understandable)) {
     return {
       correct: true,
       verdict: "minor",

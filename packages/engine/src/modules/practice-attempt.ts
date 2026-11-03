@@ -71,6 +71,18 @@ export function applyPracticeAttempt(
   } else if (existingMistake && credited) {
     // Une réussite solde un échec déjà survenu, jamais un échec à venir (LANG-03) : le compteur ne dépasse pas les échecs.
     existingMistake.resolvedCount = Math.min(existingMistake.resolvedCount + 1, existingMistake.occurrenceCount);
+  } else if (options.assisted) {
+    // Décision du 03/11/2026 : la preuve d'une réponse recopiée se fait le lendemain. La carte de révision de l'exercice (créée à
+    // l'échec, due aussitôt) est reportée à demain : elle ne revient pas dans la même séance, mais dès la prochaine.
+    // L'échec est réel : la carte repart d'un intervalle d'un jour, même si elle était mûre (relecture du 03/11/2026).
+    const card = state.reviewCards.find((candidate) => candidate.sourceExerciseId === exercise.id);
+    if (card) {
+      const tomorrow = new Date();
+      tomorrow.setHours(24, 0, 0, 0); // minuit local de l'appareil : « demain », comme le jour d'apprentissage de la série
+      card.nextReviewAt = tomorrow.toISOString();
+      card.intervalDays = 1;
+      card.repetitions = 0;
+    }
   }
   return { evaluation, duplicate: false };
 }

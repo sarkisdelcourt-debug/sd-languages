@@ -335,6 +335,34 @@ describe("audit du 26/10/2026 : tréma, négation, contresens", () => {
   });
 });
 
+describe("polarité (03/11/2026) : une négation mal placée ou une formulation secondaire retournée ne passent plus", () => {
+  const base = { language: "en", level: "A2", type: "translation", explanation: "…", hint: "…", focus: "x" } as const;
+  it("la négation doit porter sur ce que nie la formulation prévue (« I understand, don't worry » ≠ « I don't understand »)", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const understand = { ...base, id: "u", prompt: "x", answer: "I don't understand.", acceptedAnswers: ["I do not understand.", "I don't get it."], understandable: [["don't", "not", "didn't"], ["underst*", "get"]] } as const;
+    expect(evaluateAnswer(understand, "I understand, don't worry").correct).toBe(false);
+    expect(evaluateAnswer(understand, "Don't worry, I understand").correct).toBe(false);
+    expect(evaluateAnswer(understand, "Sorry, I didn't understand").correct).toBe(true);
+    const busy = { ...base, id: "b", prompt: "x", answer: "I'm sorry, I can't come — I'm busy.", acceptedAnswers: ["Sorry, I'm not able to come, I'm busy."], understandable: [["sorry"], ["can't", "cannot", "not"], ["busy"], ["come"]] } as const;
+    expect(evaluateAnswer(busy, "Sorry, I can come, I'm not busy").correct).toBe(false);
+    expect(evaluateAnswer(busy, "Sorry, I cannot come, I am busy").correct).toBe(true);
+  });
+  it("une formulation affirmative secondaire (« is broken ») n'ouvre pas la porte à « is working »", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const ac = { ...base, id: "a", prompt: "x", answer: "The air conditioning isn't working in my room.", acceptedAnswers: ["The air conditioning in my room is broken."], understandable: [["air*"], ["room"], ["isn't working", "not working", "doesn't work", "broken"]] } as const;
+    expect(evaluateAnswer(ac, "The air conditioning is working in my room").correct).toBe(false);
+    expect(evaluateAnswer(ac, "The air conditioning in my room is not broken").correct).toBe(false);
+    expect(evaluateAnswer(ac, "My room's air conditioning is broken").correct).toBe(true);
+    expect(evaluateAnswer(ac, "The air conditioning in my room doesn't work").correct).toBe(true);
+  });
+  it("le français familier sans « ne » reste accepté (« Je comprends pas »)", async () => {
+    const { evaluateAnswer } = await import("../src/learning");
+    const fr = { ...base, language: "en", id: "f", prompt: "x", answer: "Je ne comprends pas.", acceptedAnswers: ["Je n'ai pas compris."], understandable: [["pas", "ne"], ["compr*"]] } as const;
+    expect(evaluateAnswer(fr, "Je comprends pas").correct).toBe(true);
+    expect(evaluateAnswer(fr, "Pas de souci, je comprends").correct).toBe(false);
+  });
+});
+
 describe("diagnostic : le niveau n'est plus sous-estimé (audit du 26/10/2026, I8)", () => {
   it("tout juste de A1 à B1 donne B1, tout juste de A1 à B2 donne B2", async () => {
     const { DIAGNOSTIC_QUESTIONS } = await import("../src/curriculum");

@@ -41,7 +41,8 @@ export const EN_FIXES: Record<string, PhraseFix> = {
   "en-ph-hobbies-009": { keys: [{ swap: ["surf", ["surf*"]] }] },
   "en-ph-hobbies-008": { keys: [{ swap: ["camping", ["camp*"]] }], dropFrVariants: ["L'été prochain, nous ferons du camping en Écosse."] },
   "en-ph-emergency-007": { keys: [{ add: ["hit", ["hurt"]] }] },
-  "en-ph-hotel-005": { keys: [{ swap: ["air", ["air*"]] }] },
+  // Le concept « en panne » porte sa polarité : « is not broken » ne passe plus pour « isn't working » (relecture du 03/11/2026).
+  "en-ph-hotel-005": { setKeys: [["air*"], ["room"], ["isn't working", "is not working", "not working", "doesn't work", "does not work", "broken", "out of order"]] },
   "en-ph-hotel-008": { keys: [{ swap: ["bags", ["bags", "bag"]] }] },
   "en-ph-understand-008": { keys: [{ add: ["didn't", ["not", "did not"]] }, { add: ["hear", ["heard"]] }] },
   "en-ph-friends-005": { keys: [{ add: ["great", ["amazing", "brilliant", "wonderful"]] }, { add: ["evening", ["party"]] }] },
@@ -53,7 +54,9 @@ export const EN_FIXES: Record<string, PhraseFix> = {
   "en-ph-phone-010": { keys: [{ add: ["line", ["connection", "signal"]] }] },
   "en-ph-transport-009": { keys: [{ add: ["another", ["new", "alternative"]] }] },
   "en-ph-phone-007": { keys: [{ drop: "back" }] },
-  "en-ph-medical-010": { keys: [{ add: ["down", ["still", "drop*", "better"]] }] },
+  // Vers le français, le prédicat porte la polarité : « si la fièvre baisse » ne passe plus pour « ne baisse pas » (relecture du 03/11/2026).
+  "en-ph-emergency-010": { setFrKeys: [["interprete", "traducteur"], ["anglais"], ["ne parle pas", "parle pas", "pas bien", "mal", "n'est pas bon", "pas bon", "mauvais", "faible", "peu"]] },
+  "en-ph-medical-010": { keys: [{ add: ["down", ["still", "drop*", "better"]] }], setFrKeys: [["revenir", "revenez"], ["fievre"], ["trois", "3"], ["ne baisse pas", "ne diminue pas", "baisse pas", "diminue pas", "persiste", "ne tombe pas", "tombe pas", "ne descend pas", "descend pas", "toujours", "encore"]] },
   "en-ph-weather-009": { keys: [{ add: ["cool*", ["fresh*", "cold*"]] }], note: "Present perfect pour une situation qui dure depuis le début de la semaine." },
   "en-ph-weather-008": { keys: [{ add: ["say", ["says", "weather", "according"]] }] },
   "en-ph-work-007": { keys: [{ add: ["turn", ["switch*", "boot*", "work*"]] }] },
@@ -126,5 +129,10 @@ export const ES_FIXES: Record<string, PhraseFix> = {
   "es-ph-understand-006": { keys: [{ drop: "dice" }] },
   "es-ph-money-004": { setKeys: [["dónde", "donde"], ["sacar", "retirar", "cajero", "efectivo"]] },
   "es-ph-intro-002": { setKeys: [["gusto", "encantado", "encantada", "placer"]] },
-  "es-ph-cafe-004": { keys: [{ swap: ["cuenta", ["la cuenta"]] }], note: "On dit « la cuenta » ; « la adición » existe en Argentine et en Uruguay." }
+  "es-ph-cafe-004": { keys: [{ swap: ["cuenta", ["la cuenta"]] }], note: "On dit « la cuenta » ; « la adición » existe en Argentine et en Uruguay." },
+  // L'absence doit être dite : « está hoy, está enfermo » passait pour « no está hoy » (relecture du 03/11/2026).
+  "es-ph-work-009": {
+    setKeys: [["compañero", "companero", "colega"], ["no está hoy", "hoy no está", "no esta hoy", "hoy no esta", "ausente", "falta", "no ha venido", "no viene"], ["enfermo", "enferma", "malo"], ["hoy"]],
+    // Vers le français, la formulation « Mon collègue est malade aujourd'hui » ne dit pas l'absence : les clés françaises restent celles de la phrase.
+  }
 };

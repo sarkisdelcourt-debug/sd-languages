@@ -196,7 +196,7 @@ export function ConversationView({ language }: { language: LanguageCode }) {
         <button className="primary-button" disabled={sending || !text.trim()}>{sending ? "Envoi…" : "Envoyer"}</button>
       </form>
       {voiceNote ? <p className="voice-note" role="status">{voiceNote}</p> : null}
-      <p className="fine-print conversation-note">La conversation est scénarisée localement. La dictée reste modifiable et n’envoie jamais votre message automatiquement.</p>
+      <p className="fine-print conversation-note">{aiActive ? "Les réponses marquées « IA » viennent de Claude Haiku ; le moteur garde la main sur l'avancement du scénario." : "La conversation est scénarisée localement."} La dictée reste modifiable et n’envoie jamais votre message automatiquement.</p>
     </section>
   );
 }

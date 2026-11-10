@@ -103,6 +103,62 @@ describe("corrections de relecture des phrases", () => {
     expect(idle).toEqual([]);
   });
 
+  it("refuse, pour chaque phrase négative, la même phrase sans sa négation, dans les deux sens (03/11/2026)", () => {
+    const NEG = /\b(isn't|aren't|don't|doesn't|didn't|can't|cannot|won't|couldn't|not|no|never|nicht|kein|keine|nie|nunca|nadie|nada|tampoco|ne|n'|pas|jamais|rien|personne)\b/i;
+    const AUX: Record<string, string> = { "isn't": "is", "aren't": "are", "don't": "do", "doesn't": "does", "didn't": "did", "can't": "can", "cannot": "can", "won't": "will", "couldn't": "could" };
+    const accepted: string[] = [];
+    let negative = 0;
+    for (const language of LANGUAGES) {
+      for (const direction of ["to-target", "to-french"] as const) {
+        for (const exercise of phraseCandidates(language, direction)) {
+          // « ne … plus » privé de « ne » reste négatif en français (« il y a plus de lait ») : hors du balayage.
+          if (!NEG.test(exercise.answer) || /\bplus\b/i.test(exercise.answer)) continue;
+          negative += 1;
+          const stripped = exercise.answer
+            .replace(/\b(isn't|aren't|don't|doesn't|didn't|can't|cannot|won't|couldn't)\b/gi, (word) => AUX[word.toLowerCase()] ?? word)
+            .replace(/\bn'/gi, "").replace(/\b(not|no|never|nicht|kein|keine|nie|nunca|nadie|nada|tampoco|ne|pas|jamais|rien|personne)\b\s?/gi, "")
+            .replace(/\s+/g, " ").trim();
+          if (evaluateAnswer(exercise, stripped).correct) accepted.push(`${exercise.id} : « ${stripped} »`);
+        }
+      }
+    }
+    expect(negative).toBeGreaterThan(100);
+    expect(accepted).toEqual([]);
+  });
+
+  it("refuse une négation déplacée dans une autre proposition, et accepte les reformulations réelles (relecture du 03/11/2026)", () => {
+    const find = (id: string) => { const [, direction, item] = id.split("~"); return phraseCandidates(item!.slice(0, 2) as "en", direction === "tf" ? "to-target" : "to-french").find((exercise) => exercise.id === id)!; };
+    const cases: Array<[string, string, boolean]> = [
+      ["ph~tf~en-ph-understand-001", "Sorry, I don't get it", true],
+      ["ph~tf~en-ph-understand-001", "I understand, don't worry", false],
+      ["ph~tf~en-ph-understand-001", "Don't worry, I understand", false],
+      ["ph~tf~en-ph-kitchen-005", "I eat fish but I don't eat meat", true],
+      ["ph~tf~en-ph-kitchen-005", "I don't eat fish, but I eat meat", false],
+      ["ph~tf~en-ph-health-005", "I am stressed at work and I cannot sleep properly", true],
+      ["ph~tf~en-ph-phone-002", "Could you speak up, I can't hear you very well", true],
+      ["ph~tf~en-ph-hotel-005", "The air conditioning in my room doesn't work", true],
+      ["ph~tf~en-ph-hotel-005", "The air conditioning is working in my room", false],
+      ["ph~tf~en-ph-hotel-005", "The air conditioning in my room is not broken", false],
+      ["ph~tf~de-ph-leisure-011", "Ich spiele lieber Tennis, Fußball mag ich nicht so gern", true],
+      ["ph~tf~de-ph-leisure-011", "Ich mag Fußball, ich spiele nicht lieber Tennis", false],
+      ["ph~tf~de-ph-compr-003", "Ich verstehe das nicht", true],
+      ["ph~tf~de-ph-compr-003", "Kein Problem, ich verstehe", false],
+      ["ph~tf~es-ph-work-009", "Está enfermo, mi compañero no está hoy", true],
+      ["ph~tf~es-ph-work-009", "Mi compañero está hoy, no está enfermo", false],
+      ["ph~tf~es-ph-work-009", "Mi compañero está hoy, está enfermo", false],
+      ["ph~tf~es-ph-understand-001", "No lo entiendo", true],
+      ["ph~tf~es-ph-understand-001", "No te preocupes, entiendo", false],
+      ["ph~ff~en-ph-understand-001", "Je comprends pas", true],
+      ["ph~ff~en-ph-understand-001", "Pas de souci, je comprends", false],
+      ["ph~ff~en-ph-friends-006", "Désolé, je peux pas venir, je suis occupé", true],
+      ["ph~ff~en-ph-hotel-005", "La clim fonctionne pas dans ma chambre", true],
+      ["ph~ff~de-ph-cuisine-004", "Je mange pas de porc", true],
+      ["ph~ff~es-ph-understand-012", "Je sais pas comment on dit ça en espagnol", true]
+    ];
+    const wrong = cases.filter(([id, text, expected]) => evaluateAnswer(find(id), text).correct !== expected).map(([id, text]) => `${id} « ${text} »`);
+    expect(wrong).toEqual([]);
+  });
+
   it("ne laisse passer ni un sens contraire ni un mot voisin", () => {
     const answer = (id: string, text: string, direction: "to-target" | "to-french" = "to-target") => {
       const item = PHRASES[id.slice(0, 2) as "en" | "de" | "es"].find((candidate) => candidate.id === id)!;

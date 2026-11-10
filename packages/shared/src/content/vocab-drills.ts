@@ -4,8 +4,11 @@ import type { VocabItem, VocabSet } from "./types.js";
 import { DE_VOCAB } from "./de/bank.js";
 import { DE_VERB_SETS } from "./de/verb-lists.js";
 import { DE_VOCAB_MORE } from "./de/vocab-more.js";
+import { DE_VOCAB_MORE2 } from "./de/vocab-more2.js";
 import { EN_VOCAB_MORE } from "./en/vocab-more.js";
+import { EN_VOCAB_MORE2 } from "./en/vocab-more2.js";
 import { ES_VOCAB_MORE } from "./es/vocab-more.js";
+import { ES_VOCAB_MORE2 } from "./es/vocab-more2.js";
 import { DE_VOCAB_EXTRA } from "./de/vocab-extra.js";
 import { EN_VERB_SETS } from "./en/verb-lists.js";
 import { ES_VERB_SETS } from "./es/verb-lists.js";
@@ -28,9 +31,9 @@ export type VocabMode = "choice" | "typing";
 export type ConcreteDirection = Exclude<VocabDirection, "mixed">;
 
 export const VOCAB_SETS: Record<LanguageCode, VocabSet[]> = {
-  en: [...MEDICAL_VOCAB, ...GENERAL_VOCAB, ...EN_VOCAB_EXTRA, ...EN_VERB_SETS, ...EN_VOCAB_MORE],
-  de: [...DE_VOCAB, ...DE_VOCAB_EXTRA, ...DE_VERB_SETS, ...DE_VOCAB_MORE],
-  es: [...ES_VOCAB, ...ES_VOCAB_EXTRA, ...ES_VERB_SETS, ...ES_VOCAB_MORE]
+  en: [...MEDICAL_VOCAB, ...GENERAL_VOCAB, ...EN_VOCAB_EXTRA, ...EN_VERB_SETS, ...EN_VOCAB_MORE, ...EN_VOCAB_MORE2],
+  de: [...DE_VOCAB, ...DE_VOCAB_EXTRA, ...DE_VERB_SETS, ...DE_VOCAB_MORE, ...DE_VOCAB_MORE2],
+  es: [...ES_VOCAB, ...ES_VOCAB_EXTRA, ...ES_VERB_SETS, ...ES_VOCAB_MORE, ...ES_VOCAB_MORE2]
 };
 
 const LANGUAGE_NAMES: Record<LanguageCode, string> = { en: "anglais", de: "allemand", es: "espagnol" };

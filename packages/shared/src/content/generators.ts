@@ -359,7 +359,7 @@ export function articleExercises(sets: VocabSet[], language: LanguageCode): Topi
   if (!rule) return [];
   return sets.flatMap((set) => set.items.flatMap((item): TopicExercise[] => {
     const match = rule.pattern.exec(item.en.replace(/\s*\([^)]*\)/g, "").trim());
-    if (!match || /^(les|des)\s/i.test(item.fr)) return []; // pluriels : pas de genre à retenir
+    if (!match || /^(les|des)\s/i.test(item.fr) || /\(Pl\.?\)/i.test(item.en)) return []; // pluriels : pas de genre à retenir
     const article = match[1]!.toLowerCase();
     const noun = match[2]!;
     return [{

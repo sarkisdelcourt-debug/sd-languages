@@ -5,6 +5,7 @@ import { EVERYDAY_SENTENCES, GENERAL_VOCAB, GRAMMAR_EXERCISES, TRAVEL_SENTENCES 
 import { EN_GRAMMAR_EXTRA } from "./grammar-extra.js";
 import { EN_SENTENCES_EXTRA } from "./sentences-extra.js";
 import { EN_VOCAB_MORE } from "./vocab-more.js";
+import { EN_VOCAB_MORE2 } from "./vocab-more2.js";
 import { EN_VERB_SETS } from "./verb-lists.js";
 import { EN_VOCAB_EXTRA } from "./vocab-extra.js";
 import { MEDICAL_SENTENCES, MEDICAL_VOCAB } from "./medical.js";
@@ -15,7 +16,7 @@ export const ENGLISH_BANK: TopicExercise[] = [
   ...MEDICAL_VOCAB.flatMap((set) => vocabExercises(set)),
   ...sentenceExercises(MEDICAL_SENTENCES),
   ...GENERAL_VOCAB.flatMap((set) => vocabExercises(set)),
-  ...[...EN_VOCAB_EXTRA, ...EN_VERB_SETS, ...EN_VOCAB_MORE].flatMap((set) => vocabExercises(set, "en")),
+  ...[...EN_VOCAB_EXTRA, ...EN_VERB_SETS, ...EN_VOCAB_MORE, ...EN_VOCAB_MORE2].flatMap((set) => vocabExercises(set, "en")),
   ...sentenceExercises(EVERYDAY_SENTENCES),
   ...sentenceExercises(TRAVEL_SENTENCES),
   ...sentenceExercises(EN_SENTENCES_EXTRA),

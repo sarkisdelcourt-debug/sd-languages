@@ -182,14 +182,19 @@ export function conceptsCovered(normalizedAnswer: string, concepts: string[][]):
     // voyelle finale change. En dessous, deux mots différents se confondent (cuenta/cuesta, cansado/casado, manzana/mañana,
     // where/here, train/rain) : la liste des formes acceptées utilise alors « * » pour les terminaisons (repet* pour repetez).
     const genderSwap = (token: string) => token.slice(0, -1) === alt.slice(0, -1) && /[aoe]$/.test(token) && /[aoe]$/.test(alt);
-    return !alt.includes(" ") && alt.length >= 8 && tokens.some((token) => token.length >= 7 && token[0] === alt[0] && !genderSwap(token) && editDistance(token, alt) <= 1);
+    // Audit du 10/11/2026 : les trois premières lettres doivent coïncider (anmelden ≠ abmelden, anschalten ≠ abschalten) et un mot
+    // qui ne diffère que par sa dernière lettre est un autre mot (attende/attendez, verstehe/verstehen, esperarle/esperarme).
+    const lastLetterOnly = (token: string) => token.length === alt.length ? token.slice(0, -1) === alt.slice(0, -1) && !(/[rzes]$/.test(token) && /[rzes]$/.test(alt)) : ((token.startsWith(alt) && !/[ser]$/.test(token)) || (alt.startsWith(token) && !/[ser]$/.test(alt)));
+    return !alt.includes(" ") && alt.length >= 8 && tokens.some((token) => token.length >= 7 && token.slice(0, 3) === alt.slice(0, 3) && !genderSwap(token) && !lastLetterOnly(token) && editDistance(token, alt) <= 1);
   }));
 }
 
 /** Négation (français, anglais, allemand, espagnol) : un contresens ne doit pas passer pour « compris ». */
 const NEGATION = /(?:^| )(?:not|no|never|nobody|nothing|cannot|nicht|kein|keine|keinen|keinem|keiner|nie|niemals|nichts|niemand|nunca|nadie|nada|tampoco|pas|jamais|aucun|aucune|rien|personne|ne|sin|ohne|sans|without)(?: |$)|n't(?: |$)|(?:^| )(?:isn|aren|wasn|weren|don|doesn|didn|can|couldn|won|wouldn|shouldn|hasn|haven|hadn|mustn|needn)t(?: |$)/;
 // L'apostrophe est conservée pour reconnaître « isn't » : la retirer d'abord rendait « n't » invisible.
-const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(/\s+/g, " ").trim());
+// « sin plomo » / « sans plomb » ne sont pas des négations (essence sans plomb).
+const NEGATION_NEUTRAL = /\b(?:sin plomo|sans plomb|ohne blei)\b/g;
+const hasNegation = (normalized: string) => NEGATION.test(normalized.replace(NEGATION_NEUTRAL, " ").replace(/\s+/g, " ").trim());
 
 /**
  * Mots qui s'excluent : gauche/droite, jours, mois… Une réponse qui contient un de ces mots absent de toutes les formulations
@@ -204,6 +209,36 @@ const EXCLUSIVE_GROUPS: string[][] = [
   ["before", "after", "vor", "nach", "antes", "despues", "avant", "apres"],
   ["open", "closed", "offen", "geschlossen", "abierto", "cerrado", "ouvert", "ferme"]
 ];
+/**
+ * Nombres et jours relatifs (audit du 10/11/2026) : une réponse « comprise » ne peut pas contenir un nombre que ni les formulations
+ * prévues ni les mots-clés ne contiennent (« soixante-quinze » ≠ « soixante-dix », « vingt-deux ans » ≠ « vingt ans », « 10:30 » ≠ « 10 »),
+ * ni « après-demain » / « pasado mañana » quand rien de tel n'est prévu. Les mots ambigus (« neuf », « once », « tres » = très, « dos » = dos, « one », « null ») ne sont pas comptés.
+ */
+const NUMBER_WORDS: Record<string, number> = {
+  zero: 0, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100,
+  zwei: 2, drei: 3, vier: 4, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10, elf: 11, zwolf: 12, dreizehn: 13, vierzehn: 14, funfzehn: 15, sechzehn: 16, siebzehn: 17, achtzehn: 18, neunzehn: 19, zwanzig: 20, dreissig: 30, vierzig: 40, funfzig: 50, sechzig: 60, siebzig: 70, achtzig: 80, neunzig: 90, hundert: 100,
+  cero: 0, cuatro: 4, cinco: 5, siete: 7, ocho: 8, nueve: 9, diez: 10, doce: 12, trece: 13, catorce: 14, quince: 15, dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90, cien: 100, ciento: 100,
+  deux: 2, trois: 3, quatre: 4, cinq: 5, sept: 7, huit: 8, dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14, quinze: 15, seize: 16, vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60, cent: 100
+};
+const RELATIVE_DAYS = ["pasado manana", "apres demain", "anteayer", "antes de ayer", "avant hier", "day after tomorrow", "day before yesterday", "ubermorgen", "vorgestern"];
+const numbersIn = (text: string): Set<number> => {
+  const flat = text.replace(/'/g, " ");
+  const found = new Set<number>();
+  if (/\by media\b|\bet demie?\b|\bhalb\b|\bhalf past\b|\bund halb\b/.test(flat)) { found.add(0.5); found.add(30); }
+  if (/\by cuarto\b|\bet quart\b|\bviertel nach\b|\bquarter past\b/.test(flat)) { found.add(0.25); found.add(15); }
+  if (/\bmenos cuarto\b|\bmoins le quart\b|\bviertel vor\b|\bquarter to\b/.test(flat)) { found.add(-0.25); found.add(45); }
+  for (const token of flat.split(" ")) {
+    if (/^\d+$/.test(token)) { if (token !== "00") found.add(Number(token)); } else if (token in NUMBER_WORDS) found.add(NUMBER_WORDS[token]!);
+  }
+  return found;
+};
+const quantityMismatch = (normalizedAnswer: string, acceptedList: string[], keys: string[][]): boolean => {
+  const pool = [...acceptedList, ...keys.flat().map((key) => key.replace(/\*$/, ""))];
+  const allowed = new Set(pool.flatMap((entry) => [...numbersIn(entry)]));
+  for (const value of numbersIn(normalizedAnswer)) if (!allowed.has(value)) return true;
+  const padded = ` ${normalizedAnswer.replace(/'/g, " ")} `;
+  return RELATIVE_DAYS.some((phrase) => padded.includes(` ${phrase} `) && !pool.some((entry) => ` ${entry.replace(/'/g, " ")} `.includes(` ${phrase} `)));
+};
 const exclusiveMismatch = (normalizedAnswer: string, acceptedList: string[]): boolean => {
   const words = (text: string) => new Set(text.replace(/'/g, " ").split(" ").filter(Boolean));
   const ordered = (text: string, group: string[]) => text.replace(/'/g, " ").split(" ").filter((word) => group.includes(word));
@@ -238,7 +273,7 @@ export function evaluateAnswer(exercise: Exercise, submittedAnswer: string): Ans
   const nearMiss = !correct && normalizedAnswer.length >= 6 && accepted.some((candidate) => editDistance(candidate, normalizedAnswer) === 1);
   // Une négation qu'aucune formulation prévue ne contient (ou l'inverse) annonce un contresens : pas de « on vous comprendrait ».
   const sameNegation = accepted.some((candidate) => hasNegation(candidate) === hasNegation(normalizedAnswer));
-  if (!correct && exercise.understandable?.length && sameNegation && !exclusiveMismatch(normalizedAnswer, accepted) && conceptsCovered(normalizedAnswer, exercise.understandable)) {
+  if (!correct && exercise.understandable?.length && sameNegation && !exclusiveMismatch(normalizedAnswer, accepted) && !quantityMismatch(normalizedAnswer, accepted, exercise.understandable) && conceptsCovered(normalizedAnswer, exercise.understandable)) {
     return {
       correct: true,
       verdict: "minor",

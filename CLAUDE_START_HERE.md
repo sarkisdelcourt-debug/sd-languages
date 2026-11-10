@@ -39,7 +39,7 @@ React 19 + TypeScript + Vite ; le moteur (`packages/engine`) tourne dans le navi
 Fonctionnalités opérationnelles :
 
 - diagnostic A1–C1 indicatif pour les trois langues, ou niveau déclaré ;
-- 6 548 exercices déterministes avec correction didactique (2 132 anglais, 2 176 allemand, 2 240 espagnol) + tests de vocabulaire, phrases du quotidien (`content/phrase-drills.ts`) et fiches de règles (`grammar-rules.ts`, `rules/`) — le détail par fonction est dans la section « État au 26/10/2026 » ci-dessous.
+- 9 700 exercices déterministes avec correction didactique (2 972 anglais, 3 337 allemand, 3 391 espagnol) + tests de vocabulaire, phrases du quotidien (`content/phrase-drills.ts`) et fiches de règles (`grammar-rules.ts`, `rules/`) — le détail par fonction est dans la section « État au 26/10/2026 » ci-dessous.
 - 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 3) ont chacune 6 exercices propres à leur objectif, au niveau exact ; les chapitres sous le niveau déclaré se replient ;
 - carte de compétences « Mes acquis » : exposition, dix dernières réponses, stabilité, erreurs ouvertes, prochaine révision et action conseillée, avec série ciblée ;
 - carte du parcours en quatre chapitres, déblocage par maîtrise, recommandation expliquée, abandon possible ;
@@ -153,7 +153,7 @@ Avant de modifier :
 
 - **Correcteur** (`learning.ts`) : tréma allemand distingué (ä ö ü → ae oe ue, ß → ss), accents ignorés ailleurs ; QCM strict ; « se faire comprendre » (`understandable`, `conceptsCovered`) avec garde-fous : négation, mots qui s'excluent (jours, directions, con/sin), faute de frappe tolérée seulement à partir de 8 lettres, jamais une simple voyelle finale ; heures 3:00 / 8h30 normalisées.
 - **Maîtrise** : le bilan d'une leçon juge le PREMIER essai ; une réussite après avoir vu la correction est « corrigée » (pas d'XP de réussite, erreur mémorisée gardée ouverte). Indice à la demande en leçon. Le plan du jour ne promet une notion que si la leçon la contient.
-- **Phrases du quotidien** (`content/phrase-drills.ts`, `content/<langue>/phrases.ts`, corrections de relecture dans `phrase-fix-data.ts`) : ~800 phrases à formulations multiples, deux sens, mots-clés pour l'intelligibilité.
+- **Phrases du quotidien** (`content/phrase-drills.ts`, `content/<langue>/phrases.ts`, corrections de relecture dans `phrase-fix-data.ts`) : ~1 100 phrases à formulations multiples, deux sens, mots-clés pour l'intelligibilité.
 - **Règles** : 81 fiches (`rules/`), « Je pars de 0 » (Accueil et Mes objectifs), exercices de genre générés depuis les listes de vocabulaire.
 - **Voix** : enregistrements Piper (`apps/web/public/audio`, régénérés par `scripts/generate-audio.mts`, outils hors dépôt) ; repli sur la voix de l'appareil ; service worker : la page n'est mise en cache qu'avec ses scripts, plages audio gérées, cache des voix séparé.
 - **Coach IA** : délai 10 s sans nouvelle tentative, cumul de dépense sous verrou, libellés selon l'état réel, CSP limitée à l'application et à api.anthropic.com. Le plafond reste une estimation locale : le vrai plafond est la limite de dépense sur console.anthropic.com.

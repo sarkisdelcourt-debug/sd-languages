@@ -5,6 +5,9 @@ import { DE_PHRASES, DE_PHRASE_SITUATIONS } from "./de/phrases.js";
 import { ES_PHRASES, ES_PHRASE_SITUATIONS } from "./es/phrases.js";
 import { applyPhraseFixes } from "./phrase-fixes.js";
 import { DE_FIXES, EN_FIXES, ES_FIXES } from "./phrase-fix-data.js";
+import { EN_FIXES_2 } from "./phrase-fix-data-en2.js";
+import { DE_FIXES_2 } from "./phrase-fix-data-de2.js";
+import { ES_FIXES_2 } from "./phrase-fix-data-es2.js";
 
 /**
  * Phrases du quotidien (26/10/2026) : des phrases simples et utiles, avec PLUSIEURS formulations acceptées, pour se faire
@@ -43,9 +46,9 @@ export type PhraseDirection = "to-target" | "to-french" | "mixed";
 
 export const PHRASE_SITUATIONS: Record<LanguageCode, PhraseSituation[]> = { en: EN_PHRASE_SITUATIONS, de: DE_PHRASE_SITUATIONS, es: ES_PHRASE_SITUATIONS };
 export const PHRASES: Record<LanguageCode, PhraseItem[]> = {
-  en: applyPhraseFixes(EN_PHRASES, EN_FIXES),
-  de: applyPhraseFixes(DE_PHRASES, DE_FIXES),
-  es: applyPhraseFixes(ES_PHRASES, ES_FIXES)
+  en: applyPhraseFixes(EN_PHRASES, { ...EN_FIXES, ...EN_FIXES_2 }),
+  de: applyPhraseFixes(DE_PHRASES, { ...DE_FIXES, ...DE_FIXES_2 }),
+  es: applyPhraseFixes(ES_PHRASES, { ...ES_FIXES, ...ES_FIXES_2 })
 };
 
 const LANGUAGE_NAMES: Record<LanguageCode, string> = { en: "anglais", de: "allemand", es: "espagnol" };

@@ -72,7 +72,7 @@ export const ES_VOCAB: VocabSet[] = [
   ])
 ];
 
-type S = [CefrLevel, ExerciseTopic, string, string, string[], string];
+type S = [CefrLevel, ExerciseTopic, string, string, string[], string, string[]?];
 const SENTENCE_ROWS: S[] = [
   // A1
   ["A1", "everyday", "Me llamo Pablo y soy médico.", "Je m'appelle Pablo et je suis médecin.", ["introductions", "ser-estar"], "Avec ser, la profession se dit sans article : soy médico."],
@@ -102,13 +102,13 @@ const SENTENCE_ROWS: S[] = [
   ["A1", "travel", "¿Dónde está la estación?", "Où est la gare ?", ["location"], "Estación est féminin et prend un accent : la estación."],
   ["A1", "travel", "Voy al aeropuerto en taxi.", "Je vais à l'aéroport en taxi.", ["present-tense", "hotel-travel-vocabulary"], "A + el se contracte en al ; en taxi : en s'emploie pour le moyen de transport."],
   ["A1", "travel", "Mi maleta no está aquí.", "Ma valise n'est pas ici.", ["location", "hotel-travel-vocabulary"], "Estar pour la place d'un objet ; maleta est féminin."],
-  ["A1", "everyday", "¿Cuánto cuesta este jersey?", "Combien coûte ce pull ?", ["quantities", "everyday-vocabulary"], "Jersey se prononce comme en français-anglais ; este est masculin."],
+  ["A1", "everyday", "¿Cuánto cuesta este jersey?", "Combien coûte ce pull ?", ["quantities", "everyday-vocabulary"], "Jersey se prononce « kher-séï » : le j espagnol (jota) se racle au fond de la gorge ; este est masculin."],
   ["A1", "everyday", "Es demasiado caro para mí.", "C'est trop cher pour moi.", ["ser-estar", "everyday-vocabulary"], "Après une préposition, le pronom est mí avec accent : para mí."],
   ["A1", "everyday", "Busco una talla más grande.", "Je cherche une taille plus grande.", ["everyday-vocabulary", "articles-gender"], "Buscar n'est pas suivi de préposition : busco una talla."],
   ["A1", "everyday", "¿Puedo pagar con tarjeta?", "Puis-je payer par carte ?", ["polite-requests", "everyday-vocabulary"], "Pagar con tarjeta se dit avec la préposition con, pas par."],
   ["A1", "everyday", "Quiero dos kilos de naranjas.", "Je veux deux kilos d'oranges.", ["quantities", "numbers"], "Après une quantité, on emploie de : dos kilos de naranjas."],
   ["A1", "travel", "¿Dónde está el banco, por favor?", "Où est la banque, s'il vous plaît ?", ["location", "polite-requests"], "El banco est aussi le banc ; le contexte précise le sens."],
-  ["A1", "travel", "Gire a la derecha en el semáforo.", "Tournez à droite au feu.", ["location", "polite-requests"], "Gire est l'impératif de politesse (usted) du verbe girar."],
+  ["A1", "travel", "Gire a la derecha en el semáforo.", "Tournez à droite au feu.", ["location", "polite-requests"], "Gire est l'impératif de politesse (usted) du verbe girar.", ["En el semáforo, gire a la derecha."]],
   ["A1", "travel", "Siga todo recto hasta la plaza.", "Continuez tout droit jusqu'à la place.", ["location", "polite-requests"], "Siga vient de seguir ; todo recto veut dire tout droit."],
   ["A1", "travel", "El museo está cerca de aquí.", "Le musée est près d'ici.", ["location", "ser-estar"], "Cerca de se construit avec de ; la situation se dit avec estar."],
   ["A1", "travel", "¿Está lejos de aquí?", "Est-ce loin d'ici ?", ["location", "ser-estar"], "Lejos de aquí : on garde la préposition de ; estar pour la distance."],
@@ -169,8 +169,8 @@ const SENTENCE_ROWS: S[] = [
   ["B1", "travel", "Tuvimos que cambiar de tren en Zaragoza.", "Nous avons dû changer de train à Saragosse.", ["preterite", "obligation"], "Tener que au prétérit (tuvimos que) indique que l'obligation a bien été remplie."]
 ];
 
-export const ES_SENTENCES: SentenceItem[] = SENTENCE_ROWS.map(([level, topic, en, fr, skills, note], index) => ({
-  id: `es-s-${String(index + 1).padStart(3, "0")}`, topic, level, en, fr, skills, note
+export const ES_SENTENCES: SentenceItem[] = SENTENCE_ROWS.map(([level, topic, en, fr, skills, note, accepted], index) => ({
+  id: `es-s-${String(index + 1).padStart(3, "0")}`, topic, level, en, fr, skills, note, ...(accepted ? { accepted } : {})
 }));
 
 type GType = "multiple-choice" | "fill-gap" | "translation";

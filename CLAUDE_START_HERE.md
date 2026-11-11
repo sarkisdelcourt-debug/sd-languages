@@ -39,13 +39,13 @@ React 19 + TypeScript + Vite ; le moteur (`packages/engine`) tourne dans le navi
 Fonctionnalités opérationnelles :
 
 - diagnostic A1–C1 indicatif pour les trois langues, ou niveau déclaré ;
-- 9 700 exercices déterministes avec correction didactique (2 972 anglais, 3 337 allemand, 3 391 espagnol) + tests de vocabulaire, phrases du quotidien (`content/phrase-drills.ts`) et fiches de règles (`grammar-rules.ts`, `rules/`) — le détail par fonction est dans la section « État au 26/10/2026 » ci-dessous.
-- 36 leçons guidées A1–B2, soit 12 par langue et 3 par niveau ; les leçons anglaises (révision 3) ont chacune 6 exercices propres à leur objectif, au niveau exact ; les chapitres sous le niveau déclaré se replient ;
+- 9 744 exercices déterministes avec correction didactique (2 985 anglais, 3 357 allemand, 3 402 espagnol) + tests de vocabulaire, phrases du quotidien (`content/phrase-drills.ts`) et fiches de règles (`grammar-rules.ts`, `rules/`) — le détail par fonction est dans la section « État au 26/10/2026 » ci-dessous.
+- 48 leçons guidées A1–B2, soit 16 par langue (4 ajoutées le 11/11/2026 par langue) ; les leçons anglaises (révision 3) ont chacune 6 exercices propres à leur objectif, au niveau exact ; les chapitres sous le niveau déclaré se replient ;
 - carte de compétences « Mes acquis » : exposition, dix dernières réponses, stabilité, erreurs ouvertes, prochaine révision et action conseillée, avec série ciblée ;
 - carte du parcours en quatre chapitres, déblocage par maîtrise, recommandation expliquée, abandon possible ;
 - mémoire des erreurs, XP, séries et répétition espacée ;
 - séries d'entraînement « Recommandé » ou par thème, variées par format et par thème ;
-- 13 scénarios de conversation guidée (dont l'hôtel espagnol du 22/10), coach par règles et correcteur de francophones ;
+- 25 scénarios de conversation guidée (dont l'hôtel espagnol du 22/10), coach par règles et correcteur de francophones ;
 - laboratoire de prononciation avec synthèse navigateur, enregistrement audio éphémère et comparaison de transcription ;
 - PWA installable, tout hors ligne ; relais par fichier PC ⟷ iPhone, sauvegardes automatiques ;
 - thème clair / sombre selon l'appareil.
@@ -99,7 +99,7 @@ EXPORT_MANIFEST.md         contenu et règles de confidentialité de l'export
 
 Points d'entrée importants :
 
-- `packages/shared/src/lessons.ts` et `english-lessons.ts` : catalogue des 36 leçons (révisions en cascade, toutes les révisions retirées conservées) ;
+- `packages/shared/src/lessons.ts` et `english-lessons.ts` : catalogue des 48 leçons (nouvelles : lessons-new-{en,de,es}.ts) (révisions en cascade, toutes les révisions retirées conservées) ;
 - `packages/shared/src/skills.ts` et `packages/engine/src/modules/skills.ts` : liste fermée des compétences et calcul de la carte « Mes acquis » ;
 - `packages/shared/src/curriculum.ts` : diagnostics, exercices, `contentCoverage` ;
 - `packages/shared/src/content/` : banque anglaise (listes, `en/beginner.ts` pour l'A1–A2 rédigé) et `generators.ts` (exercices, variantes acceptées, `skillTags` déduits) ;

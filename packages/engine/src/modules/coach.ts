@@ -167,7 +167,8 @@ export interface TextToSpeechProvider {
  * Un mot de 5 lettres ou plus peut porter une terminaison (« fridays »).
  */
 export function keywordPresent(searchable: string, keyword: string): boolean {
-  const wanted = normalizeAnswer(keyword);
+  // L'apostrophe sépare les mots des deux côtés : « let's » (mot-clé) doit retrouver « let's » (réponse).
+  const wanted = normalizeAnswer(keyword).replace(/'/g, " ").replace(/\s+/g, " ").trim();
   if (!wanted) return false;
   const padded = ` ${searchable.replace(/'/g, " ")} `;
   if (padded.includes(` ${wanted} `)) return true;

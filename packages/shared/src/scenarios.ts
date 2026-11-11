@@ -1,3 +1,6 @@
+import { DE_NEW_SCENARIOS } from "./lessons-new-de.js";
+import { EN_NEW_SCENARIOS } from "./lessons-new-en.js";
+import { ES_NEW_SCENARIOS } from "./lessons-new-es.js";
 import type { CefrLevel, ConversationScenario, LanguageCode } from "./types.js";
 
 export const CONVERSATION_SCENARIOS: ConversationScenario[] = [
@@ -390,7 +393,10 @@ export const CONVERSATION_SCENARIOS: ConversationScenario[] = [
         reply: "Aceptamos el nuevo plan. Envíenos hoy la confirmación con las dos fechas."
       }
     ]
-  }
+  },
+  ...EN_NEW_SCENARIOS,
+  ...DE_NEW_SCENARIOS,
+  ...ES_NEW_SCENARIOS
 ];
 
 export function getScenarios(language: LanguageCode, level?: CefrLevel): ConversationScenario[] {

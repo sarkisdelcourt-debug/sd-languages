@@ -43,7 +43,7 @@ const CONTRACTIONS: Array<[RegExp, string, RegExp, string]> = [
   [/\b(do|does|did|is|are|was|were|has|have|had|should|would|could|must)n't\b/gi, "$1 not", /\b(do|does|did|is|are|was|were|has|have|had|should|would|could|must) not\b/gi, "$1n't"],
   [/\bI'm\b/g, "I am", /\bI am\b/g, "I'm"],
   [/\b(you|we|they)'re\b/gi, "$1 are", /\b(you|we|they) are\b/gi, "$1're"],
-  [/\b(I|you|we|they)'ve\b/gi, "$1 have", /\b(I|you|we|they) have\b(?! to)/gi, "$1've"],
+  [/\b(I|you|we|they)'ve\b/gi, "$1 have", /(?<!\b(?:do|does|did|could|can|would|should|might|must|will|shall|may|why|how|what|where|when|who)\s)\b(I|you|we|they) have\b(?! to)/gi, "$1've"],
   [/\b(I|you|he|she|we|they|it)'ll\b/gi, "$1 will", /\b(I|you|he|she|we|they|it) will\b/gi, "$1'll"],
   [/\b(it|that|there|what|he|she)'s\b(?= (?!been\b|got\b))/gi, "$1 is", /\b(it|that|there|what|he|she) is\b/gi, "$1's"],
   [/\b(would|should|could|might|must)'ve\b/gi, "$1 have", /\b(would|should|could|might|must) have\b/gi, "$1've"],

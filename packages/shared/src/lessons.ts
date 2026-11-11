@@ -1,6 +1,9 @@
 import { ENGLISH_LESSON_REVISIONS } from "./english-lessons.js";
 import { OTHER_LANGUAGE_LESSON_REVISIONS } from "./other-lessons.js";
 import { SPANISH_A1_LESSON_REVISIONS } from "./spanish-a1.js";
+import { DE_NEW_LESSONS } from "./lessons-new-de.js";
+import { EN_NEW_LESSONS } from "./lessons-new-en.js";
+import { ES_NEW_LESSONS } from "./lessons-new-es.js";
 import type { GuidedLessonDefinition } from "./types.js";
 
 function supplementalLesson(
@@ -72,7 +75,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "en",
     level: "B1",
-    sequence: 7,
+    sequence: 8,
     title: "Faire un point projet clair",
     objective: "Présenter votre avancée, expliquer un blocage et convenir d'une échéance.",
     focus: "Present perfect et communication professionnelle",
@@ -101,7 +104,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "en",
     level: "B2",
-    sequence: 10,
+    sequence: 13,
     title: "Expliquer un imprévu avec nuance",
     objective: "Raconter ce qui aurait pu se passer, exprimer un regret et proposer une solution crédible.",
     focus: "Hypothèse passée, regret et discours indirect",
@@ -158,7 +161,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "de",
     level: "A2",
-    sequence: 4,
+    sequence: 5,
     title: "Acheter un billet de train",
     objective: "Indiquer votre destination, préciser le trajet et comprendre les informations essentielles.",
     focus: "Ordre des mots et datif",
@@ -187,7 +190,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "de",
     level: "B1",
-    sequence: 7,
+    sequence: 9,
     title: "Organiser et justifier une décision",
     objective: "Raconter une action passée, expliquer une raison et fixer les modalités d'une réunion.",
     focus: "Perfekt et subordonnée avec weil",
@@ -216,7 +219,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "de",
     level: "B2",
-    sequence: 10,
+    sequence: 14,
     title: "Gérer un changement de programme",
     objective: "Comprendre un incident, formuler une hypothèse et négocier une solution de remplacement.",
     focus: "Konjunktiv II et précision grammaticale",
@@ -273,7 +276,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "es",
     level: "A2",
-    sequence: 4,
+    sequence: 6,
     title: "Se repérer dans un nouveau quartier",
     objective: "Vous présenter, parler de votre origine et demander où se trouve un service.",
     focus: "Ser, estar et localisation",
@@ -302,7 +305,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "es",
     level: "B1",
-    sequence: 7,
+    sequence: 10,
     title: "Présenter son expérience professionnelle",
     objective: "Raconter une expérience, exprimer une durée et préciser une échéance de travail.",
     focus: "Récit, durée et obligation",
@@ -331,7 +334,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     revision: 1,
     language: "es",
     level: "B2",
-    sequence: 10,
+    sequence: 14,
     title: "Négocier une solution sous conditions",
     objective: "Exprimer une hypothèse, parler d'une action antérieure et trouver un compromis.",
     focus: "Subjonctif, antériorité et hypothèse passée",
@@ -412,7 +415,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["en-a2-translation-routine", "en-a2-gap-grocery-any"], scenarioId: "en-travel-hotel"
   }),
   supplementalLesson({
-    id: "lesson-en-give-advice-and-request", language: "en", level: "B1", sequence: 8,
+    id: "lesson-en-give-advice-and-request", language: "en", level: "B1", sequence: 9,
     title: "Conseiller et demander une action",
     objective: "Donner un conseil et formuler une demande professionnelle polie.",
     focus: "Should, could you et échéance avec by",
@@ -426,7 +429,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["en-b1-translation-advice", "en-b1-translation-report-deadline"], scenarioId: "en-work-project-update"
   }),
   supplementalLesson({
-    id: "lesson-en-explain-availability", language: "en", level: "B1", sequence: 9,
+    id: "lesson-en-explain-availability", language: "en", level: "B1", sequence: 10,
     title: "Expliquer une indisponibilité",
     objective: "Annoncer un rendez-vous et préciser depuis quand une situation dure.",
     focus: "Rendez-vous, since et impact sur le planning",
@@ -440,7 +443,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["en-b1-translation-doctor-appointment", "en-b1-gap-since"], scenarioId: "en-work-project-update"
   }),
   supplementalLesson({
-    id: "lesson-en-report-and-regret", language: "en", level: "B2", sequence: 11,
+    id: "lesson-en-report-and-regret", language: "en", level: "B2", sequence: 14,
     title: "Rapporter un incident et un regret",
     objective: "Distinguer ce qui a été dit de ce que l'on souhaiterait changer.",
     focus: "Discours indirect et wish",
@@ -454,7 +457,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["en-b2-mcq-reported", "en-b2-gap-wish"], scenarioId: "en-work-service-recovery"
   }),
   supplementalLesson({
-    id: "lesson-en-analyse-missed-connection", language: "en", level: "B2", sequence: 12,
+    id: "lesson-en-analyse-missed-connection", language: "en", level: "B2", sequence: 15,
     title: "Analyser une correspondance manquée",
     objective: "Reconstruire la cause d'un incident et rapporter une explication.",
     focus: "Troisième conditionnel et discours indirect",
@@ -496,7 +499,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-a1-mcq-present", "de-a1-gap-article"], scenarioId: "de-daily-grocery"
   }),
   supplementalLesson({
-    id: "lesson-de-plan-a-trip", language: "de", level: "A2", sequence: 5,
+    id: "lesson-de-plan-a-trip", language: "de", level: "A2", sequence: 6,
     title: "Formuler un projet de trajet",
     objective: "Dire ce que l'on doit faire et placer correctement le verbe.",
     focus: "Verbe modal et ordre V2",
@@ -510,7 +513,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-a2-mcq-modal", "de-a2-translation-order"], scenarioId: "de-travel-station"
   }),
   supplementalLesson({
-    id: "lesson-de-pay-and-confirm", language: "de", level: "A2", sequence: 6,
+    id: "lesson-de-pay-and-confirm", language: "de", level: "A2", sequence: 7,
     title: "Payer et confirmer son choix",
     objective: "Indiquer un moyen de paiement et exprimer une nécessité.",
     focus: "Mit + datif et verbes modaux",
@@ -524,7 +527,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-a2-gap-shopping-dative", "de-a2-mcq-modal"], scenarioId: "de-travel-station"
   }),
   supplementalLesson({
-    id: "lesson-de-explain-a-delay", language: "de", level: "B1", sequence: 8,
+    id: "lesson-de-explain-a-delay", language: "de", level: "B1", sequence: 10,
     title: "Justifier un retard de réunion",
     objective: "Annoncer un changement d'horaire et en donner la raison.",
     focus: "Weil et repères temporels",
@@ -538,7 +541,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-b1-translation-because", "de-b1-translation-meeting-delay"], scenarioId: "de-work-meeting"
   }),
   supplementalLesson({
-    id: "lesson-de-explain-health-absence", language: "de", level: "B1", sequence: 9,
+    id: "lesson-de-explain-health-absence", language: "de", level: "B1", sequence: 11,
     title: "Expliquer une absence pour raison de santé",
     objective: "Demander un remède et raconter un déplacement passé.",
     focus: "Gegen + symptôme et Perfekt avec sein",
@@ -552,7 +555,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-b1-translation-pharmacy", "de-b1-gap-perfect"], scenarioId: "de-work-meeting"
   }),
   supplementalLesson({
-    id: "lesson-de-propose-an-alternative", language: "de", level: "B2", sequence: 11,
+    id: "lesson-de-propose-an-alternative", language: "de", level: "B2", sequence: 15,
     title: "Proposer une solution de remplacement",
     objective: "Comprendre une suppression et suggérer une option hypothétique.",
     focus: "Ausfallen et Konjunktiv II",
@@ -566,7 +569,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["de-b2-mcq-train-announcement", "de-b2-gap-konjunktiv"], scenarioId: "de-travel-disruption"
   }),
   supplementalLesson({
-    id: "lesson-de-clarify-a-disruption", language: "de", level: "B2", sequence: 12,
+    id: "lesson-de-clarify-a-disruption", language: "de", level: "B2", sequence: 16,
     title: "Préciser les acteurs d'un incident",
     objective: "Comprendre une annonce puis préciser avec qui l'on doit agir.",
     focus: "Verbe séparable et relatif au datif",
@@ -608,7 +611,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-a1-mcq-hotel-room", "es-a1-mcq-gender"], scenarioId: "es-daily-neighbours"
   }),
   supplementalLesson({
-    id: "lesson-es-order-a-meal", language: "es", level: "A2", sequence: 5,
+    id: "lesson-es-order-a-meal", language: "es", level: "A2", sequence: 7,
     title: "Commander une quantité au restaurant",
     objective: "Préciser une quantité et remplacer un produit déjà nommé.",
     focus: "Quantité + de et pronom direct",
@@ -622,7 +625,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-a2-gap-market-quantity", "es-a2-mcq-object"], scenarioId: "es-travel-restaurant"
   }),
   supplementalLesson({
-    id: "lesson-es-find-and-identify", language: "es", level: "A2", sequence: 6,
+    id: "lesson-es-find-and-identify", language: "es", level: "A2", sequence: 8,
     title: "Trouver un service dans le quartier",
     objective: "Localiser un lieu et reprendre un nom sans le répéter.",
     focus: "Estar de localisation et pronom direct",
@@ -636,7 +639,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-a2-translation-location", "es-a2-mcq-object"], scenarioId: "es-daily-neighbours"
   }),
   supplementalLesson({
-    id: "lesson-es-tell-career-story", language: "es", level: "B1", sequence: 8,
+    id: "lesson-es-tell-career-story", language: "es", level: "B1", sequence: 11,
     title: "Raconter son parcours",
     objective: "Décrire une habitude passée et une expérience toujours actuelle.",
     focus: "Imparfait et desde hace",
@@ -650,7 +653,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-b1-gap-imperfect", "es-b1-translation-duration"], scenarioId: "es-work-interview"
   }),
   supplementalLesson({
-    id: "lesson-es-explain-health-availability", language: "es", level: "B1", sequence: 9,
+    id: "lesson-es-explain-health-availability", language: "es", level: "B1", sequence: 12,
     title: "Négocier sa disponibilité",
     objective: "Signaler un symptôme et maintenir une échéance réaliste.",
     focus: "Doler, obligation et date limite",
@@ -664,7 +667,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-b1-translation-doctor", "es-b1-translation-work-schedule"], scenarioId: "es-work-interview"
   }),
   supplementalLesson({
-    id: "lesson-es-find-a-collaborator", language: "es", level: "B2", sequence: 11,
+    id: "lesson-es-find-a-collaborator", language: "es", level: "B2", sequence: 15,
     title: "Définir un profil recherché",
     objective: "Décrire une personne non identifiée et vérifier une expérience antérieure.",
     focus: "Subjonctif dans la relative et plus-que-parfait",
@@ -678,7 +681,7 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
     exerciseIds: ["es-b2-mcq-subjunctive", "es-b2-gap-pluperfect"], scenarioId: "es-work-negotiation"
   }),
   supplementalLesson({
-    id: "lesson-es-explain-a-missed-deadline", language: "es", level: "B2", sequence: 12,
+    id: "lesson-es-explain-a-missed-deadline", language: "es", level: "B2", sequence: 16,
     title: "Analyser un délai manqué",
     objective: "Ordonner les faits passés et imaginer une autre issue.",
     focus: "Plus-que-parfait et condition passée irréelle",
@@ -690,7 +693,8 @@ const FIRST_REVISIONS: GuidedLessonDefinition[] = [
       examples: [{ target: "Si hubiéramos empezado antes, habríamos terminado a tiempo.", translation: "Si nous avions commencé plus tôt, nous aurions terminé à temps." }]
     },
     exerciseIds: ["es-b2-gap-pluperfect", "es-b2-mcq-flight-counterfactual"], scenarioId: "es-work-negotiation"
-  })
+  }),
+  ...[...EN_NEW_LESSONS, ...DE_NEW_LESSONS, ...ES_NEW_LESSONS].map((lesson) => supplementalLesson(lesson))
 ];
 
 const REVISIONS: Array<Pick<GuidedLessonDefinition, "id" | "revision"> & Partial<GuidedLessonDefinition>> = [

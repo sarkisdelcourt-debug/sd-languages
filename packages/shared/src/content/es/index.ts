@@ -6,6 +6,7 @@ import { ES_VOCAB_MORE } from "./vocab-more.js";
 import { ES_VOCAB_MORE2 } from "./vocab-more2.js";
 import { ES_VERB_SETS } from "./verb-lists.js";
 import { ES_VOCAB_EXTRA } from "./vocab-extra.js";
+import { ES_LESSON_EXERCISES } from "./lessons-extra.js";
 import { SPANISH_ADVANCED_EXERCISES } from "./advanced.js";
 import { ES_GRAMMAR, ES_SENTENCES, ES_VOCAB } from "./bank.js";
 
@@ -18,5 +19,6 @@ export const SPANISH_BANK: TopicExercise[] = [
   ...SPANISH_ADVANCED_EXERCISES,
   ...articleExercises([...ES_VOCAB, ...ES_VOCAB_EXTRA, ...ES_VERB_SETS, ...ES_VOCAB_MORE, ...ES_VOCAB_MORE2], "es"),
   ...ES_GRAMMAR,
-  ...ES_GRAMMAR_EXTRA
+  ...ES_GRAMMAR_EXTRA,
+  ...ES_LESSON_EXERCISES
 ];

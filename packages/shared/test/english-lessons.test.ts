@@ -21,13 +21,14 @@ function searchableText(item: Exercise): string {
 }
 
 /** Leçons corrigées par la révision 4 (28/10/2026) ; les sept autres restent à la révision 3. */
+const NEW_LESSONS = new Set(["lesson-en-hire-a-car", "lesson-en-give-opinion", "lesson-en-complain-politely", "lesson-en-conference-questions"]);
 const REVISION_4 = new Set(["lesson-en-explain-availability", "lesson-en-daily-basics", "lesson-en-ask-and-clarify", "lesson-en-count-and-describe", "lesson-en-compare-options"]);
 
 describe("leçons guidées anglaises, révisions 3 (22/10/2026) et 4 (28/10/2026)", () => {
   it("donne à chacune des 12 leçons six exercices anglais distincts, sur au moins quatre formats", () => {
-    expect(english).toHaveLength(12);
+    expect(english).toHaveLength(16);
     for (const lesson of english) {
-      expect(lesson.revision, lesson.id).toBe(REVISION_4.has(lesson.id) ? 4 : 3);
+      expect(lesson.revision, lesson.id).toBe(NEW_LESSONS.has(lesson.id) ? 1 : REVISION_4.has(lesson.id) ? 4 : 3);
       expect(lesson.exerciseIds, lesson.id).toHaveLength(6);
       expect(new Set(lesson.exerciseIds).size, lesson.id).toBe(6);
       expect(lesson.exerciseIds.every((id) => exercise(id).language === "en"), lesson.id).toBe(true);

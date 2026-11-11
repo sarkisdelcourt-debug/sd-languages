@@ -153,7 +153,7 @@ const SENTENCE_ROWS: S[] = [
   ["B1", "travel", "Llegué tarde porque el taxi se averió.", "Je suis arrivé en retard parce que le taxi est tombé en panne.", ["preterite", "hotel-travel-vocabulary"], "Averiarse est pronominal pour une machine qui tombe en panne."],
   ["B1", "travel", "Para ir al aeropuerto, tome la línea tres del metro.", "Pour aller à l'aéroport, prenez la ligne trois du métro.", ["polite-requests", "location"], "Para + infinitif exprime le but ; tome est l'impératif de politesse."],
   ["B1", "travel", "Me han robado la cartera en el mercado.", "On m'a volé le portefeuille au marché.", ["hotel-travel-vocabulary", "object-pronouns"], "Me han robado : on m'a volé ; cartera désigne aussi le portefeuille."],
-  ["B1", "travel", "No hay problema, le devolveremos el dinero mañana.", "Pas de problème, nous vous rendrons l'argent demain.", ["object-pronouns", "polite-requests"], "Devolver est un verbe en ue au présent mais régulier au futur."],
+  ["B1", "travel", "No hay problema, le devolveremos el dinero mañana.", "Pas de problème, nous vous rendrons l'argent demain.", ["object-pronouns", "polite-requests"], "Devolver est un verbe en ue au présent mais régulier au futur.", ["No hay problema, mañana le devolveremos el dinero."]],
   ["B1", "travel", "Desde que llegamos, no ha dejado de llover.", "Depuis que nous sommes arrivés, il n'a pas cessé de pleuvoir.", ["duration", "preterite"], "Dejar de + infinitif signifie cesser de ; desde que + prétérit."],
   ["B1", "travel", "Si tenemos tiempo, visitaremos la catedral mañana.", "Si nous avons le temps, nous visiterons la cathédrale demain.", ["hotel-travel-vocabulary", "present-tense"], "Si + présent, futur : visitaremos."],
   // B2 médical

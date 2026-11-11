@@ -146,17 +146,18 @@ describe("curriculum integrity", () => {
   });
 
   it("builds guided lessons only from valid same-language content", () => {
-    expect(GUIDED_LESSONS).toHaveLength(36);
+    expect(GUIDED_LESSONS).toHaveLength(48);
     expect(new Set(GUIDED_LESSONS.map((lesson) => lesson.language))).toEqual(new Set(["en", "de", "es"]));
     expect(new Set(GUIDED_LESSONS.map((lesson) => lesson.id)).size).toBe(GUIDED_LESSONS.length);
     for (const language of ["en", "de", "es"] as const) {
       const lessons = GUIDED_LESSONS
         .filter((lesson) => lesson.language === language)
         .sort((left, right) => left.sequence - right.sequence);
-      expect(lessons.map((lesson) => lesson.sequence)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      expect(lessons.map((lesson) => lesson.level)).toEqual([
-        "A1", "A1", "A1", "A2", "A2", "A2", "B1", "B1", "B1", "B2", "B2", "B2"
-      ]);
+      expect(lessons.map((lesson) => lesson.sequence)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+      // Les niveaux se suivent sans retour en arrière : A1 d'abord, B2 en dernier (16 leçons par langue depuis le 11/11/2026).
+      const order = ["A1", "A2", "B1", "B2"];
+      expect(lessons.map((lesson) => order.indexOf(lesson.level))).toEqual([...lessons.map((lesson) => order.indexOf(lesson.level))].sort((a, b) => a - b));
+      expect(new Set(lessons.map((lesson) => lesson.level))).toEqual(new Set(order));
       for (const [index, lesson] of lessons.entries()) {
         expect(lesson.revision).toBeGreaterThan(0);
         expect(lesson.title.trim()).not.toBe("");
@@ -169,7 +170,10 @@ describe("curriculum integrity", () => {
         expect(CONVERSATION_SCENARIOS.some((scenario) =>
           scenario.id === lesson.scenarioId && scenario.language === lesson.language
         )).toBe(true);
-        expect(lesson.prerequisiteLessonId).toBe(index === 0 ? undefined : lessons[index - 1]?.id);
+        // Un prérequis existe toujours et précède la leçon (les prérequis publiés ne changent pas : cela verrouillerait des leçons déjà ouvertes).
+        if (index === 0) expect(lesson.prerequisiteLessonId).toBeUndefined();
+        else expect(lessons.findIndex((candidate) => candidate.id === lesson.prerequisiteLessonId), lesson.id).toBeGreaterThanOrEqual(0);
+        if (lesson.prerequisiteLessonId) expect(lessons.findIndex((candidate) => candidate.id === lesson.prerequisiteLessonId), lesson.id).toBeLessThan(index);
       }
     }
   });

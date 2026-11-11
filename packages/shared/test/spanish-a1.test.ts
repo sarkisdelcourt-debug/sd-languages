@@ -37,7 +37,7 @@ describe("formats d'exercice à la Duolingo", () => {
 
 describe("tranche espagnol A1", () => {
   it("donne à chaque leçon A1 au moins six exercices dont quatre qui lui sont propres", () => {
-    expect(spanishA1Lessons.map((lesson) => lesson.revision)).toEqual([2, 2, 3]);
+    expect(spanishA1Lessons.map((lesson) => lesson.revision)).toEqual([2, 2, 3, 1, 1]);
     const usage = new Map<string, number>();
     for (const lesson of GUIDED_LESSONS) for (const id of lesson.exerciseIds) usage.set(id, (usage.get(id) ?? 0) + 1);
     for (const lesson of spanishA1Lessons) {

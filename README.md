@@ -56,8 +56,8 @@ Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils
 
 | Domaine | État MVP | Détail |
 |---|---|---|
-| Anglais | Opérationnel | 2 972 exercices (médical, conversation, voyage, grammaire A2–B2, phrasal verbs, verbes irréguliers, faux amis), 1 499 mots et verbes, 365 phrases du quotidien, 22 fiches de règles |
-| Allemand, espagnol | Opérationnels | 3 337 et 3 391 exercices de l'A1 au B2 (60 % de QCM), 1 416 et 1 437 mots et verbes, 369 et 380 phrases du quotidien, 28 et 31 fiches de règles (dont un parcours « Premiers pas » pour partir de zéro en espagnol) |
+| Anglais | Opérationnel | 2 985 exercices (médical, conversation, voyage, grammaire A2–B2, phrasal verbs, verbes irréguliers, faux amis), 1 499 mots et verbes, 365 phrases du quotidien, 22 fiches de règles |
+| Allemand, espagnol | Opérationnels | 3 357 et 3 402 exercices de l'A1 au B2 (60 % de QCM), 1 416 et 1 437 mots et verbes, 369 et 380 phrases du quotidien, 28 et 31 fiches de règles (dont un parcours « Premiers pas » pour partir de zéro en espagnol) |
 | Niveau | Opérationnel | Diagnostic pondéré A1–C1 indicatif, ou niveau déclaré par l'apprenant (les leçons inférieures passent « Acquis ») |
 | Exercices | Opérationnel | QCM, texte à trous, traduction, phrase à construire, paires à associer, dictée ; séries de 6 variées par format et par thème |
 | Correction didactique | Opérationnel, déterministe | Verdict exact, détail mineur (accent, apostrophe) ou erreur ; contractions, chiffres en lettres, variantes US/UK, « 3 pm » acceptés |
@@ -67,7 +67,7 @@ Les tests (148 au 21/10/2026, `vitest`) ne contactent aucun service externe. Ils
 | Parcours personnalisé | Opérationnel | Objectif, durée quotidienne et niveau cible configurables pour chaque langue |
 | Parcours guidé A1–B2 | Opérationnel | 36 séances persistantes (12 par langue, 3 par niveau), carte en 4 chapitres, placement par diagnostic ou niveau déclaré, déblocage par maîtrise, abandon possible |
 | Parcours quotidien | Opérationnel | Plan adaptatif priorisé selon objectif, niveau, erreurs, cartes dues et temps disponible ; la leçon est l'action principale |
-| Conversation | Opérationnel, par règles | 12 scénarios en 4 étapes ; coach local (relances, indices, suivi du thème) et correcteur d'erreurs typiques de francophones ; avec le coach IA facultatif activé, les réponses du coach peuvent venir d'un modèle d'IA (voir « Coach IA facultatif ») |
+| Conversation | Opérationnel, par règles | 25 scénarios en 4 étapes ; coach local (relances, indices, suivi du thème) et correcteur d'erreurs typiques de francophones ; avec le coach IA facultatif activé, les réponses du coach peuvent venir d'un modèle d'IA (voir « Coach IA facultatif ») |
 | Laboratoire de prononciation | Opérationnel, progressif | 12 phrases A1–B2, écoute normale ou lente, enregistrement éphémère, transcription assistée ou manuelle et comparaison explicable des mots |
 | Lecture vocale | Opportuniste | Synthèse native du navigateur lorsqu'elle existe |
 | Dictée vocale | Opportuniste | Reconnaissance du navigateur dans la conversation et le laboratoire, transcription modifiable et envoi toujours manuel |
@@ -98,8 +98,8 @@ Les contrats `CoachProvider`, `SpeechToTextProvider` et `TextToSpeechProvider` i
 
 - Le niveau CECRL est un repère pédagogique, pas une certification.
 - La correction ignore la casse et la ponctuation. Un accent manquant est accepté comme détail mineur et expliqué séparément ; la correction sémantique libre reste hors périmètre.
-- Le catalogue compte 18 questions diagnostiques et 9 700 exercices (2 972 anglais, 3 337 allemand, 3 391 espagnol), plus, générés à la demande : les tests de vocabulaire (≈ 2 500 mots, deux sens, QCM ou saisie), 1 114 phrases du quotidien à formulations multiples et les exercices de genre des noms. 81 fiches de règles. Un mot ou une phrase = plusieurs exercices : le nombre d'éléments distincts est inférieur (≈ 1 300 par langue).
-- Le parcours couvre A1 à B2 avec trois séances par niveau et par langue. Les leçons anglaises tirent 6 exercices chacune de la banque ; celles d'allemand et d'espagnol réemploient leurs petites banques et 4 scénarios par langue.
+- Le catalogue compte 18 questions diagnostiques et 9 744 exercices (2 985 anglais, 3 357 allemand, 3 402 espagnol), plus, générés à la demande : les tests de vocabulaire (≈ 2 500 mots, deux sens, QCM ou saisie), 1 114 phrases du quotidien à formulations multiples et les exercices de genre des noms. 81 fiches de règles. Un mot ou une phrase = plusieurs exercices : le nombre d'éléments distincts est inférieur (≈ 1 300 par langue).
+- Le parcours couvre A1 à B2 avec 16 séances par langue (3 à 5 par niveau). Les leçons anglaises tirent 6 exercices chacune de la banque ; celles d'allemand et d'espagnol réemploient leurs petites banques et 4 scénarios par langue.
 - Une séance terminée ne débloque le niveau suivant que si elle atteint le seuil de maîtrise : au moins deux tiers de réponses finales justes (exactes ou à un détail près, un accent oublié n'est pas une erreur), aucune erreur finale et trois étapes de dialogue validées. Sinon, l'application propose une consolidation. « Abandonner cette leçon » la rend à nouveau disponible sans rien effacer d'autre.
 - La correction accepte des variantes générées par règles (contractions, chiffres, lexique US/UK) ; une formulation juste mais non prévue peut encore être refusée : les réponses acceptées s'enrichissent au fil des retours.
 - La dictée vocale dépend de l'API disponible dans le navigateur. Selon le navigateur, sa reconnaissance peut utiliser un service externe : elle n'est donc pas promise comme locale ou hors ligne.

@@ -7,6 +7,7 @@ import { DE_VOCAB_MORE2 } from "./vocab-more2.js";
 import { DE_VERB_SETS } from "./verb-lists.js";
 import { DE_VOCAB_EXTRA } from "./vocab-extra.js";
 import { GERMAN_BEGINNER_EXERCISES } from "./beginner.js";
+import { DE_LESSON_EXERCISES } from "./lessons-extra.js";
 import { DE_GRAMMAR, DE_SENTENCES, DE_VOCAB } from "./bank.js";
 
 /** Banque allemande rédigée et générée (22/10/2026), réactivation A2 → B2. */
@@ -16,6 +17,7 @@ export const GERMAN_BANK: TopicExercise[] = [
   ...sentenceExercises(DE_SENTENCES, "de"),
   ...sentenceExercises(DE_SENTENCES_EXTRA, "de"),
   ...GERMAN_BEGINNER_EXERCISES,
+  ...DE_LESSON_EXERCISES,
   ...articleExercises([...DE_VOCAB, ...DE_VOCAB_EXTRA, ...DE_VERB_SETS, ...DE_VOCAB_MORE, ...DE_VOCAB_MORE2], "de"),
   ...DE_GRAMMAR,
   ...DE_GRAMMAR_EXTRA

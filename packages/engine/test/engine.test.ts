@@ -112,7 +112,7 @@ describe("transport-free engine", () => {
       catalog: { recommendedLessonId: string; items: Array<{ lesson: { level: string }; status: string; statusDetail: string }> };
     };
     const lower = view.catalog.items.filter((item) => item.lesson.level === "A1" || item.lesson.level === "A2");
-    expect(lower).toHaveLength(6);
+    expect(lower).toHaveLength(7);
     expect(lower.every((item) => item.status === "completed" && item.statusDetail.includes("niveau B1 déclaré"))).toBe(true);
     expect(view.catalog.recommendedLessonId).toBe("lesson-en-project-update");
 

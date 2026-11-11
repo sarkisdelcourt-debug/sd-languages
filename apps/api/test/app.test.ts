@@ -293,7 +293,7 @@ describe("SD Languages API", () => {
 
   it("starts, advances and persists a guided conversation scenario", async () => {
     const scenarios = await request(app).get("/api/scenarios/en").expect(200);
-    expect(scenarios.body).toHaveLength(4);
+    expect(scenarios.body).toHaveLength(8);
     expect(scenarios.body[0]).toMatchObject({
       id: "en-daily-cafe",
       recommendationReason: "Pour maintenant · niveau A1"
@@ -362,6 +362,10 @@ describe("SD Languages API", () => {
       "locked",
       "locked",
       "locked",
+      "locked",
+      "locked",
+      "locked",
+      "locked",
       "locked"
     ]);
 
@@ -421,9 +425,13 @@ describe("SD Languages API", () => {
       catalog: {
         recommendedLessonId: "lesson-en-daily-basics",
         completedCount: 0,
-        totalLessons: 12,
+        totalLessons: 16,
         items: [
           expect.objectContaining({ status: "available", recommended: true }),
+          expect.objectContaining({ status: "locked" }),
+          expect.objectContaining({ status: "locked" }),
+          expect.objectContaining({ status: "locked" }),
+          expect.objectContaining({ status: "locked" }),
           expect.objectContaining({ status: "locked" }),
           expect.objectContaining({ status: "locked" }),
           expect.objectContaining({ status: "locked" }),

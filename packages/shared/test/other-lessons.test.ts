@@ -18,7 +18,7 @@ describe.each(["de", "es"] as const)("leçons guidées %s reliées aux nouvelles
   const lessons = GUIDED_LESSONS.filter((lesson) => lesson.language === language);
 
   it("donne six exercices distincts de la bonne langue à chaque leçon", () => {
-    expect(lessons).toHaveLength(12);
+    expect(lessons).toHaveLength(16);
     for (const lesson of lessons) {
       expect(lesson.exerciseIds, lesson.id).toHaveLength(6);
       expect(new Set(lesson.exerciseIds).size, lesson.id).toBe(6);

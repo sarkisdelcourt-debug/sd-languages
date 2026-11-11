@@ -3,6 +3,7 @@ import type { TopicExercise } from "../types.js";
 import { BEGINNER_EXERCISES } from "./beginner.js";
 import { EVERYDAY_SENTENCES, GENERAL_VOCAB, GRAMMAR_EXERCISES, TRAVEL_SENTENCES } from "./general.js";
 import { EN_GRAMMAR_EXTRA } from "./grammar-extra.js";
+import { EN_LESSON_EXERCISES } from "./lessons-extra.js";
 import { EN_SENTENCES_EXTRA } from "./sentences-extra.js";
 import { EN_VOCAB_MORE } from "./vocab-more.js";
 import { EN_VOCAB_MORE2 } from "./vocab-more2.js";
@@ -23,6 +24,7 @@ export const ENGLISH_BANK: TopicExercise[] = [
   ...GRAMMAR_EXERCISES,
   ...BEGINNER_EXERCISES,
   ...EN_GRAMMAR_EXTRA,
+  ...EN_LESSON_EXERCISES,
   ...phrasalVerbExercises(PHRASAL_VERBS),
   ...irregularVerbExercises(IRREGULAR_VERBS),
   ...FALSE_FRIENDS
